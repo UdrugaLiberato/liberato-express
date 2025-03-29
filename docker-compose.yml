@@ -9,7 +9,7 @@ services:
       - ./nginx/ssl/certs:/etc/ssl/certs
       - ./nginx/ssl/private:/etc/ssl/private
     depends_on:
-      - api
+      - database
     networks:
       - liberato-network
   database:
@@ -21,14 +21,12 @@ services:
     networks:
       - liberato-network
     environment:
-      MYSQL_ROOT_PASSWORD: "123"
-      MYSQL_USER: "admin"
-      MYSQL_PASSWORD: "123"
-      MYSQL_DATABASE: "liberato"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "123"
+      POSTGRES_DB: "liberato"
       TZ: "Europe/Zagreb"
     ports:
-      - "4306:3306"
-    command: --default-time-zone='Europe/Zagreb'
+      - "5432:5432"
 
 networks:
   liberato-network:
