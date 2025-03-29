@@ -30,7 +30,8 @@ services:
       - "4306:3306"
     command: --default-time-zone='Europe/Zagreb'
 
-
 networks:
   liberato-network:
     driver: bridge
+volumes:
+  db_data:
