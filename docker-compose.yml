@@ -3,15 +3,31 @@ services:
     container_name: liberato-nginx
     image: nginx:latest
     ports:
-      - "443:443"
+      - "8443:8443"
+      - "80:80"
     volumes:
-      - ./nginx/conf/local:/etc/nginx/conf.d
       - ./nginx/ssl/certs:/etc/ssl/certs
       - ./nginx/ssl/private:/etc/ssl/private
+      - ./nginx/conf/local:/etc/nginx/conf.d
     depends_on:
+      - api
       - database
     networks:
-      - liberato-network
+      - liber_liberato-network
+
+  api:
+    container_name: liberato-api
+    build:
+      dockerfile: ./docker/api/Dockerfile
+    networks:
+      - liber_liberato-network
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    working_dir: /app
+    depends_on:
+      - database
+
   database:
     image: postgres:16
     container_name: liberato-db
@@ -19,7 +35,7 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./db_dumps:/db_dumps
     networks:
-      - liberato-network
+      - liber_liberato-network
     environment:
       POSTGRES_USER: "admin"
       POSTGRES_PASSWORD: "123"
@@ -28,8 +44,9 @@ services:
     ports:
       - "5432:5432"
 
-networks:
-  liberato-network:
-    driver: bridge
 volumes:
   db_data:
+
+networks:
+  liber_liberato-network:
+    driver: bridge
