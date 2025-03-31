@@ -2,7 +2,7 @@
 
 ## Dev env setup
 
-### Step 1 - generate ssl certs
+### Step 1 - ssl/localhost setup
 - MacOS
 ```bash
 openssl genrsa -out nginx/ssl/private/liberato.key 2048
@@ -14,4 +14,24 @@ sudo vim /etc/hosts
 127.0.0.1 liberato.local # add this line
 ```
 
+If needed, import your .crt file into browser (usually firefox).
+
+- Windows
+@TODO
+- Linux
+@TODO
+
 ### Step 2 - docker installation
+```bash
+# use docker desktop or colima
+# navigate to project directory
+docker compose up --build -d
+```
+Containers access:
+```bash
+docker exec -ti -u 0 liberato-api bash
+docker exec -ti -u 0 liberato-nginx bash
+docker exec -ti -u 0 liberato-db bash
+```
+
+
