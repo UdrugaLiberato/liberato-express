@@ -8,12 +8,30 @@ services:
     networks:
       - liberato-network
     environment:
-      POSTGRES_USER: "admin"
+      POSTGRES_USER: "root"
       POSTGRES_PASSWORD: "123"
       POSTGRES_DB: "liberato"
       TZ: "Europe/Zagreb"
     ports:
       - "5432:5432"
+
+#  temp_database:
+#    image: mysql:8.0.33
+#    container_name: temp-db
+#    volumes:
+#      - temp_db_data:/var/lib/mysql
+#      - ./db_dumps:/db_dumps
+#    networks:
+#      - liberato-network
+#    environment:
+#      MYSQL_USER: "admin"
+#      MYSQL_PASSWORD: "123"
+#      MYSQL_ROOT_PASSWORD: "123"
+#      MYSQL_DATABASE: "temp"
+#      TZ: "Europe/Zagreb"
+#    command: --default-authentication-plugin=mysql_native_password
+#    ports:
+#      - "4306:3306"
 
   api:
     container_name: liberato-api
@@ -43,8 +61,10 @@ services:
     networks:
       - liberato-network
 
+
 volumes:
   db_data:
+#  temp_db_data:
 
 networks:
   liberato-network:

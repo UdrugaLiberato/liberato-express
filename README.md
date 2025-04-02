@@ -34,4 +34,17 @@ docker exec -ti -u 0 liberato-nginx bash
 docker exec -ti -u 0 liberato-db bash
 ```
 
+### Step 3 - database
+
+Accessing db:
+```bash
+psql -U root -d liberato
+```
+
+Importing sql dump:
+```bash
+# from db container:
+psql -U root -d liberato -f db_dumps/dump_file_name.sql
+```
+
 

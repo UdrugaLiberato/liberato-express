@@ -10,8 +10,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@jenssimon/eslint-config-base": "^8.1.1",
     "@eslint/js": "^9.23.0",
+    "@jenssimon/eslint-config-base": "^8.1.1",
     "@types/node": "^22.13.14",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
@@ -38,6 +38,7 @@
     "format": "prettier --write .",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts"
   },
+  "type": "commonjs",
   "keywords": [],
   "author": "",
   "license": "ISC",
