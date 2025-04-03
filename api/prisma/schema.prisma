@@ -94,7 +94,7 @@ model image_location {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model location {
-  id             String           @id(map: "idx_16423_primary") @db.VarChar(255)
+  id             String           @id(map: "idx_16423_primary") @db.VarChar(255)  @default(uuid())
   category_id    String           @db.VarChar(255)
   user_id        String?          @db.VarChar(255)
   city_id        String           @db.VarChar(255)

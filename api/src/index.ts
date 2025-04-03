@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 
 import cityRoutes from './routes/city-routes';
+import locationRoutes from "./routes/location-routes";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.get('/', (request, res) => {
 });
 
 app.use('/api/cities', cityRoutes);
+app.use('/api/locations', locationRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
