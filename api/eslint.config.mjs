@@ -57,9 +57,13 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': ['error', {}],
       'no-console': 'off',
       'import/extensions': 'off',
+      "unicorn/prevent-abbreviations": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "unicorn/no-null": "off",
+      "import-esm/explicit-extension": "off"
     },
   },
   {
     ignores: ['eslint.config.mjs'],
-  }
+  },
 ]);
