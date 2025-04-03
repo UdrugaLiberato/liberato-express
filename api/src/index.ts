@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 
 import cityRoutes from './routes/city-routes';
-import locationRoutes from "./routes/location-routes";
+import locationRoutes from './routes/location-routes';
 
 dotenv.config();
 
