@@ -53,10 +53,10 @@ model city {
   name         String     @unique(map: "idx_16403_uniq_2d5b02345e237e06") @db.VarChar(255)
   latitude     Float
   longitude    Float
-  created_at   DateTime   @db.Timestamptz(6)  @default(now())
-  updated_at   DateTime?  @db.Timestamptz(6)
-  deleted_at   DateTime?  @db.Timestamptz(6)
-  radius_in_km Int
+  createdAt   DateTime   @db.Timestamptz(6)  @default(now()) @map("created_at")
+  updatedAt   DateTime?  @db.Timestamptz(6)  @map("updated_at")
+  deletedAt   DateTime?  @db.Timestamptz(6)  @map("deleted_at")
+  radiusInKm   Int        @map("radius_in_km")
   location     location[]
 }
 
