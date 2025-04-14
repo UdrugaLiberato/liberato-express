@@ -1,0 +1,9 @@
+routes:
+  /api/users:
+    GET: [ROLE_ADMIN]
+    POST: [ROLE_ADMIN]
+
+  /api/cities:
+    GET: [ROLE_ADMIN, ROLE_USER]
+    POST: [ROLE_ADMIN]
+    DELETE: [ROLE_ADMIN]

@@ -8,13 +8,17 @@
     "dotenv": "^16.4.7",
     "express": "^5.0.1",
     "express-jwt": "^8.5.1",
+    "fs": "^0.0.1-security",
+    "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
+    "path": "^0.12.7",
     "tsconfig-paths": "^4.2.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
     "@jenssimon/eslint-config-base": "^8.1.1",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.13.14",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",

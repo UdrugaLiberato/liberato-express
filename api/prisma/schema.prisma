@@ -174,7 +174,7 @@ model task {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model user {
-  id                             String     @id(map: "idx_16443_primary") @db.VarChar(255)
+  id                             String     @id(map: "idx_16443_primary") @db.VarChar(255) @default(uuid())
   email                          String     @unique(map: "idx_16443_uniq_8d93d649e7927c74") @db.VarChar(180)
   phone                          String?    @db.VarChar(180)
   roles                          String

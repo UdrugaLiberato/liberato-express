@@ -7,8 +7,6 @@ export const getAll = () => {
   return prisma.user.findMany({
     include: {
       location: true,
-      tasksCreated: true,
-      tasksAssigned: true
     }
   })
 }
@@ -18,8 +16,6 @@ export const getById = (id: string) => {
     where: { id },
     include: {
       location: true,
-      tasksCreated: true,
-      tasksAssigned: true
     }
   })
 }
@@ -29,7 +25,7 @@ export const create = async (data: any) => {
   return prisma.user.create({
     data: {
       ...data,
-      roles: [data.roles || 'ROLE_USER'],
+      roles: data.roles || 'ROLE_USER',
       password: hashedPassword,
       created_at: new Date()
     }

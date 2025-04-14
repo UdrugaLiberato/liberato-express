@@ -1,19 +1,18 @@
-import express from 'express'
+import express from 'express';
 import {
   getAllUsers,
   getUser,
   createUser,
   updateUser,
   deleteUser
-} from '../controllers/user-controller'
-import { isAdminOrSelf } from '../middleware/auth/auth'
+} from '../controllers/user-controller';
 
 const router = express.Router()
 
-router.get('/', getAllUsers)
-router.get('/:id', getUser)
-router.post('/', createUser)
-router.put('/:id', isAdminOrSelf, updateUser)
-router.delete('/:id', isAdminOrSelf, deleteUser)
+router.get('/', getAllUsers);
+router.get('/:id', getUser);
+router.post('/', createUser);
+router.put('/:id', updateUser);
+router.delete('/:id', deleteUser);
 
 export default router
