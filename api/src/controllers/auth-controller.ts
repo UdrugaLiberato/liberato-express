@@ -22,11 +22,18 @@ export const login = async (req: Request, res: Response) => {
   const token = jwt.sign(
     {
       id: user.id,
-      role: user.roles, // or parse roles string if comma-separated
+      role: user.roles,
     },
     process.env.JWT_SECRET as string,
-    { expiresIn: '1h' }
+    { expiresIn: process.env.JWT_EXPIRATION }
   );
 
-  res.json({ token });
+  res.cookie('BEARER', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: process.env.JWT_EXPIRATION,
+  });
+
+  res.json({ message: 'Login successful' });
 };

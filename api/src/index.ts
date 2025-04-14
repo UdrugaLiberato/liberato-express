@@ -7,6 +7,7 @@ import {authenticate} from "./middleware/authenticate";
 import {checkRoleAccess} from "./middleware/check-role";
 import authRoutes from './routes/auth-routes';
 import userRoutes from "./routes/user-routes";
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get('/', (request, res) => {
   res.send('Hello World!');
