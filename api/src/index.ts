@@ -3,9 +3,9 @@ import dotenv from 'dotenv';
 import cityRoutes from './routes/city-routes';
 import locationRoutes from './routes/location-routes';
 import categoryRoutes from "./routes/category-routes";
-import {authenticate} from "./middleware/authenticate";
-import {checkRoleAccess} from "./middleware/check-role";
-import authRoutes from './routes/auth-routes';
+// import {authenticate} from "./middleware/authenticate";
+// import {checkRoleAccess} from "./middleware/check-role";
+// import authRoutes from './routes/auth-routes';
 import userRoutes from "./routes/user-routes";
 import cookieParser from 'cookie-parser';
 
@@ -21,7 +21,7 @@ app.get('/', (request, res) => {
   res.send('Hello World!');
 });
 
-app.use('/api/auth', authRoutes);
+// app.use('/api/auth', authRoutes);
 
 // app.use(authenticate);
 // app.use(checkRoleAccess);
