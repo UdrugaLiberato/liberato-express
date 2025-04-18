@@ -10,6 +10,7 @@ import userRoutes from "./routes/user-routes";
 import cookieParser from 'cookie-parser';
 import volunteerRoutes from "./routes/volunteer-routes";
 import taskRoutes from "./routes/task-routes";
+import emailRoutes from "./routes/email-routes";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/emails', emailRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
