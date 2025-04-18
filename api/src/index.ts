@@ -8,6 +8,7 @@ import categoryRoutes from "./routes/category-routes";
 // import authRoutes from './routes/auth-routes';
 import userRoutes from "./routes/user-routes";
 import cookieParser from 'cookie-parser';
+import volunteerRoutes from "./routes/volunteer-routes";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/cities', cityRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/volunteers', volunteerRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

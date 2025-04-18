@@ -191,7 +191,7 @@ model user {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model volunteer {
-  id         String    @id(map: "idx_16448_primary") @db.VarChar(255)
+  id         String    @id(map: "idx_16448_primary") @db.VarChar(255) @default(uuid())
   first_name String    @db.VarChar(255)
   last_name  String    @db.VarChar(255)
   city       String    @db.VarChar(255)

@@ -6,14 +6,13 @@ import {
   updateCategory,
   deleteCategory
 } from '../controllers/category-controller';
-// import { isAdmin } from '../middleware/auth'
 
 const router = express.Router()
 
 router.get('/', getAllCategories);
 router.get('/:id', getCategory);
-// router.post('/', isAdmin, createCategory)
-// router.put('/:id', isAdmin, updateCategory)
-// router.delete('/:id', isAdmin, deleteCategory)
+router.post('/', createCategory)
+router.put('/:id', updateCategory)
+router.delete('/:id', deleteCategory)
 
 export default router
