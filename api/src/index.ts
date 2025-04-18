@@ -11,6 +11,7 @@ import cookieParser from 'cookie-parser';
 import volunteerRoutes from "./routes/volunteer-routes";
 import taskRoutes from "./routes/task-routes";
 import emailRoutes from "./routes/email-routes";
+import questionRoutes from "./routes/question-routes";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/emails', emailRoutes);
+app.use('/api/questions', questionRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
