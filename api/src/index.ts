@@ -12,6 +12,7 @@ import volunteerRoutes from "./routes/volunteer-routes";
 import taskRoutes from "./routes/task-routes";
 import emailRoutes from "./routes/email-routes";
 import questionRoutes from "./routes/question-routes";
+import answerRoutes from "./routes/answer-routes";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/emails', emailRoutes);
 app.use('/api/questions', questionRoutes);
+app.use('/api/answers', answerRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
