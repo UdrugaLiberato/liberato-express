@@ -14,6 +14,8 @@ import emailRoutes from "./routes/email-routes";
 import questionRoutes from "./routes/question-routes";
 import answerRoutes from "./routes/answer-routes";
 import memberRoutes from "./routes/member-routes";
+import imageRoutes from "./routes/image-routes";
+import imageLocationRoutes from "./routes/image-location-routes";
 
 dotenv.config();
 
@@ -42,6 +44,8 @@ app.use('/api/emails', emailRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/answers', answerRoutes);
 app.use('/api/members', memberRoutes);
+app.use('/api/images', imageRoutes);
+app.use('/api/image_locations', imageLocationRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
