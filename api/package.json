@@ -46,6 +46,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "test:prepare": "sh ./src/scripts/reset-test-db.sh",
     "test": "jest",
     "build": "tsc",
     "start": "ts-node src/index.ts",

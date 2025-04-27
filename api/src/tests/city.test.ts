@@ -1,16 +1,20 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.test' });
+
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
 
-describe('Tasks API', () => {
+describe('Cities API', () => {
   let token: string;
 
   beforeAll(async () => {
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'testadmin@test.com', password: 'password' });
+      .send({ email: 'testviktor@test.com', password: 'password' });
 
     const cookies = res.headers['set-cookie'];
+    console.log(cookies);
 
     let bearerCookie = '';
 
@@ -25,71 +29,65 @@ describe('Tasks API', () => {
   });
 
   afterAll(async () => {
-    await prisma.task.deleteMany();
+    await prisma.city.deleteMany(); // Clean up cities
     await prisma.$disconnect();
   });
 
-  it('should create a task', async () => {
+  it('should create a city', async () => {
     const res = await request(app)
-      .post('/api/tasks')
+      .post('/api/cities')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        name: 'Test Task',
-        priority: 'High',
-        is_finished: false,
-        note: 'Test note',
-        deadline: new Date().toISOString(),
-        created_at: new Date().toISOString(),
+        name: 'Test City',
+        latitude: 40.7128,
+        longitude: -74.0060,
+        radiusInKm: 50,
       });
 
     expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty('id');
-    expect(res.body.name).toEqual('Test Task');
+    expect(res.body.name).toEqual('Test City');
   });
 
-  it('should get all tasks', async () => {
+  it('should get all cities', async () => {
     const res = await request(app)
-      .get('/api/tasks')
+      .get('/api/cities')
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toEqual(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('should get a single task', async () => {
-    const task = await prisma.task.create({
+  it('should get a single city', async () => {
+    const city = await prisma.city.create({
       data: {
-        name: 'Another Task',
-        priority: 'Medium',
-        is_finished: false,
-        note: 'Another note',
-        deadline: new Date(),
-        created_at: new Date(),
+        name: 'Another City',
+        latitude: 48.8566,
+        longitude: 2.3522,
+        radiusInKm: 30,
       },
     });
 
     const res = await request(app)
-      .get(`/api/tasks/${task.id}`)
+      .get(`/api/cities/${city.id}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('name', 'Another Task');
+    expect(res.body).toHaveProperty('name', 'Another City');
   });
 
-  it('should delete a task', async () => {
-    const task = await prisma.task.create({
+  it('should delete a city', async () => {
+    const city = await prisma.city.create({
       data: {
-        name: 'Delete Me',
-        priority: 'Low',
-        is_finished: false,
-        note: 'To be deleted',
-        deadline: new Date(),
-        created_at: new Date(),
+        name: 'Delete City',
+        latitude: 34.0522,
+        longitude: -118.2437,
+        radiusInKm: 70,
       },
     });
 
     const res = await request(app)
-      .delete(`/api/tasks/${task.id}`)
+      .delete(`/api/cities/${city.id}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toEqual(204);
