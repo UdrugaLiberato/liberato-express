@@ -6,13 +6,15 @@ import {
   updateUser,
   deleteUser
 } from '../controllers/user-controller';
+import {authenticate} from "../middleware/authenticate";
+import {checkPermissions} from "../middleware/check-permissions";
 
 const router = express.Router()
 
-router.get('/', getAllUsers);
-router.get('/:id', getUser);
-router.post('/', createUser);
-router.put('/:id', updateUser);
-router.delete('/:id', deleteUser);
+router.get('/', authenticate, checkPermissions, getAllUsers);
+router.get('/:id', authenticate, checkPermissions, getUser);
+router.post('/', authenticate, checkPermissions, createUser);
+router.put('/:id', authenticate, checkPermissions, updateUser);
+router.delete('/:id', authenticate, checkPermissions, deleteUser);
 
 export default router

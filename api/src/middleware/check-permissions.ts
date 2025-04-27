@@ -12,16 +12,18 @@ export function checkPermissions(req: Request, res: Response, next: NextFunction
     return;
   }
 
-  const userRole = req.user?.role;
+  if (!allowedRoles.includes('PUBLIC_ACCESS')) {
+    const userRole = req.user?.role;
 
-  if (!userRole) {
-    res.status(401).json({ message: 'Unauthorized: No user role found.' });
-    return;
-  }
+    if (!userRole) {
+      res.status(401).json({ message: 'Unauthorized: No user role found.' });
+      return;
+    }
 
-  if (!allowedRoles.includes(userRole)) {
-    res.status(403).json({ message: 'Forbidden: Insufficient permissions.' });
-    return;
+    if (!allowedRoles.includes(userRole)) {
+      res.status(403).json({ message: 'Forbidden: Insufficient permissions.' });
+      return;
+    }
   }
 
   next();

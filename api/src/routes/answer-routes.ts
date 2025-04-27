@@ -13,9 +13,9 @@ import { checkPermissions } from '../middleware/check-permissions';
 const router = express.Router();
 
 router.get('/', authenticate, checkPermissions, getAllAnswers);
-router.get('/:id', getAnswer);
-router.post('/', createAnswer);
-router.put('/:id', updateAnswer);
-router.delete('/:id', deleteAnswer);
+router.get('/:id', authenticate, checkPermissions, getAnswer);
+router.post('/', authenticate, checkPermissions, createAnswer);
+router.put('/:id', authenticate, checkPermissions, updateAnswer);
+router.delete('/:id', authenticate, checkPermissions, deleteAnswer);
 
 export default router;

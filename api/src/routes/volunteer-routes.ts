@@ -7,14 +7,16 @@ import {
   updateVolunteer,
   deleteVolunteer
 } from '../controllers/volunteer-controller';
+import {authenticate} from "../middleware/authenticate";
+import {checkPermissions} from "../middleware/check-permissions";
 
 
 const router = express.Router();
 
-router.get('/', getAllVolunteers);
-router.get('/:id', getVolunteer);
-router.post('/', createVolunteer);
-router.put('/:id', updateVolunteer);
-router.delete('/:id', deleteVolunteer);
+router.get('/', authenticate, checkPermissions, getAllVolunteers);
+router.get('/:id', authenticate, checkPermissions, getVolunteer);
+router.post('/', authenticate, checkPermissions, createVolunteer);
+router.put('/:id', authenticate, checkPermissions, updateVolunteer);
+router.delete('/:id', authenticate, checkPermissions, deleteVolunteer);
 
 export default router;
