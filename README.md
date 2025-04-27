@@ -47,4 +47,8 @@ Importing sql dump:
 psql -U root -d liberato -f db_dumps/dump_file_name.sql
 ```
 
+Creating test database:
+```bash 
+CREATE DATABASE liberato_test WITH TEMPLATE liberato OWNER root;
+```
 
