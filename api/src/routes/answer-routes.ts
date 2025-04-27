@@ -6,10 +6,13 @@ import {
   updateAnswer,
   deleteAnswer
 } from '../controllers/answer-controller';
+import { authenticate } from '../middleware/authenticate';
+import { checkPermissions } from '../middleware/check-permissions';
+
 
 const router = express.Router();
 
-router.get('/', getAllAnswers);
+router.get('/', authenticate, checkPermissions, getAllAnswers);
 router.get('/:id', getAnswer);
 router.post('/', createAnswer);
 router.put('/:id', updateAnswer);

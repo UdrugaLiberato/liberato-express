@@ -16,6 +16,7 @@ import answerRoutes from "./routes/answer-routes";
 import memberRoutes from "./routes/member-routes";
 import imageRoutes from "./routes/image-routes";
 import imageLocationRoutes from "./routes/image-location-routes";
+import authRoutes from "./routes/auth-routes";
 
 dotenv.config();
 
@@ -29,7 +30,7 @@ app.get('/', (request, res) => {
   res.send('Hello World!');
 });
 
-// app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 
 // app.use(authenticate);
 // app.use(checkRoleAccess);
