@@ -31,7 +31,21 @@ describe('Cities API', () => {
     await prisma.$disconnect();
   });
 
+  it('should get all cities', async () => {
+    const res = await request(app)
+      .get('/api/cities')
+      .set('Cookie', [`BEARER=${token}`]);
+
+    if (res.statusCode !== 200) {
+      console.error('Error getting all cities:', res.statusCode, res.body);
+    }
+
+    expect(res.statusCode).toEqual(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
   let testCityId: string | null = null;
+  let testCityName: string | null = null;
 
   it('should create a city', async () => {
     const cityName = 'Test City ' + Math.random().toString();
@@ -54,6 +68,7 @@ describe('Cities API', () => {
     expect(res.body).toHaveProperty('id');
     expect(res.body.name).toEqual(cityName);
 
+    testCityId = res.body.name;
     testCityId = res.body.id;
   });
 
@@ -63,7 +78,7 @@ describe('Cities API', () => {
       .set('Cookie', [`BEARER=${token}`]);
 
     if (res.statusCode !== 200) {
-      console.error('Error creating city:', res.statusCode, res.body);
+      console.error('Error getting city:', res.statusCode, res.body);
     }
 
     expect(res.statusCode).toEqual(200);
@@ -73,5 +88,38 @@ describe('Cities API', () => {
     testCityId = res.body.id;
   });
 
+
+  it('should update test city name', async () => {
+    const updatedTestCityName = testCityName + ' Updated';
+    const res = await request(app)
+      .put('/api/cities/' + testCityId)
+      .set('Cookie', [`BEARER=${token}`])
+      .send({
+        name: updatedTestCityName,
+      });
+
+    if (res.statusCode !== 200) {
+      console.error('Error updating city:', res.statusCode, res.body);
+    }
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('id');
+    expect(res.body.name).toEqual(updatedTestCityName);
+  });
+
+  it('should delete test city', async () => {
+    const res = await request(app)
+      .delete('/api/cities/' + testCityId)
+      .set('Cookie', [`BEARER=${token}`]);
+
+    if (res.statusCode !== 200) {
+      console.error('Error updating city:', res.statusCode, res.body);
+    }
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('id');
+    expect(res.body.deletedAt).not.toBeNull();
+
+  });
 
 });

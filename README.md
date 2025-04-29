@@ -52,3 +52,8 @@ Creating test database:
 CREATE DATABASE liberato_test WITH TEMPLATE liberato OWNER root;
 ```
 
+
+### Testing
+```bash
+sh scripts/run-test.sh
+```
