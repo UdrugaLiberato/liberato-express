@@ -11,10 +11,9 @@ describe('Cities API', () => {
   beforeAll(async () => {
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'testviktor@test.com', password: 'password' });
+      .send({ email: 'testadmin@test.com', password: 'password' });
 
     const cookies = res.headers['set-cookie'];
-    console.log(cookies);
 
     let bearerCookie = '';
 
@@ -29,14 +28,14 @@ describe('Cities API', () => {
   });
 
   afterAll(async () => {
-    await prisma.city.deleteMany(); // Clean up cities
+    // await prisma.city.deleteMany();
     await prisma.$disconnect();
   });
 
   it('should create a city', async () => {
     const res = await request(app)
       .post('/api/cities')
-      .set('Authorization', `Bearer ${token}`)
+      .set('Cookie', [`BEARER=${token}`])
       .send({
         name: 'Test City',
         latitude: 40.7128,
