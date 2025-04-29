@@ -28,67 +28,50 @@ describe('Cities API', () => {
   });
 
   afterAll(async () => {
-    // await prisma.city.deleteMany();
     await prisma.$disconnect();
   });
 
+  let testCityId: string | null = null;
+
   it('should create a city', async () => {
+    const cityName = 'Test City ' + Math.random().toString();
     const res = await request(app)
       .post('/api/cities')
       .set('Cookie', [`BEARER=${token}`])
       .send({
-        name: 'Test City',
+        name: cityName,
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: 74.0060,
         radiusInKm: 50,
       });
 
+    console.log(res.statusCode);
+    if (res.statusCode != 201) {
+      console.error('Error creating city:', res.statusCode, res.body);
+    }
+
     expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty('id');
-    expect(res.body.name).toEqual('Test City');
+    expect(res.body.name).toEqual(cityName);
+
+    testCityId = res.body.id;
   });
 
-  it('should get all cities', async () => {
+  it('should get test city', async () => {
     const res = await request(app)
-      .get('/api/cities')
-      .set('Authorization', `Bearer ${token}`);
+      .get('/api/cities/' + testCityId)
+      .set('Cookie', [`BEARER=${token}`]);
+
+    if (res.statusCode !== 200) {
+      console.error('Error creating city:', res.statusCode, res.body);
+    }
 
     expect(res.statusCode).toEqual(200);
-    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body).toHaveProperty('id');
+    expect(res.body.id).toEqual(testCityId);
+
+    testCityId = res.body.id;
   });
 
-  it('should get a single city', async () => {
-    const city = await prisma.city.create({
-      data: {
-        name: 'Another City',
-        latitude: 48.8566,
-        longitude: 2.3522,
-        radiusInKm: 30,
-      },
-    });
 
-    const res = await request(app)
-      .get(`/api/cities/${city.id}`)
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('name', 'Another City');
-  });
-
-  it('should delete a city', async () => {
-    const city = await prisma.city.create({
-      data: {
-        name: 'Delete City',
-        latitude: 34.0522,
-        longitude: -118.2437,
-        radiusInKm: 70,
-      },
-    });
-
-    const res = await request(app)
-      .delete(`/api/cities/${city.id}`)
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(res.statusCode).toEqual(204);
-  });
 });

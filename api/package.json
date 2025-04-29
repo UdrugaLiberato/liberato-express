@@ -47,7 +47,7 @@
   "main": "index.js",
   "scripts": {
     "test:prepare": "sh ./src/scripts/reset-test-db.sh",
-    "test": "jest",
+    "test": "find dist/ -name '*.test.js' -delete && jest --no-cache",
     "build": "tsc",
     "start": "ts-node src/index.ts",
     "lint": "eslint . --ext .ts",

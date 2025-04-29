@@ -2,17 +2,27 @@ import { Request, Response, NextFunction } from 'express';
 import { permissions } from '../config/permissions';
 
 export function checkPermissions(req: Request, res: Response, next: NextFunction): void {
-  const routePath = req.baseUrl + req.route.path;
+  const routePath = req.baseUrl + (req.route?.path || '');
   const method = req.method;
+  const requestPath = req.originalUrl.split('?')[0]; // full path without query params
 
-  const allowedRoles = permissions[routePath]?.[method];
+  let matchedRoles: string[] | undefined = undefined;
 
-  if (!allowedRoles) {
+  // Check if any permission path matches requestPath using regex
+  for (const [permissionPath, methods] of Object.entries(permissions)) {
+    const regex = new RegExp('^' + permissionPath.replace(/\*/g, '.*') + '$'); // convert wildcards
+    if (regex.test(requestPath)) {
+      matchedRoles = methods[method];
+      break;
+    }
+  }
+
+  if (!matchedRoles) {
     res.status(403).json({ message: 'Access denied: No permissions set.' });
     return;
   }
 
-  if (!allowedRoles.includes('PUBLIC_ACCESS')) {
+  if (!matchedRoles.includes('PUBLIC_ACCESS')) {
     const userRole = req.user?.role;
 
     if (!userRole) {
@@ -20,7 +30,7 @@ export function checkPermissions(req: Request, res: Response, next: NextFunction
       return;
     }
 
-    if (!allowedRoles.includes(userRole)) {
+    if (!matchedRoles.includes(userRole)) {
       res.status(403).json({ message: 'Forbidden: Insufficient permissions.' });
       return;
     }
