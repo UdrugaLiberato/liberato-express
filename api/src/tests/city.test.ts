@@ -67,7 +67,7 @@ describe('Cities API', () => {
     expect(res.body).toHaveProperty('id');
     expect(res.body.name).toEqual(cityName);
 
-    testCityId = res.body.name;
+    testCityName = res.body.name;
     testCityId = res.body.id;
   });
 
