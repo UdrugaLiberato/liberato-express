@@ -23,5 +23,5 @@ export const updateVolunteer = async (req: Request, res: Response) => {
 
 export const deleteVolunteer = async (req: Request, res: Response) => {
   await VolunteerService.remove(req.params.id);
-  res.status(204).send();
+  res.status(200).send();
 }
