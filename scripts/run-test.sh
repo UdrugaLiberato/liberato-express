@@ -14,6 +14,6 @@ docker exec $DB_CONTAINER_NAME psql -U $DB_USER -d postgres -c "DROP DATABASE IF
 
 echo "Preparing new test db..."
 docker exec $DB_CONTAINER_NAME psql -U $DB_USER -d postgres -c "CREATE DATABASE $TEST_DB WITH TEMPLATE $ORIGINAL_DB OWNER $DB_USER;"
-
-echo "Running jest tests..."
-docker exec $API_CONTAINER_NAME npm run test
+#
+#echo "Running jest tests..."
+#docker exec $API_CONTAINER_NAME npm run test

@@ -59,7 +59,6 @@ describe('Cities API', () => {
         radiusInKm: 50,
       });
 
-    console.log(res.statusCode);
     if (res.statusCode != 201) {
       console.error('Error creating city:', res.statusCode, res.body);
     }

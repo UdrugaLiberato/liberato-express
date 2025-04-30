@@ -48,11 +48,19 @@ export const permissions: Record<string, Record<string, string[]>> = {
     GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
     POST: ['ROLE_ADMIN'],
     DELETE: ['ROLE_ADMIN'],
+    PUT: ['ROLE_ADMIN'],
   },
   '/api/tasks/*': {
     GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
     POST: ['ROLE_ADMIN'],
     DELETE: ['ROLE_ADMIN'],
+    PUT: ['ROLE_ADMIN'],
+  },
+  '/api/tasks': {
+    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
+    POST: ['ROLE_ADMIN'],
+    DELETE: ['ROLE_ADMIN'],
+    PUT: ['ROLE_ADMIN'],
   },
   '/api/users/*': {
     GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
