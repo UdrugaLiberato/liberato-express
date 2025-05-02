@@ -98,6 +98,7 @@ export const permissions: Record<string, Record<string, string[]>> = {
   '/api/users/*': {
     GET: ['ROLE_ADMIN'],
     POST: ['ROLE_ADMIN'],
+    PUT: ['ROLE_ADMIN'],
     DELETE: ['ROLE_ADMIN'],
   },
   '/api/users': {
