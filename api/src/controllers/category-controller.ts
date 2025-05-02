@@ -23,5 +23,5 @@ export const updateCategory = async (req: Request, res: Response) => {
 
 export const deleteCategory = async (req: Request, res: Response) => {
   await CategoryService.remove(req.params.id);
-  res.status(204).send();
+  res.status(200).send();
 }

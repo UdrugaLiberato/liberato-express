@@ -23,5 +23,5 @@ export const updateAnswer = async (req: Request, res: Response) => {
 
 export const deleteAnswer = async (req: Request, res: Response) => {
   await AnswerService.remove(req.params.id);
-  res.status(204).send();
+  res.status(200).send();
 }
