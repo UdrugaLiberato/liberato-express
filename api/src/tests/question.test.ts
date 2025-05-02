@@ -5,9 +5,10 @@ import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
 
-describe('Emails API', () => {
+describe('Questions API', () => {
   let token: string;
-  let testEmailId: string | null = null;
+  let testQuestionId: string | null = null;
+  let testQuestionContent: string | null = null;
 
   beforeAll(async () => {
     const res = await request(app)
@@ -31,73 +32,64 @@ describe('Emails API', () => {
     await prisma.$disconnect();
   });
 
-  it('should get all emails', async () => {
+  it('should get all questions', async () => {
     const res = await request(app)
-      .get('/api/emails')
+      .get('/api/questions')
       .set('Cookie', [`BEARER=${token}`]);
-
-    if (res.statusCode !== 200) {
-      console.error('Error getting all emails:', res.statusCode, res.body);
-    }
 
     expect(res.statusCode).toEqual(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('should create an email', async () => {
-    const emailAddress = `test${Math.floor(Math.random() * 10000)}@example.com`;
+  it('should create a question', async () => {
+    const category = await prisma.category.findFirst();
+
+    if (!category || !category.id) {
+      console.error('No category found.');
+      return;
+    }
+
     const res = await request(app)
-      .post('/api/emails')
+      .post('/api/questions')
       .set('Cookie', [`BEARER=${token}`])
       .send({
-        message_id: 'asldkj',
-        from_address: emailAddress,
-        from_name: 'Test name',
-        subject: 'Test Subject',
-        body: 'Test Body',
-        attachments: 'testAttachments',
-        date: "2025-04-04T13:05:38+00:00",
+        question: 'test pitanje',
+        category_id: category.id,
       });
-
-
-    if (res.statusCode !== 201) {
-      console.error('Error creating email:', res.statusCode, res.body);
-    }
 
     expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty('id');
 
-    testEmailId = res.body.id;
+    testQuestionId = res.body.id;
   });
 
-  it('should get the created email', async () => {
+  it('should get the created question', async () => {
     const res = await request(app)
-      .get(`/api/emails/${testEmailId}`)
+      .get(`/api/questions/${testQuestionId}`)
       .set('Cookie', [`BEARER=${token}`]);
 
-    if (res.statusCode !== 200) {
-      console.error('Error getting email:', res.statusCode, res.body);
-    }
-
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty('id');
-    expect(res.body.id).toEqual(testEmailId);
+    expect(res.body.id).toEqual(testQuestionId);
   });
 
-  it('should update the email subject', async () => {
-    const updatedSubject = 'Updated Subject';
+  it('should update the question content', async () => {
+    const updatedQuestion = 'updated question';
     const res = await request(app)
-      .put(`/api/emails/${testEmailId}`)
+      .put(`/api/questions/${testQuestionId}`)
       .set('Cookie', [`BEARER=${token}`])
-      .send({ subject: updatedSubject });
-
-    if (res.statusCode !== 200) {
-      console.error('Error updating email:', res.statusCode, res.body);
-    }
+      .send({ question: updatedQuestion });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty('id');
-    expect(res.body.subject).toEqual(updatedSubject);
+    expect(res.body.question).toEqual(updatedQuestion);
   });
 
+  it('should delete the question', async () => {
+    const res = await request(app)
+      .delete(`/api/questions/${testQuestionId}`)
+      .set('Cookie', [`BEARER=${token}`]);
+
+    expect(res.statusCode).toEqual(204);
+  });
 });

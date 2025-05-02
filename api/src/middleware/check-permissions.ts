@@ -2,13 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import { permissions } from '../config/permissions';
 
 export function checkPermissions(req: Request, res: Response, next: NextFunction): void {
-  const routePath = req.baseUrl + (req.route?.path || '');
   const method = req.method;
-  const requestPath = req.originalUrl.split('?')[0]; // full path without query params
+  const requestPath = req.originalUrl.split('?')[0];
 
   let matchedRoles: string[] | undefined = undefined;
 
-  // Check if any permission path matches requestPath using regex
   for (const [permissionPath, methods] of Object.entries(permissions)) {
     const regex = new RegExp('^' + permissionPath.replace(/\*/g, '.*') + '$'); // convert wildcards
     if (regex.test(requestPath)) {
