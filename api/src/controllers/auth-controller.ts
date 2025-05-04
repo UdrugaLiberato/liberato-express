@@ -11,7 +11,7 @@ const JWT_SECRET: Secret = process.env.JWT_SECRET || 'default_secret';
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
 const COOKIE_EXPIRATION = parseInt(process.env.COOKIE_EXPIRATION || '3600000', 10);
 
-export const login = async (req: Request, res: Response) => {
+const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   const user = await prisma.user.findUnique({ where: { email } });
@@ -44,7 +44,7 @@ export const login = async (req: Request, res: Response) => {
   res.json({ message: 'Login successful' });
 };
 
-export const googleLogin = async (req: Request, res: Response) => {
+const googleLogin = async (req: Request, res: Response) => {
   const { token } = req.body;
 
   try {
@@ -69,7 +69,7 @@ export const googleLogin = async (req: Request, res: Response) => {
           username: name,
           avatar: picture || '',
           password: '',
-          roles: 'user',
+          roles: 'ROLE_USER',
           created_at: new Date(),
         },
       });
@@ -94,3 +94,8 @@ export const googleLogin = async (req: Request, res: Response) => {
     res.status(401).json({ message: 'Authentication failed' });
   }
 };
+
+export {
+  login,
+  googleLogin,
+}
