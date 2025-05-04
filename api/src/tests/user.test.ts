@@ -96,7 +96,7 @@ describe('Users API', () => {
       .delete(`/api/users/${testUserId}`)
       .set('Cookie', [`BEARER=${token}`]);
 
-    expect(res.statusCode).toEqual(204);
+    expect(res.statusCode).toEqual(200);
   });
 
   it('should be able to login', async () => {

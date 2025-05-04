@@ -23,5 +23,5 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
   await userService.remove(req.params.id)
-  res.status(204).send()
+  res.status(200).send()
 }
