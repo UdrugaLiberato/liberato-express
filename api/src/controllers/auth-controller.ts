@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt, { Secret } from 'jsonwebtoken';
 import prisma from "../config/prisma";
+import { OAuth2Client } from 'google-auth-library';
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const JWT_SECRET: Secret = process.env.JWT_SECRET || 'default_secret';
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
@@ -38,4 +42,55 @@ export const login = async (req: Request, res: Response) => {
   });
 
   res.json({ message: 'Login successful' });
+};
+
+export const googleLogin = async (req: Request, res: Response) => {
+  const { token } = req.body;
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload) {
+      return res.status(401).json({ message: 'Invalid Google token' });
+    }
+
+    const { email, name, picture, sub: googleId } = payload;
+
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email,
+          username: name,
+          avatar: picture || '',
+          password: '',
+          roles: 'user',
+          created_at: new Date(),
+        },
+      });
+    }
+
+    const jwtToken = jwt.sign(
+      { id: user.id, role: user.roles },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRATION }
+    );
+
+    res.cookie('BEARER', jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+      maxAge: COOKIE_EXPIRATION,
+    });
+
+    res.json({ message: 'Google login successful' });
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(401).json({ message: 'Authentication failed' });
+  }
 };

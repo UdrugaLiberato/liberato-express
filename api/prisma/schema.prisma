@@ -178,7 +178,8 @@ model user {
   email                          String     @unique(map: "idx_16443_uniq_8d93d649e7927c74") @db.VarChar(180)
   phone                          String?    @db.VarChar(180)
   roles                          String
-  password                       String     @db.VarChar(255)
+  password                       String?    @db.VarChar(255)
+  provider                       String     @default("local") // local/google
   username                       String     @db.VarChar(255)
   avatar                         String
   created_at                     DateTime   @db.Timestamptz(6)
