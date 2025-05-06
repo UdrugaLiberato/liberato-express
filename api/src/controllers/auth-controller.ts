@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt, { Secret } from 'jsonwebtoken';
 import prisma from "../config/prisma";
 import { OAuth2Client } from 'google-auth-library';
+import {create} from "../services/user-service";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -55,7 +56,8 @@ const googleLogin = async (req: Request, res: Response) => {
 
     const payload = ticket.getPayload();
     if (!payload) {
-      return res.status(401).json({ message: 'Invalid Google token' });
+      res.status(401).json({ message: 'Invalid Google token' });
+      return;
     }
 
     const { email, name, picture, sub: googleId } = payload;
@@ -63,22 +65,22 @@ const googleLogin = async (req: Request, res: Response) => {
     let user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email,
-          username: name,
-          avatar: picture || '',
-          password: '',
-          roles: 'ROLE_USER',
-          created_at: new Date(),
-        },
+      user = await create({
+        username: name,
+        email: email,
+        avatar: picture || '',
       });
+    }
+
+    if (!user) {
+      res.status(500).json({ message: 'Error' });
+      return;
     }
 
     const jwtToken = jwt.sign(
       { id: user.id, role: user.roles },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRATION }
+      { expiresIn: JWT_EXPIRATION } as jwt.SignOptions
     );
 
     res.cookie('BEARER', jwtToken, {

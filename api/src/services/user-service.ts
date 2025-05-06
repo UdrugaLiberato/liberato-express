@@ -21,7 +21,7 @@ export const getById = (id: string) => {
 }
 
 export const create = async (data: any) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10)
+  const hashedPassword = data.password? await bcrypt.hash(data.password, 10) : '';
   return prisma.user.create({
     data: {
       ...data,

@@ -32,8 +32,6 @@ app.get('/', (request, res) => {
 
 app.use('/api/auth', authRoutes);
 
-// app.use(authenticate);
-// app.use(checkRoleAccess);
 
 app.use('/api/cities', cityRoutes);
 app.use('/api/locations', locationRoutes);

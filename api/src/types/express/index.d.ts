@@ -5,6 +5,7 @@ declare module 'express' {
     user?: {
       id: string;
       role: 'ROLE_ADMIN' | 'ROLE_USER';
+      // email: string; // todo @viktor
     };
   }
 }
