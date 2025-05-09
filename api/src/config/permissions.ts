@@ -117,4 +117,7 @@ export const permissions: Record<string, Record<string, string[]>> = {
     DELETE: ['ROLE_ADMIN'],
     PUT: ['ROLE_ADMIN'],
   },
+  '/api/auth*': {
+    POST: ['PUBLIC_ACCESS'],
+  },
 };
