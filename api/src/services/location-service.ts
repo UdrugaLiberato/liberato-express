@@ -1,4 +1,5 @@
 import prisma from '../config/prisma';
+import { GoogleMaps } from '../utils/google-maps';
 
 export const getAllLocations = () => {
   return prisma.location.findMany({
@@ -20,14 +21,22 @@ export const createLocation = async (data: {
   userId?: string;
   name: string;
   street: string;
+  cityName: string,
   phone?: string;
   email?: string;
   about?: string;
-  latitude: number;
-  longitude: number;
+  // latitude: number;
+  // longitude: number;
   published?: boolean;
   featured?: boolean;
 }) => {
+  const googleMaps = new GoogleMaps();
+  const geo = await googleMaps.getCoordinateForStreet(data.street, data.cityName);
+
+  if (!geo?.lat || !geo?.lng) {
+    throw new Error(`Google api error: Latitude or longitude is missing for "${data.street}, ${data.cityName}"`);
+  }
+
   return prisma.location.create({
     data: {
       category: {
@@ -45,8 +54,8 @@ export const createLocation = async (data: {
       phone: data.phone,
       email: data.email,
       about: data.about,
-      latitude: data.latitude,
-      longitude: data.longitude,
+      latitude: geo.lat,
+      longitude: geo.lng,
       published: data.published ?? false,
       featured: data.featured ?? false,
       created_at: new Date(),
