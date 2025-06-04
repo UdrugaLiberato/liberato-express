@@ -42,7 +42,13 @@ const login = async (req: Request, res: Response) => {
     maxAge: COOKIE_EXPIRATION,
   });
 
-  res.json({ message: 'Login successful' });
+  res.json({
+    message: 'Login successful',
+    role: user.roles,
+    name: user.username,
+    email: user.email,
+    token: token
+  });
 };
 
 const googleLogin = async (req: Request, res: Response) => {
