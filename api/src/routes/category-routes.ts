@@ -9,9 +9,9 @@ import {
 import {authenticate} from "../middleware/authenticate";
 import {checkPermissions} from "../middleware/check-permissions";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/', authenticate, checkPermissions, getAllCategories);
+router.get('/', getAllCategories);
 router.get('/:id', authenticate, checkPermissions, getCategory);
 router.post('/', authenticate, checkPermissions, createCategory)
 router.put('/:id', authenticate, checkPermissions, updateCategory)
