@@ -52,13 +52,13 @@ export const permissions: Record<string, Record<string, string[]>> = {
     DELETE: ['ROLE_ADMIN'],
   },
   '/api/locations/*': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
+    GET: ['ROLE_ADMIN'],
     POST: ['ROLE_ADMIN'],
     DELETE: ['ROLE_ADMIN'],
     PUT: ['ROLE_ADMIN'],
   },
   '/api/locations': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
+    GET: ['ROLE_ADMIN'],
     POST: ['ROLE_ADMIN'],
     DELETE: ['ROLE_ADMIN'],
     PUT: ['ROLE_ADMIN'],
