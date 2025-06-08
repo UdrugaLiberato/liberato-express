@@ -2,11 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload, VerifyErrors } from 'jsonwebtoken';
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
-  console.log(req, req.cookies)
   const token = req.cookies?.BEARER;
 
   if (!token) {
-    res.sendStatus(401);
+    next();
     return;
   }
 
