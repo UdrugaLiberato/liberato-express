@@ -50,7 +50,8 @@ const login = async (req: Request, res: Response) => {
     role: user.roles,
     name: user.username,
     email: user.email,
-    token: token
+    token: token,
+    id: user.id,
   });
 };
 
