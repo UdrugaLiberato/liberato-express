@@ -25,7 +25,10 @@ const login = async (req: Request, res: Response) => {
   if (!user.password) {
     throw new Error("User password is null");
   }
-  const validPassword = await bcrypt.compare(password, user.password);
+
+  const hash = user.password.replace(/^\$2y\$/, '$2b$'); // normalize prefix todo viktor @reminder
+
+  const validPassword = await bcrypt.compare(password, hash);
   if (!validPassword) {
     res.status(401).json({ message: 'Invalid credentials' });
     return;
@@ -46,11 +49,11 @@ const login = async (req: Request, res: Response) => {
   });
 
   res.json({
-    message: 'Login successful',
+    // message: 'Login successful',
     role: user.roles,
     name: user.username,
     email: user.email,
-    token: token,
+    // token: token,
     id: user.id,
   });
 };
