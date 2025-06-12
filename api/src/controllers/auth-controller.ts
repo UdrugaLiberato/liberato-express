@@ -78,6 +78,7 @@ const googleLogin = async (req: Request, res: Response) => {
     let user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
+      console.log('User not found');
       user = await create({
         username: name,
         email: email,
