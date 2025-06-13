@@ -1,29 +1,22 @@
-name: Deploy via SSH
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main  # or master
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Set up SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
-        ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-
-    - name: SSH into server and deploy
-      run: |
-        ssh serenity@${{ secrets.SERVER_IP }} << 'EOF'
-          cd /home/serenity/liberato-express
-          git pull origin main
-          docker compose down
-          docker compose up -d --build
-        EOF
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.WEB1 }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.WEB2 }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.WEB3 }} >> ~/.ssh/known_hosts
