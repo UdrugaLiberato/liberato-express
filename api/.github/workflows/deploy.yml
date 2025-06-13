@@ -2,28 +2,28 @@ name: Deploy via SSH
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
-        ssh-keyscan your-server-ip >> ~/.ssh/known_hosts
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan your-server-ip >> ~/.ssh/known_hosts
 
-    - name: SSH into server and deploy
-      run: |
-        ssh serenity@${{ secrets.SERVER_IP }} << 'EOF'
-          cd /home/serenity/liberato-express
-          git pull origin main
-          docker compose down
-          docker compose up -d --build
-        EOF
+      - name: SSH into server and deploy
+        run: |
+          ssh serenity@${{ secrets.SERVER_IP }} << 'EOF'
+            cd /home/serenity/liberato-express
+            git pull origin main
+            docker compose down
+            docker compose up -d --build
+          EOF

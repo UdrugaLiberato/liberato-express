@@ -1,0 +1,1155 @@
+{
+	"info": {
+		"_postman_id": "cc690c58-83bb-4437-9394-50c324b942a9",
+		"name": "Liberato",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37758514"
+	},
+	"item": [
+		{
+			"name": "cities",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/cities",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/cities/1ed8d239-241e-63da-a643-f9394dd526a9",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities",
+								"1ed8d239-241e-63da-a643-f9394dd526a9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"TestCity1\",\n  \"latitude\": 55,\n  \"longitude\": 55,\n  \"radiusInKm\": 40\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/cities",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"TestCity1 updated\",\n  \"latitude\": 45.812,\n  \"longitude\": 15.975,\n  \"radiusInKm\": 12\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/cities/132325b9-aa33-408f-a72a-c5d0b27a0189",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities",
+								"132325b9-aa33-408f-a72a-c5d0b27a0189"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/cities/132325b9-aa33-408f-a72a-c5d0b27a0189",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities",
+								"132325b9-aa33-408f-a72a-c5d0b27a0189"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/users",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/users/1ed198be-8109-68e4-8afe-cd8a4ea3d515",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"users",
+								"1ed198be-8109-68e4-8afe-cd8a4ea3d515"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"phone\": null,\n  \"roles\": \"ROLE_USER\",\n  \"password\": \"password\",\n  \"username\": \"testuser\",\n  \"avatar\": \"\",\n  \"created_at\": \"2025-04-14T12:00:00.000Z\",\n  \"updated_at\": null,\n  \"deleted_at\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/users",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"TestCity1 updated\",\n  \"latitude\": 45.812,\n  \"longitude\": 15.975,\n  \"radiusInKm\": 12\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/cities/132325b9-aa33-408f-a72a-c5d0b27a0189",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities",
+								"132325b9-aa33-408f-a72a-c5d0b27a0189"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/cities/132325b9-aa33-408f-a72a-c5d0b27a0189",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities",
+								"132325b9-aa33-408f-a72a-c5d0b27a0189"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "locations",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/locations",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/locations/1ed8e83d-54b3-6c74-ad13-f1170e1bff24",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations",
+								"1ed8e83d-54b3-6c74-ad13-f1170e1bff24"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryId\": \"1ed1d9b1-6665-66e4-af1e-693d58951939\",\n  \"cityId\": \"1ed8d239-241e-63da-a643-f9394dd526a9\",\n  \"userId\": \"1ed198be-8109-68e4-8afe-cd8a4ea3d515\",\n  \"name\": \"Test location\",\n  \"street\": \"Neka ulica\",\n  \"phone\": \"+123456789\",\n  \"email\": \"neki@email.com\",\n  \"about\": \"Opis lokacije\",\n  \"latitude\": 48.4444,\n  \"longitude\": 23.34,\n  \"published\": true,\n  \"featured\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/locations",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated name\",\n  \"street\": \"Updated ulica\",\n  \"phone\": \"+2314234234\",\n  \"email\": \"updated@asd.com\",\n  \"about\": \"updated opis\",\n  \"latitude\": 44.7866,\n  \"longitude\": 20.4489,\n  \"published\": true,\n  \"featured\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/locations/9c6f0ca2-5304-4f47-97ba-0942a015704c",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations",
+								"9c6f0ca2-5304-4f47-97ba-0942a015704c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/locations/9c6f0ca2-5304-4f47-97ba-0942a015704c",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations",
+								"9c6f0ca2-5304-4f47-97ba-0942a015704c"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "categories",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/categories",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/categories/1ed8e83d-54b3-6c74-ad13-f1170e1bff24",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories",
+								"1ed8e83d-54b3-6c74-ad13-f1170e1bff24"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryId\": \"1ed1d9b1-6665-66e4-af1e-693d58951939\",\n  \"cityId\": \"1ed8d239-241e-63da-a643-f9394dd526a9\",\n  \"userId\": \"1ed198be-8109-68e4-8afe-cd8a4ea3d515\",\n  \"name\": \"Test location\",\n  \"street\": \"Neka ulica\",\n  \"phone\": \"+123456789\",\n  \"email\": \"neki@email.com\",\n  \"about\": \"Opis lokacije\",\n  \"latitude\": 48.4444,\n  \"longitude\": 23.34,\n  \"published\": true,\n  \"featured\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/categories",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated name\",\n  \"street\": \"Updated ulica\",\n  \"phone\": \"+2314234234\",\n  \"email\": \"updated@asd.com\",\n  \"about\": \"updated opis\",\n  \"latitude\": 44.7866,\n  \"longitude\": 20.4489,\n  \"published\": true,\n  \"featured\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/categories/9c6f0ca2-5304-4f47-97ba-0942a015704c",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories",
+								"9c6f0ca2-5304-4f47-97ba-0942a015704c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/categories/9c6f0ca2-5304-4f47-97ba-0942a015704c",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories",
+								"9c6f0ca2-5304-4f47-97ba-0942a015704c"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "volonteers",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/volunteers",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"volunteers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/volunteers/1ee5dd15-ef9a-6772-a9cf-31823d7ca9e4",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"volunteers",
+								"1ee5dd15-ef9a-6772-a9cf-31823d7ca9e4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"Ana\",\n  \"last_name\": \"Horvat\",\n  \"city\": \"Zagreb\",\n  \"email\": \"ana.horvat@example.com\",\n  \"membership\": true,\n  \"reason\": \"Razlog\",\n  \"resume\": \"stranica\",\n  \"notes\": \"note\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/volunteers",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"volunteers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"Ana\",\n  \"last_name\": \"Horvat\",\n  \"city\": \"Zagreb\",\n  \"email\": \"ana.horvat@example.com\",\n  \"membership\": true,\n  \"reason\": \"Razlog\",\n  \"resume\": \"stranica\",\n  \"notes\": \"note\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/volunteers/1ee5dd15-ef9a-6772-a9cf-31823d7ca9e4",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"volunteers",
+								"1ee5dd15-ef9a-6772-a9cf-31823d7ca9e4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/volunteers/1ee5dd15-ef9a-6772-a9cf-31823d7ca9e4",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"volunteers",
+								"1ee5dd15-ef9a-6772-a9cf-31823d7ca9e4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tasks",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/tasks",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/tasks/1ee36b6a-921e-622a-ad8a-33afaab3e575",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"tasks",
+								"1ee36b6a-921e-622a-ad8a-33afaab3e575"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Task ime\",\n  \"priority\": \"Visoka\",\n  \"is_finished\": false,\n  \"deadline\": \"2025-05-01T17:00:00.000Z\",\n  \"note\": \"Note\",\n  \"assigned_to_id\": \"1ed198be-8109-68e4-8afe-cd8a4ea3d515\",\n  \"created_by_id\": \"1ed198be-8109-68e4-8afe-cd8a4ea3d515\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/tasks",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Task ime - updated\",\n  \"priority\": \"Srednja\",\n  \"is_finished\": true,\n  \"finished_at\": \"2025-04-20T12:00:00.000Z\",\n  \"deadline\": \"2025-05-01T17:00:00.000Z\",\n  \"note\": \"Završeno ranije nego očekivano\",\n  \"assigned_to_id\": \"1ed198be-8109-68e4-8afe-cd8a4ea3d515\",\n  \"created_by_id\": \"1ed198be-8109-68e4-8afe-cd8a4ea3d515\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/tasks/acef2a15-83f2-4675-9d6c-25fd055e4084",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"tasks",
+								"acef2a15-83f2-4675-9d6c-25fd055e4084"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/tasks/acef2a15-83f2-4675-9d6c-25fd055e4084",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"tasks",
+								"acef2a15-83f2-4675-9d6c-25fd055e4084"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "emails",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/emails",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"emails"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/emails/1ee4b295-e611-683c-a4dc-0fa509b2da87",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"emails",
+								"1ee4b295-e611-683c-a4dc-0fa509b2da87"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message_id\": \"129\",\n  \"subject\": \"email subject\",\n  \"from_address\": \"viktor@example.com\",\n  \"body\": \"body\",\n  \"date\": \"2025-04-04T13:05:38+00:00\",\n  \"attachments\": \"askldjaskld\",\n  \"from_name\": \"viktor\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/emails",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"emails"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message_id\": \"129\",\n  \"subject\": \"email subject\",\n  \"from_address\": \"viktor@example.com\",\n  \"body\": \"body\",\n  \"date\": \"2025-04-04T13:05:38+00:00\",\n  \"attachments\": \"askldjaskld\",\n  \"from_name\": \"viktor\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/emails/1ee4b295-e611-683c-a4dc-0fa509b2da87",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"emails",
+								"1ee4b295-e611-683c-a4dc-0fa509b2da87"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/emails/acef2a15-83f2-4675-9d6c-25fd055e4084",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"emails",
+								"acef2a15-83f2-4675-9d6c-25fd055e4084"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "questions",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/questions",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"questions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/questions/1ed1d9b1-3c46-6a8e-a0c6-0f45ce8af6f3",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"questions",
+								"1ed1d9b1-3c46-6a8e-a0c6-0f45ce8af6f3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"category_id\": \"1ed1d9b1-3bab-6f16-95c2-0f45ce8af6f3\",\n  \"question\": \"neko pitanje\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/questions",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"questions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"category_id\": \"1ed1d9b1-3bab-6f16-95c2-0f45ce8af6f3\",\n  \"question\": \"Prilagodeni WC - ažurirano\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/questions/1ed1d9b1-3c46-6a8e-a0c6-0f45ce8af6f3",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"questions",
+								"1ed1d9b1-3c46-6a8e-a0c6-0f45ce8af6f3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/questions/1ed1d9b1-3c46-6a8e-a0c6-0f45ce8af6f3",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"questions",
+								"1ed1d9b1-3c46-6a8e-a0c6-0f45ce8af6f3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "answers",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/answers",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"answers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/answers/1ed8e841-45b9-6a76-842f-23f8b561f761",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"answers",
+								"1ed8e841-45b9-6a76-842f-23f8b561f761"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"location_id\": \"1ed8e841-45b9-6882-997b-23f8b561f761\",\n  \"question_id\": \"1ed1d9b1-4939-693a-b6a5-d3c18ddca025\",\n  \"answer\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/answers",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"answers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"location_id\": \"1ed8e841-45b9-6882-997b-23f8b561f761\",\n  \"question_id\": \"1ed1d9b1-4939-693a-b6a5-d3c18ddca025\",\n  \"answer\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/answers/1ed8e841-45b9-6a76-842f-23f8b561f761",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"answers",
+								"1ed8e841-45b9-6a76-842f-23f8b561f761"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/answers/1ed8e841-45b9-6a76-842f-23f8b561f761",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"answers",
+								"1ed8e841-45b9-6a76-842f-23f8b561f761"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "members",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/members",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/members/1ee1d83f-c339-68f6-ad82-51cc36207eda",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"members",
+								"1ee1d83f-c339-68f6-ad82-51cc36207eda"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstname\": \"Iva\",\n  \"lastname\": \"Marić\",\n  \"is_student\": true,\n  \"dob\": \"1995-04-12T00:00:00.000Z\",\n  \"oib\": \"12345678901\",\n  \"address\": \"Trg bana Jelačića 5\",\n  \"city\": \"Zagreb\",\n  \"phone\": \"123456789\",\n  \"email\": \"iva.maric@example.com\",\n  \"disabled_percent\": \"20\",\n  \"join_date\": \"2024-04-12T00:00:00.000Z\",\n  \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/members",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"is_active\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/members/1ee1d83f-c339-68f6-ad82-51cc36207eda",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"members",
+								"1ee1d83f-c339-68f6-ad82-51cc36207eda"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/members/1ee1d83f-c339-68f6-ad82-51cc36207eda",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"members",
+								"1ee1d83f-c339-68f6-ad82-51cc36207eda"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/auth/login",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

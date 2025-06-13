@@ -1,0 +1,343 @@
+{
+	"info": {
+		"_postman_id": "cc690c58-83bb-4437-9394-50c324b942a9",
+		"name": "Liberato",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37758514"
+	},
+	"item": [
+		{
+			"name": "cities",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/cities",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/cities/1ed8d239-241e-63da-a643-f9394dd526a9",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities",
+								"1ed8d239-241e-63da-a643-f9394dd526a9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"TestCity1\",\n  \"latitude\": 55,\n  \"longitude\": 55,\n  \"radiusInKm\": 40\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/cities",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"TestCity1 updated\",\n  \"latitude\": 45.812,\n  \"longitude\": 15.975,\n  \"radiusInKm\": 12\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/cities/132325b9-aa33-408f-a72a-c5d0b27a0189",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities",
+								"132325b9-aa33-408f-a72a-c5d0b27a0189"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/cities/132325b9-aa33-408f-a72a-c5d0b27a0189",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"cities",
+								"132325b9-aa33-408f-a72a-c5d0b27a0189"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "locations",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/locations",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/locations/1ed8e83d-54b3-6c74-ad13-f1170e1bff24",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations",
+								"1ed8e83d-54b3-6c74-ad13-f1170e1bff24"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryId\": \"1ed1d9b1-6665-66e4-af1e-693d58951939\",\n  \"cityId\": \"1ed8d239-241e-63da-a643-f9394dd526a9\",\n  \"userId\": \"1ed198be-8109-68e4-8afe-cd8a4ea3d515\",\n  \"name\": \"Test location\",\n  \"street\": \"Neka ulica\",\n  \"phone\": \"+123456789\",\n  \"email\": \"neki@email.com\",\n  \"about\": \"Opis lokacije\",\n  \"latitude\": 48.4444,\n  \"longitude\": 23.34,\n  \"published\": true,\n  \"featured\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/locations",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated name\",\n  \"street\": \"Updated ulica\",\n  \"phone\": \"+2314234234\",\n  \"email\": \"updated@asd.com\",\n  \"about\": \"updated opis\",\n  \"latitude\": 44.7866,\n  \"longitude\": 20.4489,\n  \"published\": true,\n  \"featured\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/locations/9c6f0ca2-5304-4f47-97ba-0942a015704c",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations",
+								"9c6f0ca2-5304-4f47-97ba-0942a015704c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/locations/9c6f0ca2-5304-4f47-97ba-0942a015704c",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"locations",
+								"9c6f0ca2-5304-4f47-97ba-0942a015704c"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "categories",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/categories",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/categories/1ed8e83d-54b3-6c74-ad13-f1170e1bff24",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories",
+								"1ed8e83d-54b3-6c74-ad13-f1170e1bff24"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryId\": \"1ed1d9b1-6665-66e4-af1e-693d58951939\",\n  \"cityId\": \"1ed8d239-241e-63da-a643-f9394dd526a9\",\n  \"userId\": \"1ed198be-8109-68e4-8afe-cd8a4ea3d515\",\n  \"name\": \"Test location\",\n  \"street\": \"Neka ulica\",\n  \"phone\": \"+123456789\",\n  \"email\": \"neki@email.com\",\n  \"about\": \"Opis lokacije\",\n  \"latitude\": 48.4444,\n  \"longitude\": 23.34,\n  \"published\": true,\n  \"featured\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/categories",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated name\",\n  \"street\": \"Updated ulica\",\n  \"phone\": \"+2314234234\",\n  \"email\": \"updated@asd.com\",\n  \"about\": \"updated opis\",\n  \"latitude\": 44.7866,\n  \"longitude\": 20.4489,\n  \"published\": true,\n  \"featured\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseApi}}/categories/9c6f0ca2-5304-4f47-97ba-0942a015704c",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories",
+								"9c6f0ca2-5304-4f47-97ba-0942a015704c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseApi}}/categories/9c6f0ca2-5304-4f47-97ba-0942a015704c",
+							"host": [
+								"{{baseApi}}"
+							],
+							"path": [
+								"categories",
+								"9c6f0ca2-5304-4f47-97ba-0942a015704c"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
