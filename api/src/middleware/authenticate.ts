@@ -5,6 +5,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
   const token = req.cookies?.BEARER;
 
   if (!token) {
+    console.log('no token');
     next();
     return;
   }
@@ -15,7 +16,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
       return;
     }
 
-    req.user = decoded as { id: string; role: 'ROLE_ADMIN' | 'ROLE_USER' };
+    req.user = decoded as { id: string; role: string };
     next();
   });
 };

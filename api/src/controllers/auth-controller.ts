@@ -43,7 +43,7 @@ const login = async (req: Request, res: Response) => {
 
   res.cookie('BEARER', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: true, // process.env.NODE_ENV === 'production',
     sameSite: 'none',
     maxAge: COOKIE_EXPIRATION,
   });

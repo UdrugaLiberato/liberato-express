@@ -28,7 +28,15 @@ export function checkPermissions(req: Request, res: Response, next: NextFunction
       return;
     }
 
-    if (!matchedRoles.includes(userRole)) {
+    const arrayOfRoles = JSON.parse(userRole);
+
+    if (!arrayOfRoles) {
+      return;
+    }
+
+    console.log(arrayOfRoles, matchedRoles);
+
+    if (!arrayOfRoles.some((item: string) => matchedRoles.includes(item))) {
       res.status(403).json({ message: 'Forbidden: Insufficient permissions.' });
       return;
     }
