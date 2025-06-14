@@ -11,13 +11,45 @@ export const getMyself = async (req: Request, res: Response) => {
     res.status(403);
     return;
   }
-  const user = await userService.getById(req.user.id)
-  res.json(user);
+  const user = await userService.getById(req.user.id);
+
+  if (!user) {
+    return;
+  }
+
+  res.json({
+    id: user.id,
+    email: user.email,
+    phone: user.phone,
+    roles: user.roles,
+    username: user.username,
+    avatar: user.avatar,
+    createdAt: user.created_at,
+    updatedAt: user.updated_at,
+    deletedAt: user.deleted_at,
+
+  })
 }
 
 export const getUser = async (req: Request, res: Response) => {
   const user = await userService.getById(req.params.id)
-  res.json(user)
+
+  if (!user) {
+    return;
+  }
+
+  res.json({
+    id: user.id,
+    email: user.email,
+    phone: user.phone,
+    roles: user.roles,
+    username: user.username,
+    avatar: user.avatar,
+    createdAt: user.updated_at,
+    updatedAt: user.updated_at,
+    deletedAt: user.deleted_at,
+
+  })
 }
 
 export const createUser = async (req: Request, res: Response) => {
