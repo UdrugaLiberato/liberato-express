@@ -6,6 +6,15 @@ export const getAllUsers = async (_req: Request, res: Response) => {
   res.json(users)
 }
 
+export const getMyself = async (req: Request, res: Response) => {
+  if (!req.user) {
+    res.status(403);
+    return;
+  }
+  const user = await userService.getById(req.user.id)
+  res.json(user);
+}
+
 export const getUser = async (req: Request, res: Response) => {
   const user = await userService.getById(req.params.id)
   res.json(user)
