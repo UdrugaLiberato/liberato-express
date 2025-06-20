@@ -31,10 +31,9 @@ export function checkPermissions(req: Request, res: Response, next: NextFunction
     const arrayOfRoles = JSON.parse(userRole);
 
     if (!arrayOfRoles) {
+      res.status(403).json({ message: 'Access denied: No permissions set.' });
       return;
     }
-
-    console.log(arrayOfRoles, matchedRoles);
 
     if (!arrayOfRoles.some((item: string) => matchedRoles.includes(item))) {
       res.status(403).json({ message: 'Forbidden: Insufficient permissions.' });
