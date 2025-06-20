@@ -32,6 +32,25 @@ export const create = async (data: any) => {
   })
 }
 
+export const createIncomplete = async (
+  email: string,
+  password: string,
+  username: string,
+  avatar: string,
+) => {
+  const hashedPassword = password? await bcrypt.hash(password, 10) : '';
+  return prisma.user.create({
+    data: {
+      email: email,
+      username: username,
+      roles: JSON.stringify(['ROLE_USER']),
+      password: hashedPassword,
+      created_at: new Date(),
+      avatar: avatar
+    }
+  })
+}
+
 export const update = async (id: string, data: any) => {
   const updateData = {
     ...data,

@@ -3,7 +3,9 @@ import bcrypt from 'bcrypt';
 import jwt, { Secret } from 'jsonwebtoken';
 import prisma from "../config/prisma";
 import { OAuth2Client } from 'google-auth-library';
-import {create} from "../services/user-service";
+import {create, createIncomplete} from "../services/user-service";
+import {createUser} from "./user-controller";
+import * as userService from "../services/user-service";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -57,6 +59,39 @@ const login = async (req: Request, res: Response) => {
     id: user.id,
   });
 };
+
+const register = async (req: Request, res: Response) => {
+  let {
+    email,
+    password,
+    username,
+    avatar
+  } = req.body;
+
+  if (!email || !password || !username) {
+    res.status(400).json({ message: 'Missing required fields' });
+    return;
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (user) {
+    res.status(400).json({ message: 'User already registered' });
+    return;
+  }
+
+  if (!avatar) {
+    avatar = '';
+  }
+
+  const newUser = await userService.createIncomplete(email, password, username, avatar);
+
+  if (!newUser) {
+    res.status(500).json({ message: 'Unexpected error' });
+    return;
+  }
+
+  res.status(201).json({ message: 'User created successfully' });
+}
 
 const googleLogin = async (req: Request, res: Response) => {
   const { token } = req.body;
@@ -114,4 +149,5 @@ const googleLogin = async (req: Request, res: Response) => {
 export {
   login,
   googleLogin,
+  register
 }
