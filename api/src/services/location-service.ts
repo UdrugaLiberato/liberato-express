@@ -19,7 +19,8 @@ export const getLocationById = (id: string) => {
 
 export const createLocation = async (
   body: any,
-  files: Express.Multer.File[]
+  files: Express.Multer.File[],
+  userId: any,
 ) => {
 
 
@@ -51,7 +52,7 @@ export const createLocation = async (
     data: {
       category: { connect: { id: body.category_id } },
       city: { connect: { id: body.city_id } },
-      user: body.user_id ? { connect: { id: body.user_id } } : undefined,
+      user: { connect: { id: userId } },
       name: body.name,
       street: body.street,
       phone: body.phone,

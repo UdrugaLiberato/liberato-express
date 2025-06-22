@@ -33,8 +33,12 @@ export const getLocation = async (req: Request, res: Response) => {
 // };
 
 export const createLocation = async (req: Request, res: Response) => {
+  if (!req.user) {
+    res.status(403).json({ message: 'User not found' });
+    return;
+  }
   try {
-    const location = await LocationService.createLocation(req.body, req.files as Express.Multer.File[]);
+    const location = await LocationService.createLocation(req.body, req.files as Express.Multer.File[], req.user.id);
     res.status(201).json(location);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
