@@ -30,7 +30,7 @@ export const getMyself = async (req: Request, res: Response) => {
     createdAt: user.created_at,
     updatedAt: user.updated_at,
     deletedAt: user.deleted_at,
-
+    locations: user.location,
   })
 }
 

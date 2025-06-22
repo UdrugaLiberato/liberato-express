@@ -21,6 +21,16 @@ export const createLocation = async (
   body: any,
   files: Express.Multer.File[]
 ) => {
+
+
+  const googleMaps = new GoogleMaps();
+  // @todo viktor - cityname should get from city id
+  const geo = await googleMaps.getCoordinateForStreet(body.street, "Split");
+
+  if (!geo?.lat || !geo?.lng) {
+    throw new Error(`Google Maps failed to find coordinates`);
+  }
+
   const imageCreates = await Promise.all(
     files.map((file) =>
       prisma.image.create({
@@ -47,8 +57,8 @@ export const createLocation = async (
       phone: body.phone,
       email: body.email,
       about: body.about,
-      latitude: parseFloat(body.latitude),
-      longitude: parseFloat(body.longitude),
+      latitude: geo.lat,
+      longitude: geo.lng,
       published: body.published === 'true',
       featured: body.featured === 'true',
       created_at: new Date(),
@@ -72,53 +82,6 @@ export const createLocation = async (
 };
 
 
-export const createLocationOld = async (data: {
-  categoryId: string;
-  cityId: string;
-  userId?: string;
-  name: string;
-  street: string;
-  cityName: string,
-  phone?: string;
-  email?: string;
-  about?: string;
-  // latitude: number;
-  // longitude: number;
-  published?: boolean;
-  featured?: boolean;
-}) => {
-  const googleMaps = new GoogleMaps();
-  const geo = await googleMaps.getCoordinateForStreet(data.street, data.cityName);
-
-  if (!geo?.lat || !geo?.lng) {
-    throw new Error(`Google api error: Latitude or longitude is missing for "${data.street}, ${data.cityName}"`);
-  }
-
-  return prisma.location.create({
-    data: {
-      category: {
-        connect: { id: data.categoryId },
-      },
-      // category_id: data.categoryId,
-      city: {
-        connect: { id: data.cityId },
-      },
-      user: data.userId ? { connect: { id: data.userId } } : undefined,
-      // city_id: data.cityId,
-      // user_id: data.userId,
-      name: data.name,
-      street: data.street,
-      phone: data.phone,
-      email: data.email,
-      about: data.about,
-      latitude: geo.lat,
-      longitude: geo.lng,
-      published: data.published ?? false,
-      featured: data.featured ?? false,
-      created_at: new Date(),
-    },
-  });
-};
 
 export const updateLocation = async (
   id: string,

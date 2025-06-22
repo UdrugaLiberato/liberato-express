@@ -34,7 +34,6 @@ export const getLocation = async (req: Request, res: Response) => {
 
 export const createLocation = async (req: Request, res: Response) => {
   try {
-    console.log(req.files);
     const location = await LocationService.createLocation(req.body, req.files as Express.Multer.File[]);
     res.status(201).json(location);
   } catch (error: any) {

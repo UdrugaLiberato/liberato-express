@@ -50,6 +50,8 @@ export class GoogleMaps {
       }
     );
 
+    console.log(response);
+
     const data = response.data;
 
     if (data.status === 'ZERO_RESULTS') {
