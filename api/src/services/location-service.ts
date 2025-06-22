@@ -4,14 +4,14 @@ import { GoogleMaps } from '../utils/google-maps';
 export const getAllLocations = () => {
   return prisma.location.findMany({
     where: { deleted_at: null },
-    include: { city: true, category: true, user: true },
+    include: { city: true, category: true, user: { select: {id: true, username: true }} },
   });
 };
 
 export const getLocationById = (id: string) => {
   return prisma.location.findUnique({
     where: { id },
-    include: { city: true, category: true, user: true },
+    include: { city: true, category: true, user: { select: {id: true, username: true }} },
   });
 };
 
