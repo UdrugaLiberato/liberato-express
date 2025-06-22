@@ -1,5 +1,6 @@
 import prisma from '../config/prisma';
 import { GoogleMaps } from '../utils/google-maps';
+import { Express } from 'express';
 
 export const getAllLocations = () => {
   return prisma.location.findMany({
@@ -15,7 +16,63 @@ export const getLocationById = (id: string) => {
   });
 };
 
-export const createLocation = async (data: {
+
+export const createLocation = async (
+  body: any,
+  files: Express.Multer.File[]
+) => {
+  const imageCreates = await Promise.all(
+    files.map((file) =>
+      prisma.image.create({
+        data: {
+          src: file.filename,
+          name: file.originalname,
+          mime: file.mimetype,
+        },
+      })
+    )
+  );
+
+  const imageLocationLinks = imageCreates.map((img) => ({
+    image: { connect: { id: img.id } },
+  }));
+
+  const location = await prisma.location.create({
+    data: {
+      category: { connect: { id: body.category_id } },
+      city: { connect: { id: body.city_id } },
+      user: body.user_id ? { connect: { id: body.user_id } } : undefined,
+      name: body.name,
+      street: body.street,
+      phone: body.phone,
+      email: body.email,
+      about: body.about,
+      latitude: parseFloat(body.latitude),
+      longitude: parseFloat(body.longitude),
+      published: body.published === 'true',
+      featured: body.featured === 'true',
+      created_at: new Date(),
+      image_location: {
+        create: imageLocationLinks,
+      },
+    },
+    include: {
+      city: true,
+      category: true,
+      user: {
+        select: { id: true, username: true },
+      },
+      image_location: {
+        include: { image: true },
+      },
+    },
+  });
+
+  return location;
+};
+
+
+export const createLocationOld = async (data: {
   categoryId: string;
   cityId: string;
   userId?: string;

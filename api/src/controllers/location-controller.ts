@@ -16,14 +16,32 @@ export const getLocation = async (req: Request, res: Response) => {
   }
 };
 
+// export const createLocation = async (req: Request, res: Response) => {
+//   try {
+//     const image = req.file?.filename;
+//
+//     const locationData = {
+//       ...req.body,
+//       image,
+//     };
+//
+//     const location = await LocationService.createLocation(locationData);
+//     res.status(201).json(location);
+//   } catch (error: any) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
+
 export const createLocation = async (req: Request, res: Response) => {
   try {
-    const location = await LocationService.createLocation(req.body);
+    console.log(req.files);
+    const location = await LocationService.createLocation(req.body, req.files as Express.Multer.File[]);
     res.status(201).json(location);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 export const updateLocation = async (req: Request, res: Response) => {
   try {
