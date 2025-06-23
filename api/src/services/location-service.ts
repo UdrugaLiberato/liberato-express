@@ -82,6 +82,13 @@ export const createLocation = async (
   return location;
 };
 
+export const addLocationImage = async () => {
+
+}
+
+export const removeLocationImage = async () => {
+
+}
 
 
 export const updateLocation = async (
