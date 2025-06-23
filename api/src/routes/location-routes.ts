@@ -9,7 +9,6 @@ const router = Router();
 
 router.get('/:id', authenticate, checkPermissions, LocationController.getLocation as RequestHandler);
 router.get('/', authenticate, checkPermissions, LocationController.getLocations as RequestHandler);
-// router.post('/', authenticate, checkPermissions, LocationController.createLocation as RequestHandler);
 router.post(
   '/',
   authenticate,
@@ -19,5 +18,22 @@ router.post(
 );
 router.put('/:id', authenticate, checkPermissions, LocationController.updateLocation as RequestHandler);
 router.delete('/:id', authenticate, checkPermissions, LocationController.deleteLocation as RequestHandler);
+
+router.post(
+  '/:id/images',
+  authenticate,
+  checkPermissions,
+  upload.array('images'),
+  LocationController.addLocationImage as RequestHandler
+);
+
+// ✅ Remove image from a location
+router.delete(
+  '/:id/images',
+  authenticate,
+  checkPermissions,
+  LocationController.removeLocationImage as RequestHandler
+);
+
 
 export default router;

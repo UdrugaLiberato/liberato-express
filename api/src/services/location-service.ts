@@ -82,15 +82,6 @@ export const createLocation = async (
   return location;
 };
 
-export const addLocationImage = async () => {
-
-}
-
-export const removeLocationImage = async () => {
-
-}
-
-
 export const updateLocation = async (
   id: string,
   data: Partial<{
@@ -121,4 +112,71 @@ export const deleteLocation = async (id: string) => {
       deleted_at: new Date(),
     },
   });
+};
+
+
+export const addLocationImage = async (
+  locationId: string,
+  files: Express.Multer.File[]
+) => {
+  // Create image entries
+  const imageCreates = await Promise.all(
+    files.map((file) =>
+      prisma.image.create({
+        data: {
+          src: file.filename,
+          name: file.originalname,
+          mime: file.mimetype || null,
+        },
+      })
+    )
+  );
+
+  // Link them to the location via image_location table
+  const imageLocationLinks = imageCreates.map((img) => ({
+    image_id: img.id,
+    location_id: locationId,
+  }));
+
+  await prisma.image_location.createMany({
+    data: imageLocationLinks,
+  });
+
+  // Return updated location with images
+  return prisma.location.findUnique({
+    where: { id: locationId },
+    include: {
+      image_location: {
+        include: { image: true },
+      },
+    },
+  });
+};
+
+
+export const removeLocationImage = async (
+  imageId: number,
+  locationId: string
+) => {
+  // Remove the link
+  await prisma.image_location.delete({
+    where: {
+      image_id_location_id: {
+        image_id: imageId,
+        location_id: locationId,
+      },
+    },
+  });
+
+  // Check if the image is still linked elsewhere
+  const stillUsed = await prisma.image_location.findFirst({
+    where: { image_id: imageId },
+  });
+
+  // If not used, delete the image record itself
+  if (!stillUsed) {
+    await prisma.image.delete({ where: { id: imageId } });
+  }
+
+  return { success: true };
 };

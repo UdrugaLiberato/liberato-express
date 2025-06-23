@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as LocationService from '../services/location-service';
+import { Express } from 'express';
 
 export const getLocations = async (_req: Request, res: Response) => {
   const locations = await LocationService.getAllLocations();
@@ -16,21 +17,37 @@ export const getLocation = async (req: Request, res: Response) => {
   }
 };
 
-// export const createLocation = async (req: Request, res: Response) => {
-//   try {
-//     const image = req.file?.filename;
-//
-//     const locationData = {
-//       ...req.body,
-//       image,
-//     };
-//
-//     const location = await LocationService.createLocation(locationData);
-//     res.status(201).json(location);
-//   } catch (error: any) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
+export const addLocationImage = async (req: Request, res: Response) => {
+  try {
+    const locationId = req.params.id;
+    const files = req.files as Express.Multer.File[];
+
+    if (!files?.length) {
+      return res.status(400).json({ message: 'No files uploaded' });
+    }
+
+    const updatedLocation = await LocationService.addLocationImage(locationId, files);
+    res.json(updatedLocation);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const removeLocationImage = async (req: Request, res: Response) => {
+  try {
+    const { imageId } = req.body;
+    const locationId = req.params.id as string;
+
+    if (!imageId) {
+      return res.status(400).json({ message: 'imageId is required' });
+    }
+
+    await LocationService.removeLocationImage(imageId, locationId);
+    res.status(204).send();
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const createLocation = async (req: Request, res: Response) => {
   if (!req.user) {
