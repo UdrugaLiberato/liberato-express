@@ -22,11 +22,18 @@ export const createLocation = async (
   files: Express.Multer.File[],
   userId: any,
 ) => {
-
-
   const googleMaps = new GoogleMaps();
   // @todo viktor - cityname should get from city id
-  const geo = await googleMaps.getCoordinateForStreet(body.street, "Split");
+
+  const city = await prisma.city.findUnique({
+    where: { id: body.city_id },
+  });
+  console.log(city);
+  if (!city) {
+    return;
+  }
+
+  const geo = await googleMaps.getCoordinateForStreet(body.street, city.name);
 
   if (!geo?.lat || !geo?.lng) {
     throw new Error(`Google Maps failed to find coordinates`);
