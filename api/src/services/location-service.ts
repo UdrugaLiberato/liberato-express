@@ -5,14 +5,28 @@ import { Express } from 'express';
 export const getAllLocations = () => {
   return prisma.location.findMany({
     where: { deleted_at: null },
-    include: { city: true, category: true, user: { select: {id: true, username: true }} },
+    include: {
+      city: true,
+      category: true,
+      user: { select: {id: true, username: true }},
+      answer: {
+        select: {id: true, question: true, answer: true}
+      },
+    },
   });
 };
 
 export const getLocationById = (id: string) => {
   return prisma.location.findUnique({
     where: { id },
-    include: { city: true, category: true, user: { select: {id: true, username: true }} },
+    include: {
+      city: true,
+      category: true,
+      user: { select: {id: true, username: true }},
+      answer: {
+        select: {id: true, question: true, answer: true},
+      },
+    },
   });
 };
 
