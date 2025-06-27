@@ -17,6 +17,7 @@ export const getById = (id: string) => {
     include: {
       location: {
         include: {
+          category: true,
           image_location: {
             include: {
               image: true,
