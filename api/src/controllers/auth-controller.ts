@@ -61,37 +61,74 @@ const login = async (req: Request, res: Response) => {
 };
 
 const register = async (req: Request, res: Response) => {
-  let {
-    email,
-    password,
-    username,
-    avatar
-  } = req.body;
+  try {
+    const { email, password, username } = req.body;
+    const file = req.file as Express.Multer.File | undefined;
 
-  if (!email || !password || !username) {
-    res.status(400).json({ message: 'Missing required fields' });
-    return;
+    if (!email || !password || !username) {
+      res.status(400).json({ message: 'Missing required fields' });
+      return;
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      res.status(400).json({ message: 'User already registered' });
+      return;
+    }
+
+    // Handle avatar
+    const avatar = file?.filename || '';
+
+    const newUser = await userService.createIncomplete(email, password, username, avatar);
+
+    if (!newUser) {
+      res.status(500).json({ message: 'Unexpected error' });
+      return;
+    }
+
+    res.status(201).json({
+      username: newUser.username,
+      email: newUser.email,
+      avatar: newUser.avatar,
+      id: newUser.id,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
   }
+};
 
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (user) {
-    res.status(400).json({ message: 'User already registered' });
-    return;
-  }
-
-  if (!avatar) {
-    avatar = '';
-  }
-
-  const newUser = await userService.createIncomplete(email, password, username, avatar);
-
-  if (!newUser) {
-    res.status(500).json({ message: 'Unexpected error' });
-    return;
-  }
-
-  res.status(201).json({ message: 'User created successfully' });
-}
+// const register = async (req: Request, res: Response) => {
+//   let {
+//     email,
+//     password,
+//     username,
+//     avatar
+//   } = req.body;
+//
+//   if (!email || !password || !username) {
+//     res.status(400).json({ message: 'Missing required fields' });
+//     return;
+//   }
+//
+//   const user = await prisma.user.findUnique({ where: { email } });
+//   if (user) {
+//     res.status(400).json({ message: 'User already registered' });
+//     return;
+//   }
+//
+//   if (!avatar) {
+//     avatar = '';
+//   }
+//
+//   const newUser = await userService.createIncomplete(email, password, username, avatar);
+//
+//   if (!newUser) {
+//     res.status(500).json({ message: 'Unexpected error' });
+//     return;
+//   }
+//
+//   res.status(201).send();
+// }
 
 const googleLogin = async (req: Request, res: Response) => {
   const { token } = req.body;

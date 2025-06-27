@@ -23,14 +23,13 @@ export const createLocation = async (
   userId: any,
 ) => {
   const googleMaps = new GoogleMaps();
-  // @todo viktor - cityname should get from city id
 
   const city = await prisma.city.findUnique({
     where: { id: body.city_id },
   });
-  console.log(city);
+
   if (!city) {
-    return;
+    return null;
   }
 
   const geo = await googleMaps.getCoordinateForStreet(body.street, city.name);
