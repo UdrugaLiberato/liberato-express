@@ -15,7 +15,15 @@ export const getById = (id: string) => {
   return prisma.user.findUnique({
     where: { id },
     include: {
-      location: true,
+      location: {
+        include: {
+          image_location: {
+            include: {
+              image: true,
+            }
+          }
+        }
+      }
     }
   })
 }

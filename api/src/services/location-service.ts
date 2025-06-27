@@ -84,23 +84,71 @@ export const createLocation = async (
 
 export const updateLocation = async (
   id: string,
-  data: Partial<{
+  body: Partial<{
     name: string;
     street: string;
     phone?: string;
     email?: string;
     about?: string;
-    latitude: number;
-    longitude: number;
-    published: boolean;
-    featured: boolean;
-  }>,
+    category_id: string;
+    city_id: string;
+    published: boolean | string;
+    featured: boolean | string;
+  }>
 ) => {
+  const dataToUpdate: any = {};
+
+  if (body.name !== undefined) dataToUpdate.name = body.name;
+  if (body.street !== undefined) dataToUpdate.street = body.street;
+  if (body.phone !== undefined) dataToUpdate.phone = body.phone;
+  if (body.email !== undefined) dataToUpdate.email = body.email;
+  if (body.about !== undefined) dataToUpdate.about = body.about;
+
+  if (body.category_id !== undefined) {
+    dataToUpdate.category = { connect: { id: body.category_id } };
+  }
+
+  if (body.city_id !== undefined) {
+    dataToUpdate.city = { connect: { id: body.city_id } };
+  }
+
+  if (body.published !== undefined) {
+    dataToUpdate.published = body.published === true || body.published === 'true';
+  }
+
+  if (body.featured !== undefined) {
+    dataToUpdate.featured = body.featured === true || body.featured === 'true';
+  }
+
+  if (body.street !== undefined || body.city_id !== undefined) {
+    // Get city name if city_id is provided (you said this was a @todo)
+    const city = body.city_id
+      ? await prisma.city.findUnique({ where: { id: body.city_id } })
+      : null;
+
+    const googleMaps = new GoogleMaps();
+    const geo = await googleMaps.getCoordinateForStreet(body.street ?? '', city?.name ?? 'Split');
+
+    if (!geo?.lat || !geo?.lng) {
+      throw new Error(`Google Maps failed to find coordinates`);
+    }
+
+    dataToUpdate.latitude = geo.lat;
+    dataToUpdate.longitude = geo.lng;
+  }
+
+  dataToUpdate.updated_at = new Date();
+
   return prisma.location.update({
     where: { id },
-    data: {
-      ...data,
-      updated_at: new Date(),
+    data: dataToUpdate,
+    include: {
+      city: true,
+      category: true,
+      user: { select: { id: true, username: true } },
+      image_location: {
+        include: { image: true },
+      },
     },
   });
 };

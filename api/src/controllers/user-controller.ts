@@ -8,15 +8,13 @@ export const getAllUsers = async (_req: Request, res: Response) => {
 
 export const getMyself = async (req: Request, res: Response) => {
   if (!req.user) {
-    console.log(404);
-    res.status(403);
+    res.status(403).send();
     return;
   }
   const user = await userService.getById(req.user.id);
-  console.log(user);
 
   if (!user) {
-    res.status(404);
+    res.status(404).send();
     return;
   }
 

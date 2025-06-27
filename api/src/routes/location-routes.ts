@@ -27,7 +27,6 @@ router.post(
   LocationController.addLocationImage as RequestHandler
 );
 
-// ✅ Remove image from a location
 router.delete(
   '/:id/images',
   authenticate,
