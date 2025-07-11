@@ -5,6 +5,7 @@ import locationRoutes from './routes/location-routes';
 import categoryRoutes from './routes/category-routes';
 import userRoutes from './routes/user-routes';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import volunteerRoutes from './routes/volunteer-routes';
 import taskRoutes from './routes/task-routes';
 import emailRoutes from './routes/email-routes';
@@ -23,6 +24,7 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 
 app.get('/', (request, res) => {
   res.send('Hello World!');
@@ -32,6 +34,7 @@ app.post(
   '/api/webhooks',
   express.raw({ type: 'application/json' }),
   async (req, res) => {
+    console.log('Received webhook request:', req.body);
     try {
       const evt = await verifyWebhook(req);
 
