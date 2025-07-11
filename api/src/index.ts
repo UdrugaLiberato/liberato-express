@@ -36,7 +36,9 @@ app.post(
   async (req, res) => {
     console.log('Received webhook request:', req.body);
     try {
-      const evt = await verifyWebhook(req);
+      const evt = await verifyWebhook(req, {
+        secret: process.env.CLERK_WEBHOOK_SIGNING_SECRET,
+      });
 
       // Do something with payload
       // For this guide, log payload to console
