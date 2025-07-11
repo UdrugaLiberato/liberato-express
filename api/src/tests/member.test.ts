@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
+
+dotenv.config({ path: '.env.test' });
 
 describe('Members API', () => {
   let token: string;
@@ -20,7 +21,8 @@ describe('Members API', () => {
 
     if (cookies) {
       const cookieList = Array.isArray(cookies) ? cookies : [cookies];
-      bearerCookie = cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
+      bearerCookie =
+        cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
     }
 
     if (bearerCookie) {
@@ -47,14 +49,14 @@ describe('Members API', () => {
       lastname: 'Ivic',
       is_student: true,
       dob: '1995-04-12T00:00:00.000Z',
-      oib: Math.floor(Math.random() * 100000000000).toString(),
+      oib: Math.floor(Math.random() * 100_000_000_000).toString(),
       address: 'Trg bana Jelačića 5',
       city: 'Zagreb',
-      phone: Math.floor(Math.random() * 100000000000).toString(),
-      email: `testni+${Math.floor(Math.random() * 10000)}@example.com`,
+      phone: Math.floor(Math.random() * 100_000_000_000).toString(),
+      email: `testni+${Math.floor(Math.random() * 10_000)}@example.com`,
       disabled_percent: '100',
       join_date: '2024-04-12T00:00:00.000Z',
-      is_active: true
+      is_active: true,
     };
 
     const res = await request(app)
@@ -85,7 +87,7 @@ describe('Members API', () => {
   });
 
   it('should update the member firstname', async () => {
-    const updatedFirstname = testMemberFirstname + ' Updated';
+    const updatedFirstname = `${testMemberFirstname} Updated`;
     const res = await request(app)
       .put(`/api/members/${testMemberId}`)
       .set('Cookie', [`BEARER=${token}`])

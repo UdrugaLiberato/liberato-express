@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
+
+dotenv.config({ path: '.env.test' });
 
 describe('Answers API', () => {
   let token: string;
@@ -20,7 +21,8 @@ describe('Answers API', () => {
 
     if (cookies) {
       const cookieList = Array.isArray(cookies) ? cookies : [cookies];
-      bearerCookie = cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
+      bearerCookie =
+        cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
     }
 
     if (bearerCookie) {

@@ -1,31 +1,32 @@
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const getAll = async () => {
   return await prisma.emails.findMany();
-}
+};
 
 export const getById = async (id: string) => {
   return await prisma.emails.findUnique({
-    where: { id }
+    where: { id },
   });
-}
+};
 
 export const create = async (data: any) => {
   return await prisma.emails.create({
-    data
+    data,
   });
-}
+};
 
 export const update = async (id: string, data: any) => {
   return await prisma.emails.update({
     where: { id },
-    data
+    data,
   });
-}
+};
 
 export const remove = async (id: string) => {
   return await prisma.emails.delete({
-    where: { id }
+    where: { id },
   });
-}
+};

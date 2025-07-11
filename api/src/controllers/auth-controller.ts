@@ -1,16 +1,19 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt, { Secret } from 'jsonwebtoken';
-import prisma from "../config/prisma";
+import prisma from '../config/prisma';
 import { OAuth2Client } from 'google-auth-library';
-import {create} from "../services/user-service";
+import { create } from '../services/user-service';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const JWT_SECRET: Secret = process.env.JWT_SECRET || 'default_secret';
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
-const COOKIE_EXPIRATION = parseInt(process.env.COOKIE_EXPIRATION || '3600000', 10);
+const COOKIE_EXPIRATION = Number.parseInt(
+  process.env.COOKIE_EXPIRATION || '3600000',
+  10,
+);
 
 const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -23,7 +26,7 @@ const login = async (req: Request, res: Response) => {
   }
 
   if (!user.password) {
-    throw new Error("User password is null");
+    throw new Error('User password is null');
   }
 
   const hash = user.password.replace(/^\$2y\$/, '$2b$'); // normalize prefix todo viktor @reminder
@@ -34,12 +37,9 @@ const login = async (req: Request, res: Response) => {
     return;
   }
 
-
-  const token = jwt.sign(
-    { id: user.id, role: user.roles },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRATION } as jwt.SignOptions
-  );
+  const token = jwt.sign({ id: user.id, role: user.roles }, JWT_SECRET, {
+    expiresIn: JWT_EXPIRATION,
+  } as jwt.SignOptions);
 
   res.cookie('BEARER', token, {
     httpOnly: true,
@@ -81,7 +81,7 @@ const googleLogin = async (req: Request, res: Response) => {
       console.log('User not found');
       user = await create({
         username: name,
-        email: email,
+        email,
         avatar: picture || '',
       });
     }
@@ -91,11 +91,9 @@ const googleLogin = async (req: Request, res: Response) => {
       return;
     }
 
-    const jwtToken = jwt.sign(
-      { id: user.id, role: user.roles },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRATION } as jwt.SignOptions
-    );
+    const jwtToken = jwt.sign({ id: user.id, role: user.roles }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRATION,
+    } as jwt.SignOptions);
 
     res.cookie('BEARER', jwtToken, {
       httpOnly: true,
@@ -111,7 +109,4 @@ const googleLogin = async (req: Request, res: Response) => {
   }
 };
 
-export {
-  login,
-  googleLogin,
-}
+export { login, googleLogin };

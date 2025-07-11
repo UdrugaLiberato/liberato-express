@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@clerk/express": "^1.7.5",
     "@prisma/client": "^6.5.0",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.1",

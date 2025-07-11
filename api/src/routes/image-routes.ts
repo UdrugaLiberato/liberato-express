@@ -4,10 +4,10 @@ import {
   getImage,
   createImage,
   updateImage,
-  deleteImage
+  deleteImage,
 } from '../controllers/image-controller';
-import {authenticate} from "../middleware/authenticate";
-import {checkPermissions} from "../middleware/check-permissions";
+import { authenticate } from '../middleware/authenticate';
+import { checkPermissions } from '../middleware/check-permissions';
 
 const router = express.Router();
 

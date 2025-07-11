@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
+
+dotenv.config({ path: '.env.test' });
 
 describe('Tasks API', () => {
   let token: string;
@@ -19,7 +20,8 @@ describe('Tasks API', () => {
 
     if (cookies) {
       const cookieList = Array.isArray(cookies) ? cookies : [cookies];
-      bearerCookie = cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
+      bearerCookie =
+        cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
     }
 
     if (bearerCookie) {
@@ -41,14 +43,12 @@ describe('Tasks API', () => {
   });
 
   it('should create a task', async () => {
-
-    const taskData =
-    {
-      name: "Task ime " + Date.now(),
-      priority: "Visoka",
+    const taskData = {
+      name: `Task ime ${Date.now()}`,
+      priority: 'Visoka',
       is_finished: false,
-      deadline: "2025-05-01T17:00:00.000Z",
-    }
+      deadline: '2025-05-01T17:00:00.000Z',
+    };
 
     const res = await request(app)
       .post('/api/tasks')
@@ -64,7 +64,7 @@ describe('Tasks API', () => {
 
   it('should get the created task', async () => {
     const res = await request(app)
-      .get('/api/tasks/' + testTaskId)
+      .get(`/api/tasks/${testTaskId}`)
       .set('Cookie', [`BEARER=${token}`]);
 
     expect(res.statusCode).toEqual(200);
@@ -74,11 +74,11 @@ describe('Tasks API', () => {
 
   it('should update the task', async () => {
     const updatedData = {
-      name: 'Updated Test Task bla' + Date.now(),
+      name: `Updated Test Task bla${Date.now()}`,
     };
 
     const res = await request(app)
-      .put('/api/tasks/' + testTaskId)
+      .put(`/api/tasks/${testTaskId}`)
       .set('Cookie', [`BEARER=${token}`])
       .send(updatedData);
 

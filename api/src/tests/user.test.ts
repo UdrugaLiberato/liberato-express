@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
+
+dotenv.config({ path: '.env.test' });
 
 describe('Users API', () => {
   let token: string;
@@ -22,7 +23,8 @@ describe('Users API', () => {
 
     if (cookies) {
       const cookieList = Array.isArray(cookies) ? cookies : [cookies];
-      bearerCookie = cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
+      bearerCookie =
+        cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
     }
 
     if (bearerCookie) {
@@ -44,16 +46,16 @@ describe('Users API', () => {
   });
 
   it('should create a user', async () => {
-    email = `testuser${Math.floor(Math.random() * 10000)}@example.com`;
+    email = `testuser${Math.floor(Math.random() * 10_000)}@example.com`;
     password = 'somepassword';
     const userData = {
       email,
       phone: '1234567890',
       roles: 'USER',
-      password: password,
-      username: 'testuser_' + Math.floor(Math.random() * 10000),
+      password,
+      username: `testuser_${Math.floor(Math.random() * 10_000)}`,
       avatar: 'someavatar',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     const res = await request(app)
@@ -80,7 +82,7 @@ describe('Users API', () => {
   });
 
   it('should update the user username', async () => {
-    const updatedUsername = testUsername + '_updated';
+    const updatedUsername = `${testUsername}_updated`;
     const res = await request(app)
       .put(`/api/users/${testUserId}`)
       .set('Cookie', [`BEARER=${token}`])
@@ -102,8 +104,8 @@ describe('Users API', () => {
   it('should be able to login', async () => {
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: email, password: password });
+      .send({ email, password });
 
     expect(res.statusCode).toBe(200);
-  })
+  });
 });

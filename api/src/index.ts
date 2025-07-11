@@ -2,18 +2,19 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cityRoutes from './routes/city-routes';
 import locationRoutes from './routes/location-routes';
-import categoryRoutes from "./routes/category-routes";
-import userRoutes from "./routes/user-routes";
+import categoryRoutes from './routes/category-routes';
+import userRoutes from './routes/user-routes';
 import cookieParser from 'cookie-parser';
-import volunteerRoutes from "./routes/volunteer-routes";
-import taskRoutes from "./routes/task-routes";
-import emailRoutes from "./routes/email-routes";
-import questionRoutes from "./routes/question-routes";
-import answerRoutes from "./routes/answer-routes";
-import memberRoutes from "./routes/member-routes";
-import imageRoutes from "./routes/image-routes";
-import imageLocationRoutes from "./routes/image-location-routes";
-import authRoutes from "./routes/auth-routes";
+import volunteerRoutes from './routes/volunteer-routes';
+import taskRoutes from './routes/task-routes';
+import emailRoutes from './routes/email-routes';
+import questionRoutes from './routes/question-routes';
+import answerRoutes from './routes/answer-routes';
+import memberRoutes from './routes/member-routes';
+import { verifyWebhook } from '@clerk/express/webhooks';
+import imageRoutes from './routes/image-routes';
+import imageLocationRoutes from './routes/image-location-routes';
+import authRoutes from './routes/auth-routes';
 
 dotenv.config();
 
@@ -27,8 +28,31 @@ app.get('/', (request, res) => {
   res.send('Hello World!');
 });
 
-app.use('/api/auth', authRoutes);
+app.post(
+  '/api/webhooks',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    try {
+      const evt = await verifyWebhook(req);
 
+      // Do something with payload
+      // For this guide, log payload to console
+      const { id } = evt.data;
+      const eventType = evt.type;
+      console.log(
+        `Received webhook with ID ${id} and event type of ${eventType}`,
+      );
+      console.log('Webhook payload:', evt.data);
+
+      return res.send('Webhook received');
+    } catch (error) {
+      console.error('Error verifying webhook:', error);
+      return res.status(400).send('Error verifying webhook');
+    }
+  },
+);
+
+app.use('/api/auth', authRoutes);
 
 app.use('/api/cities', cityRoutes);
 app.use('/api/locations', locationRoutes);

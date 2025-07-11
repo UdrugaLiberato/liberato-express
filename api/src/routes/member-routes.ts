@@ -4,10 +4,10 @@ import {
   getMember,
   createMember,
   updateMember,
-  deleteMember
+  deleteMember,
 } from '../controllers/member-controller';
-import {authenticate} from "../middleware/authenticate";
-import {checkPermissions} from "../middleware/check-permissions";
+import { authenticate } from '../middleware/authenticate';
+import { checkPermissions } from '../middleware/check-permissions';
 
 const router = express.Router();
 

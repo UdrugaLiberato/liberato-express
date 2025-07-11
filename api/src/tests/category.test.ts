@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
+
+dotenv.config({ path: '.env.test' });
 
 describe('Categories API', () => {
   let token: string;
@@ -20,7 +21,8 @@ describe('Categories API', () => {
 
     if (cookies) {
       const cookieList = Array.isArray(cookies) ? cookies : [cookies];
-      bearerCookie = cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
+      bearerCookie =
+        cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
     }
 
     if (bearerCookie) {
@@ -46,13 +48,13 @@ describe('Categories API', () => {
   });
 
   it('should create a category', async () => {
-    const categoryName = 'Test Category ' + Math.random().toString();
+    const categoryName = `Test Category ${Math.random().toString()}`;
     const res = await request(app)
       .post('/api/categories')
       .set('Cookie', [`BEARER=${token}`])
       .send({
         name: categoryName,
-        description: 'A category for testing'
+        description: 'A category for testing',
       });
 
     if (res.statusCode !== 201) {
@@ -82,7 +84,7 @@ describe('Categories API', () => {
   });
 
   it('should update the category name', async () => {
-    const updatedName = testCategoryName + ' Updated';
+    const updatedName = `${testCategoryName} Updated`;
     const res = await request(app)
       .put(`/api/categories/${testCategoryId}`)
       .set('Cookie', [`BEARER=${token}`])

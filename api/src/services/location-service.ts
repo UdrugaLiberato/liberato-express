@@ -21,7 +21,7 @@ export const createLocation = async (data: {
   userId?: string;
   name: string;
   street: string;
-  cityName: string,
+  cityName: string;
   phone?: string;
   email?: string;
   about?: string;
@@ -31,10 +31,15 @@ export const createLocation = async (data: {
   featured?: boolean;
 }) => {
   const googleMaps = new GoogleMaps();
-  const geo = await googleMaps.getCoordinateForStreet(data.street, data.cityName);
+  const geo = await googleMaps.getCoordinateForStreet(
+    data.street,
+    data.cityName,
+  );
 
   if (!geo?.lat || !geo?.lng) {
-    throw new Error(`Google api error: Latitude or longitude is missing for "${data.street}, ${data.cityName}"`);
+    throw new Error(
+      `Google api error: Latitude or longitude is missing for "${data.street}, ${data.cityName}"`,
+    );
   }
 
   return prisma.location.create({

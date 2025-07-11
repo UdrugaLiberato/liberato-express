@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
+
+dotenv.config({ path: '.env.test' });
 
 describe('Emails API', () => {
   let token: string;
@@ -19,7 +20,8 @@ describe('Emails API', () => {
 
     if (cookies) {
       const cookieList = Array.isArray(cookies) ? cookies : [cookies];
-      bearerCookie = cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
+      bearerCookie =
+        cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
     }
 
     if (bearerCookie) {
@@ -45,7 +47,7 @@ describe('Emails API', () => {
   });
 
   it('should create an email', async () => {
-    const emailAddress = `test${Math.floor(Math.random() * 10000)}@example.com`;
+    const emailAddress = `test${Math.floor(Math.random() * 10_000)}@example.com`;
     const res = await request(app)
       .post('/api/emails')
       .set('Cookie', [`BEARER=${token}`])
@@ -56,9 +58,8 @@ describe('Emails API', () => {
         subject: 'Test Subject',
         body: 'Test Body',
         attachments: 'testAttachments',
-        date: "2025-04-04T13:05:38+00:00",
+        date: '2025-04-04T13:05:38+00:00',
       });
-
 
     if (res.statusCode !== 201) {
       console.error('Error creating email:', res.statusCode, res.body);
@@ -99,5 +100,4 @@ describe('Emails API', () => {
     expect(res.body).toHaveProperty('id');
     expect(res.body.subject).toEqual(updatedSubject);
   });
-
 });
