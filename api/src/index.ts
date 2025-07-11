@@ -44,10 +44,10 @@ app.post(
       );
       console.log('Webhook payload:', evt.data);
 
-      return res.send('Webhook received');
+      res.send('Webhook received');
     } catch (error) {
       console.error('Error verifying webhook:', error);
-      return res.status(400).send('Error verifying webhook');
+      res.status(400).send('Error verifying webhook');
     }
   },
 );
