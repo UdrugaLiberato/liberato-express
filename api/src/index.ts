@@ -12,16 +12,17 @@ import questionRoutes from './routes/question-routes';
 import answerRoutes from './routes/answer-routes';
 import memberRoutes from './routes/member-routes';
 import { verifyWebhook } from '@clerk/express/webhooks';
+import { clerkClient } from '@clerk/express';
 import imageRoutes from './routes/image-routes';
 import imageLocationRoutes from './routes/image-location-routes';
 import authRoutes from './routes/auth-routes';
 import bodyParser from 'body-parser';
+import e from 'express';
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.json());
 app.use(cookieParser());
 
 app.get('/', (request, res) => {
@@ -34,7 +35,7 @@ app.post(
   async (req, res) => {
     try {
       const evt = await verifyWebhook(req);
-
+      
       // Do something with payload
       // For this guide, log payload to console
       const { id } = evt.data;
@@ -44,6 +45,12 @@ app.post(
       );
       console.log('Webhook payload:', evt.data);
 
+
+  await clerkClient.users.updateUserMetadata(userId: evt.data.user_id, {
+    publicMetadata: {
+      role: 'admin',
+    },
+  })
       res.send('Webhook received');
     } catch (error) {
       console.error('Error verifying webhook:', error);
@@ -52,6 +59,7 @@ app.post(
   },
 );
 
+app.use(express.json());
 app.use('/api/auth', authRoutes);
 
 app.use('/api/cities', cityRoutes);
