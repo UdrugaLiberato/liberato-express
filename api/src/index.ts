@@ -1,5 +1,5 @@
 import cors from 'cors';
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import cityRoutes from './routes/city-routes';
 import locationRoutes from './routes/location-routes';
@@ -76,7 +76,7 @@ app.post(
   },
 );
 
-const isAdmin = (req, res, next) => {
+const isAdmin = (req: Request, res: Response, next: NextFunction) => {
   const auth = getAuth(req);
   const publicMetadata = auth.sessionClaims?.publicMetadata as { role?: string } | undefined;
   if (auth.userId && publicMetadata?.role === 'admin') {
@@ -84,7 +84,7 @@ const isAdmin = (req, res, next) => {
   } else {
     res.status(403).json({ error: 'Forbidden: Admin access required' });
   }
-};  
+};
 
 
 app.get('/hi', requireAuth(), isAdmin, (req, res) => {
