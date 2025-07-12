@@ -79,6 +79,7 @@ app.post(
 const isAdmin = (req: Request, res: Response, next: NextFunction) => {
   const auth = getAuth(req);
   const publicMetadata = auth.sessionClaims?.publicMetadata as { role?: string } | undefined;
+  console.log(publicMetadata);
   if (auth.userId && publicMetadata?.role === 'admin') {
     next();
   } else {
