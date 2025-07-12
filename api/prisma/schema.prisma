@@ -211,10 +211,10 @@ model ClerkUser {
   emailAddress              String? @unique
   externalId                 String?  @unique
   username                   String?  @unique
-  lastSignInAt               Int?
-  lastActiveAt               Int?
-  updatedAt                  Int?
-  createdAt                  Int?
+  lastSignInAt               BigInt?
+  lastActiveAt               BigInt?
+  updatedAt                  BigInt?
+  createdAt                  BigInt?
   banned                   Boolean  @default(false)
   role                     String?  @default("member") // member/admin
   @@map("users")
