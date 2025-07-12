@@ -63,11 +63,9 @@ app.post(
                 id: evt.data.id!,
                 emailAddress:
                   evt.data.email_addresses?.[0]?.email_address || '',
-                externalId: evt.data.external_id || '',
+                externalId: evt.data.external_accounts?.[0]?.id || '',
                 username: evt.data.username || '',
-                lastSignInAt: evt.data.last_sign_in_at
-                  ? new Date(evt.data.last_sign_in_at).getTime()
-                  : Date.now(),
+                lastSignInAt: evt.data.last_sign_in_at,
                 lastActiveAt: evt.data.last_active_at
                   ? new Date(evt.data.last_active_at).getTime()
                   : Date.now(),
