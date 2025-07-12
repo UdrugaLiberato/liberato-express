@@ -44,27 +44,14 @@ app.post(
 
       // Do something with payload
       // For this guide, log payload to console
-      let userId: string | undefined;
-      let id: string | undefined;
-
-      // Check if evt.data has a userId or user_id property
-      if ('userId' in evt.data) {
-        userId = (evt.data as any).userId;
-      } else if ('user_id' in evt.data) {
-        userId = (evt.data as any).user_id;
-      }
-
-      if ('id' in evt.data) {
-        id = (evt.data as any).id;
-      }
-
+      const { id } = evt.data;
       const eventType = evt.type;
 
       if (eventType.startsWith('user.')) {
         console.log('Webhook payload:', evt.data);
 
-        if (userId) {
-          await clerkClient.users.updateUserMetadata(userId, {
+        if (id) {
+          await clerkClient.users.updateUserMetadata(id, {
             publicMetadata: {
               role: 'admin',
             },
