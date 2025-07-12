@@ -12,7 +12,7 @@ import questionRoutes from './routes/question-routes';
 import answerRoutes from './routes/answer-routes';
 import memberRoutes from './routes/member-routes';
 import { verifyWebhook } from '@clerk/express/webhooks';
-import { clerkClient } from '@clerk/express';
+import { clerkClient, getAuth } from '@clerk/express';
 import imageRoutes from './routes/image-routes';
 import imageLocationRoutes from './routes/image-location-routes';
 import authRoutes from './routes/auth-routes';
@@ -75,6 +75,16 @@ app.post(
     }
   },
 );
+
+app.get('/hi', (req, res) => {
+  const auth = getAuth(req);
+  console.log(auth);
+  res.json({
+    message: 'Hello from the API!',
+    userId: auth.userId,
+    sessionId: auth.sessionId,
+  });
+});
 
 app.use(express.json());
 app.use('/api/auth', authRoutes);
