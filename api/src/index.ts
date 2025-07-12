@@ -38,15 +38,17 @@ app.post(
       
       // Do something with payload
       // For this guide, log payload to console
-      const { id } = evt.data;
+      const { user_id, id } = evt.data;
       const eventType = evt.type;
       console.log(
         `Received webhook with ID ${id} and event type of ${eventType}`,
       );
       console.log('Webhook payload:', evt.data);
 
+      console.log(user_id)
 
-  await clerkClient.users.updateUserMetadata(userId: evt.data.user_id, {
+
+  await clerkClient.users.updateUserMetadata(user_id, {
     publicMetadata: {
       role: 'admin',
     },
