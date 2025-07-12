@@ -208,80 +208,14 @@ model volunteer {
 
 model ClerkUser {
   id                          String   @id
+  emailAddress              String?
   externalId                 String?  @unique
   username                   String?  @unique
-  firstName                  String
-  lastName                   String
-  imageUrl                   String
-  profileImageUrl            String
-  hasImage                   Boolean
-  primaryEmailAddressId      String
-  primaryPhoneNumberId       String?
-  primaryWeb3WalletId        String?
-  publicMetadata             Json
-  privateMetadata            Json
-  unsafeMetadata             Json
   lastSignInAt               BigInt
   lastActiveAt               BigInt
   updatedAt                  BigInt
   createdAt                  BigInt
-  locked                     Boolean
-  lockoutExpiresInSeconds    Int?
-  verificationAttemptsRemaining Int
-  twoFactorEnabled           Boolean
-  totpEnabled                Boolean
-  mfaEnabledAt               BigInt?
-  mfaDisabledAt              BigInt?
-  deleteSelfEnabled          Boolean
-  createOrganizationEnabled  Boolean
-  backupCodeEnabled          Boolean
-  banned                     Boolean
-  legalAcceptedAt            BigInt?
-
-  emailAddresses             EmailAddress[]
-  externalAccounts           ExternalAccount[]
-
+  banned                   Boolean  @default(false)
+  role                     String?  @default("member") // member/admin
   @@map("users")
-}
-
-model EmailAddress {
-  id            String   @id
-  emailAddress  String
-  createdAt     BigInt
-  updatedAt     BigInt
-  reserved      Boolean
-  matchesSsoConnection Boolean
-  linkedTo      Json
-  verification  Json
-  userId        String
-  user          ClerkUser     @relation(fields: [userId], references: [id])
-
-  @@map("email_addresses")
-}
-
-model ExternalAccount {
-  id                String   @id
-  externalAccountId String
-  provider          String
-  providerUserId    String
-  emailAddress      String
-  approvedScopes    String
-  avatarUrl         String
-  createdAt         BigInt
-  updatedAt         BigInt
-  familyName        String
-  firstName         String
-  givenName         String
-  lastName          String
-  googleId          String
-  label             String?
-  picture           String
-  username          String?
-  identificationId  String
-  publicMetadata    Json
-  verification      Json
-  userId            String
-  user              ClerkUser     @relation(fields: [userId], references: [id])
-
-  @@map("external_accounts")
 }

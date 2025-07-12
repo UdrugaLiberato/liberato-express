@@ -54,17 +54,35 @@ app.post(
         if (id) {
           await clerkClient.users.updateUserMetadata(id, {
             publicMetadata: {
-              role: 'admin',
+              role: 'member',
             },
           });
-
-          const user = await prisma.clerkUser.create({
-            data: {
-              ...evt.data,
-            },
-          });
-
-          console.log('User created in database:', user);
+          if (eventType === 'user.created') {
+            const user = await prisma.clerkUser.create({
+              data: {
+                id: evt.data.id!,
+                emailAddress:
+                  evt.data.email_addresses?.[0]?.email_address || '',
+                externalId: evt.data.external_id || '',
+                username: evt.data.username || '',
+                lastSignInAt: evt.data.last_sign_in_at
+                  ? new Date(evt.data.last_sign_in_at).getTime()
+                  : Date.now(),
+                lastActiveAt: evt.data.last_active_at
+                  ? new Date(evt.data.last_active_at).getTime()
+                  : Date.now(),
+                updatedAt: evt.data.updated_at
+                  ? new Date(evt.data.updated_at).getTime()
+                  : Date.now(),
+                createdAt: evt.data.created_at
+                  ? new Date(evt.data.created_at).getTime()
+                  : Date.now(),
+                banned: evt.data.banned || false,
+                role: 'member', // Default role
+              },
+            });
+            console.log('User created in database:', user);
+          }
         }
       }
       res.send('Webhook received');
