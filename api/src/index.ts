@@ -78,7 +78,8 @@ app.post(
 
 const isAdmin = (req, res, next) => {
   const auth = getAuth(req);
-  if (auth.userId && auth.sessionClaims?.publicMetadata?.role === 'admin') {
+  const publicMetadata = auth.sessionClaims?.publicMetadata as { role?: string } | undefined;
+  if (auth.userId && publicMetadata?.role === 'admin') {
     next();
   } else {
     res.status(403).json({ error: 'Forbidden: Admin access required' });
