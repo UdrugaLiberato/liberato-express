@@ -12,12 +12,11 @@ import questionRoutes from './routes/question-routes';
 import answerRoutes from './routes/answer-routes';
 import memberRoutes from './routes/member-routes';
 import { verifyWebhook } from '@clerk/express/webhooks';
-import { clerkClient, getAuth } from '@clerk/express';
+import { clerkClient, clerkMiddleware, getAuth } from '@clerk/express';
 import imageRoutes from './routes/image-routes';
 import imageLocationRoutes from './routes/image-location-routes';
 import authRoutes from './routes/auth-routes';
 import bodyParser from 'body-parser';
-import e from 'express';
 
 dotenv.config();
 
@@ -25,7 +24,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cookieParser());
-
+app.use(clerkMiddleware());
 app.get('/', (request, res) => {
   res.send('Hello World!');
 });
