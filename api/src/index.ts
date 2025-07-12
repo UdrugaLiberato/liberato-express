@@ -18,6 +18,7 @@ import imageLocationRoutes from './routes/image-location-routes';
 import authRoutes from './routes/auth-routes';
 import bodyParser from 'body-parser';
 import e from 'express';
+
 dotenv.config();
 
 const app = express();
@@ -35,24 +36,38 @@ app.post(
   async (req, res) => {
     try {
       const evt = await verifyWebhook(req);
-      
+
       // Do something with payload
       // For this guide, log payload to console
-      const { user_id, id } = evt.data;
+      let userId: string | undefined;
+      let id: string | undefined;
+
+      // Check if evt.data has a userId or user_id property
+      if ('userId' in evt.data) {
+        userId = (evt.data as any).userId;
+      } else if ('user_id' in evt.data) {
+        userId = (evt.data as any).user_id;
+      }
+
+      if ('id' in evt.data) {
+        id = (evt.data as any).id;
+      }
+
       const eventType = evt.type;
       console.log(
         `Received webhook with ID ${id} and event type of ${eventType}`,
       );
       console.log('Webhook payload:', evt.data);
 
-      console.log(user_id)
+      console.log(userId);
 
-
-  await clerkClient.users.updateUserMetadata(user_id, {
-    publicMetadata: {
-      role: 'admin',
-    },
-  })
+      if (userId) {
+        await clerkClient.users.updateUserMetadata(userId, {
+          publicMetadata: {
+            role: 'admin',
+          },
+        });
+      }
       res.send('Webhook received');
     } catch (error) {
       console.error('Error verifying webhook:', error);
