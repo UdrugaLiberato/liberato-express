@@ -60,7 +60,7 @@ app.post(
 
       const eventType = evt.type;
 
-      if (!eventType.startsWith('user.')) {
+      if (eventType.startsWith('user.')) {
         console.log('Webhook payload:', evt.data);
 
         if (userId) {
