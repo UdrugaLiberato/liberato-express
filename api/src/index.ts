@@ -13,7 +13,7 @@ import questionRoutes from './routes/question-routes';
 import answerRoutes from './routes/answer-routes';
 import memberRoutes from './routes/member-routes';
 import { verifyWebhook } from '@clerk/express/webhooks';
-import { clerkClient, clerkMiddleware, getAuth } from '@clerk/express';
+import { clerkClient, clerkMiddleware, getAuth, requireAuth } from '@clerk/express';
 import imageRoutes from './routes/image-routes';
 import imageLocationRoutes from './routes/image-location-routes';
 import authRoutes from './routes/auth-routes';
@@ -76,7 +76,17 @@ app.post(
   },
 );
 
-app.get('/hi', (req, res) => {
+const isAdmin = (req, res, next) => {
+  const auth = getAuth(req);
+  if (auth.userId && auth.sessionClaims?.publicMetadata?.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ error: 'Forbidden: Admin access required' });
+  }
+};  
+
+
+app.get('/hi', requireAuth(), isAdmin, (req, res) => {
   const auth = getAuth(req);
   console.log(auth);
   res.json({
