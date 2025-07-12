@@ -23,6 +23,7 @@ import imageRoutes from './routes/image-routes';
 import imageLocationRoutes from './routes/image-location-routes';
 import authRoutes from './routes/auth-routes';
 import bodyParser from 'body-parser';
+import prisma from './config/prisma';
 
 dotenv.config();
 
@@ -56,6 +57,14 @@ app.post(
               role: 'admin',
             },
           });
+
+          const user = await prisma.clerkUser.create({
+            data: {
+              ...evt.data,
+            },
+          });
+
+          console.log('User created in database:', user);
         }
       }
       res.send('Webhook received');
