@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 import dotenv from 'dotenv';
 import cityRoutes from './routes/city-routes';
@@ -22,7 +23,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-
+app.use(cors());
 app.use(cookieParser());
 app.use(clerkMiddleware());
 app.get('/', (request, res) => {
