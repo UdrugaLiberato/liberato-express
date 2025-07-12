@@ -13,7 +13,12 @@ import questionRoutes from './routes/question-routes';
 import answerRoutes from './routes/answer-routes';
 import memberRoutes from './routes/member-routes';
 import { verifyWebhook } from '@clerk/express/webhooks';
-import { clerkClient, clerkMiddleware, getAuth, requireAuth } from '@clerk/express';
+import {
+  clerkClient,
+  clerkMiddleware,
+  getAuth,
+  requireAuth,
+} from '@clerk/express';
 import imageRoutes from './routes/image-routes';
 import imageLocationRoutes from './routes/image-location-routes';
 import authRoutes from './routes/auth-routes';
@@ -54,19 +59,17 @@ app.post(
       }
 
       const eventType = evt.type;
-      console.log(
-        `Received webhook with ID ${id} and event type of ${eventType}`,
-      );
-      console.log('Webhook payload:', evt.data);
 
-      console.log(userId);
+      if (!eventType.startsWith('user.')) {
+        console.log('Webhook payload:', evt.data);
 
-      if (userId) {
-        await clerkClient.users.updateUserMetadata(userId, {
-          publicMetadata: {
-            role: 'admin',
-          },
-        });
+        if (userId) {
+          await clerkClient.users.updateUserMetadata(userId, {
+            publicMetadata: {
+              role: 'admin',
+            },
+          });
+        }
       }
       res.send('Webhook received');
     } catch (error) {
@@ -78,7 +81,9 @@ app.post(
 
 const isAdmin = (req: Request, res: Response, next: NextFunction) => {
   const auth = getAuth(req);
-  const publicMetadata = auth.sessionClaims?.metadata as { role?: string } | undefined;
+  const publicMetadata = auth.sessionClaims?.metadata as
+    | { role?: string }
+    | undefined;
 
   if (auth.userId && publicMetadata?.role === 'admin') {
     next();
@@ -86,7 +91,6 @@ const isAdmin = (req: Request, res: Response, next: NextFunction) => {
     res.status(403).json({ error: 'Forbidden: Admin access required' });
   }
 };
-
 
 app.get('/hi', requireAuth(), isAdmin, (req, res) => {
   const auth = getAuth(req);
