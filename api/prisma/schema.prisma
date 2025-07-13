@@ -209,7 +209,7 @@ model volunteer {
 model ClerkUser {
   id                          String   @id
   emailAddress              String? @unique
-  username                   String?  @unique
+  username                   String? 
   role                     String?  @default("member") // member/admin
   externalId                 String?  @unique
   avatarUrl                 String?

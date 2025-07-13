@@ -75,6 +75,12 @@ app.post(
         });
       }
       if (eventType === 'user.deleted') {
+        await prisma.clerkUser.update({
+          where: { id: id as string },
+          data: {
+            deletedAt: BigInt(Date.now()),
+          },
+        });
         console.log(evt.data);
       }
       res.send('Webhook received');
