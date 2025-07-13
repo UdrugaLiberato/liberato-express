@@ -65,7 +65,9 @@ app.post(
                   evt.data.email_addresses?.[0]?.email_address || '',
                 externalId: evt.data.external_accounts?.[0]?.id || '',
                 username: evt.data.username || '',
-                lastSignInAt: evt.data.last_sign_in_at,
+                lastSignInAt: evt.data.last_sign_in_at
+                  ? new Date(evt.data.last_sign_in_at).getTime()
+                  : Date.now(),
                 lastActiveAt: evt.data.last_active_at
                   ? new Date(evt.data.last_active_at).getTime()
                   : Date.now(),
@@ -79,7 +81,14 @@ app.post(
                 role: 'member', // Default role
               },
             });
-            console.log('User created in database:', user);
+            const fetchedUser = await prisma.clerkUser.findUnique({
+              where: { id: user.id },
+            });
+            console.log('User created in database:', fetchedUser?.lastSignInAt);
+            console.log(
+              'User created in database:',
+              new Date(+fetchedUser?.lastSignInAt),
+            );
           }
         }
       }
