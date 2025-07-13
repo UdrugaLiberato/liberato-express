@@ -36,61 +36,46 @@ app.get('/', (request, res) => {
   res.send('Hello World!');
 });
 
+app.get('/user', async (req, res) => {
+  const user = await clerkClient.users.getUser(
+    'user_2zopSNp2MhN4Jg7BhIrIHQJFGyy',
+  );
+
+  res.json(user);
+});
 app.post(
   '/api/webhooks',
   bodyParser.raw({ type: 'application/json' }),
   async (req, res) => {
     try {
       const evt = await verifyWebhook(req);
-
       // Do something with payload
       // For this guide, log payload to console
       const { id } = evt.data;
       const eventType = evt.type;
 
-      if (eventType.startsWith('user.')) {
-        console.log('Webhook payload:', evt.data);
-
-        if (id) {
-          await clerkClient.users.updateUserMetadata(id, {
-            publicMetadata: {
-              role: 'member',
-            },
-          });
-          if (eventType === 'user.created') {
-            const user = await prisma.clerkUser.create({
-              data: {
-                id: evt.data.id!,
-                emailAddress:
-                  evt.data.email_addresses?.[0]?.email_address || '',
-                externalId: evt.data.external_accounts?.[0]?.id || '',
-                username: evt.data.username || '',
-                lastSignInAt: evt.data.last_sign_in_at
-                  ? new Date(evt.data.last_sign_in_at).getTime()
-                  : Date.now(),
-                lastActiveAt: evt.data.last_active_at
-                  ? new Date(evt.data.last_active_at).getTime()
-                  : Date.now(),
-                updatedAt: evt.data.updated_at
-                  ? new Date(evt.data.updated_at).getTime()
-                  : Date.now(),
-                createdAt: evt.data.created_at
-                  ? new Date(evt.data.created_at).getTime()
-                  : Date.now(),
-                banned: evt.data.banned || false,
-                role: 'member', // Default role
-              },
-            });
-            const fetchedUser = await prisma.clerkUser.findUnique({
-              where: { id: user.id },
-            });
-            console.log('User created in database:', fetchedUser?.lastSignInAt);
-            console.log(
-              'User created in database:',
-              new Date(+fetchedUser?.lastSignInAt),
-            );
-          }
-        }
+      if (eventType === 'user.created') {
+        await prisma.clerkUser.create({
+          data: {
+            id: id as string,
+            emailAddress: evt.data.email_addresses[0]?.email_address || '',
+            externalId: evt.data.external_accounts[0]?.id || '',
+            avatarUrl: evt.data.image_url || '',
+            username: evt.data.username || '',
+            deletedAt: null,
+            lastSignInAt: evt.data.last_sign_in_at
+              ? BigInt(new Date(evt.data.last_sign_in_at).getTime())
+              : null,
+            lastActiveAt: evt.data.last_active_at
+              ? BigInt(new Date(evt.data.last_active_at).getTime())
+              : null,
+            createdAt: BigInt(new Date(evt.data.created_at).getTime()),
+            updatedAt: BigInt(new Date(evt.data.updated_at).getTime()),
+          },
+        });
+      }
+      if (eventType === 'user.deleted') {
+        console.log(evt.data);
       }
       res.send('Webhook received');
     } catch (error) {
@@ -139,8 +124,8 @@ app.use('/api/members', memberRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/image_locations', imageLocationRoutes);
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(3001, () => {
+  console.log(`Server is running on 3001 ${3001}`);
 });
 
 export { app };

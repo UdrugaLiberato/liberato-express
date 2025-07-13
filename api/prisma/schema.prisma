@@ -209,14 +209,16 @@ model volunteer {
 model ClerkUser {
   id                          String   @id
   emailAddress              String? @unique
-  externalId                 String?  @unique
   username                   String?  @unique
+  role                     String?  @default("member") // member/admin
+  externalId                 String?  @unique
+  avatarUrl                 String?
+  banned                   Boolean  @default(false)
   lastSignInAt               BigInt?
   lastActiveAt               BigInt?
   updatedAt                  BigInt?
   createdAt                  BigInt?
-  banned                   Boolean  @default(false)
-  role                     String?  @default("member") // member/admin
+  deletedAt                 BigInt?
   @@map("users")
 }
 
