@@ -4,9 +4,9 @@ import {
   getEmail,
   createEmail,
   updateEmail,
-} from '../controllers/email-controller';
-import {authenticate} from "../middleware/authenticate";
-import {checkPermissions} from "../middleware/check-permissions";
+} from './email-controller';
+import {authenticate} from "../api/src/middleware/authenticate";
+import {checkPermissions} from "../api/src/middleware/check-permissions";
 
 const router = express.Router();
 

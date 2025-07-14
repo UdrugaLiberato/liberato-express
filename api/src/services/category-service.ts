@@ -23,24 +23,46 @@ export const getById = (id: string) => {
   })
 }
 
-export const create = (data: any) => {
-  return prisma.category.create({
-    data: {
-      ...data,
-      created_at: new Date()
-    }
-  })
-}
+export const create = async (data: {
+  name: string;
+  description?: string;
+  questions?: string;
+  category_image: string;
+}) => {
+  const { name, description, questions, category_image } = data;
 
-export const update = (id: string, data: any) => {
-  return prisma.category.update({
-    where: { id },
+  const image = await prisma.category_image.create({
     data: {
-      ...data,
-      updated_at: new Date()
-    }
-  })
-}
+      src: category_image,
+      created_at: new Date(),
+    },
+  });
+
+  const category = await prisma.category.create({
+    data: {
+      name,
+      description,
+      created_at: new Date(),
+      category_image: {
+        connect: { id: image.id },
+      },
+    },
+  });
+
+  if (questions) {
+    const items = questions.split(',').map(q => q.trim()).filter(Boolean);
+    await prisma.question.createMany({
+      data: items.map(question => ({
+        question,
+        category_id: category.id,
+        created_at: new Date(),
+      })),
+    });
+  }
+
+  return category;
+};
+
 
 export const remove = (id: string) => {
   return prisma.category.update({

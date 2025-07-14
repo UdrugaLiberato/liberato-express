@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
-import { app } from '../index';
-import prisma from '../config/prisma';
+import { app } from '../api/src';
+import prisma from '../api/src/config/prisma';
 
 describe('Emails API', () => {
   let token: string;

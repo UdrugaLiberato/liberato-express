@@ -16,7 +16,13 @@ router.post(
   upload.array('images'),
   LocationController.createLocation as RequestHandler
 );
-router.put('/:id', authenticate, checkPermissions, LocationController.updateLocation as RequestHandler);
+router.put(
+  '/:id',
+  authenticate,
+  checkPermissions,
+  upload.array('images'),
+  LocationController.updateLocation as RequestHandler
+);
 router.delete('/:id', authenticate, checkPermissions, LocationController.deleteLocation as RequestHandler);
 
 router.post(

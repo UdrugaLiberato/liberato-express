@@ -1,13 +1,7 @@
 import axios from 'axios';
+import CoordinatesNotFound from '../exceptions/CoordinatesNotFound';
 
 const GOOGLE_API_KEY: string = process.env.GOOGLE_API_KEY!;
-
-class CoordinatesNotFound extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'CoordinatesNotFound';
-  }
-}
 
 export class GoogleMaps {
   constructor(private apiKey: string = GOOGLE_API_KEY) {}
@@ -49,8 +43,6 @@ export class GoogleMaps {
         },
       }
     );
-
-    console.log(response);
 
     const data = response.data;
 

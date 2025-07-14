@@ -21,7 +21,7 @@ export const addLocationImage = async (req: Request, res: Response) => {
   try {
     const locationId = req.params.id;
     const files = req.files as Express.Multer.File[];
-
+``
     if (!files?.length) {
       return res.status(400).json({ message: 'No files uploaded' });
     }
@@ -68,6 +68,7 @@ export const updateLocation = async (req: Request, res: Response) => {
     const updated = await LocationService.updateLocation(
       req.params.id,
       req.body,
+      req.files as Express.Multer.File[]
     );
     res.json(updated);
   } catch (error: any) {

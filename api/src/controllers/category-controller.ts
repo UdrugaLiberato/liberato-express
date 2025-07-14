@@ -12,14 +12,31 @@ export const getCategory = async (req: Request, res: Response) => {
 }
 
 export const createCategory = async (req: Request, res: Response) => {
-  const newCategory = await CategoryService.create(req.body);
-  res.status(201).json(newCategory);
-}
+  try {
+    const { name, description, questions } = req.body;
+    const file = req.file;
 
-export const updateCategory = async (req: Request, res: Response) => {
-  const updated = await CategoryService.update(req.params.id, req.body);
-  res.json(updated);
-}
+
+    if (!name || !file) {
+      return res.status(400).json({ error: 'Missing required fields: name or category_image' });
+    }
+
+    const category_image = file.filename;
+
+    const newCategory = await CategoryService.create({
+      name,
+      description,
+      category_image,
+      questions,
+    });
+
+    res.status(201).json(newCategory);
+  } catch (error) {
+    console.error('Error creating category:', error);
+    res.status(500).json({ error: 'Failed to create category' });
+  }
+};
+
 
 export const deleteCategory = async (req: Request, res: Response) => {
   await CategoryService.remove(req.params.id);

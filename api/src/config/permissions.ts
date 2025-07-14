@@ -31,16 +31,6 @@ export const permissions: Record<string, Record<string, string[]>> = {
     POST: ['ROLE_ADMIN'],
     DELETE: ['ROLE_ADMIN'],
   },
-  '/api/emails/*': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
-    POST: ['ROLE_ADMIN'],
-    DELETE: ['ROLE_ADMIN'],
-    PUT: ['ROLE_ADMIN'],
-  },
-  '/api/emails': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
-    POST: ['ROLE_ADMIN'],
-  },
   '/api/images/*': {
     GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
     POST: ['ROLE_ADMIN'],
@@ -63,16 +53,6 @@ export const permissions: Record<string, Record<string, string[]>> = {
     DELETE: ['ROLE_ADMIN'],
     PUT: ['ROLE_ADMIN'],
   },
-  '/api/members/*': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
-    POST: ['ROLE_ADMIN'],
-    DELETE: ['ROLE_ADMIN'],
-    PUT: ['ROLE_ADMIN'],
-  },
-  '/api/members': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
-    POST: ['ROLE_ADMIN'],
-  },
   '/api/questions/*': {
     GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
     POST: ['ROLE_ADMIN'],
@@ -83,18 +63,6 @@ export const permissions: Record<string, Record<string, string[]>> = {
     GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
     POST: ['ROLE_ADMIN'],
   },
-  '/api/tasks/*': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
-    POST: ['ROLE_ADMIN'],
-    DELETE: ['ROLE_ADMIN'],
-    PUT: ['ROLE_ADMIN'],
-  },
-  '/api/tasks': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
-    POST: ['ROLE_ADMIN'],
-    DELETE: ['ROLE_ADMIN'],
-    PUT: ['ROLE_ADMIN'],
-  },
   '/api/users/*': {
     GET: ['ROLE_ADMIN'],
     POST: ['ROLE_ADMIN'],
@@ -104,18 +72,6 @@ export const permissions: Record<string, Record<string, string[]>> = {
   '/api/users': {
     GET: ['ROLE_ADMIN'],
     POST: ['ROLE_ADMIN'],
-  },
-  '/api/volunteers/*': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
-    POST: ['ROLE_ADMIN'],
-    DELETE: ['ROLE_ADMIN'],
-    PUT: ['ROLE_ADMIN'],
-  },
-  '/api/volunteers': {
-    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
-    POST: ['ROLE_ADMIN'],
-    DELETE: ['ROLE_ADMIN'],
-    PUT: ['ROLE_ADMIN'],
   },
   '/api/auth*': {
     POST: ['PUBLIC_ACCESS'],

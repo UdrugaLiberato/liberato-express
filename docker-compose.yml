@@ -15,23 +15,23 @@ services:
     ports:
       - "5432:5432"
 
-#  temp_database:
-#    image: mysql:8.0.33
-#    container_name: temp-db
-#    volumes:
-#      - temp_db_data:/var/lib/mysql
-#      - ./db_dumps:/db_dumps
-#    networks:
-#      - liberato-network
-#    environment:
-#      MYSQL_USER: "admin"
-#      MYSQL_PASSWORD: "123"
-#      MYSQL_ROOT_PASSWORD: "123"
-#      MYSQL_DATABASE: "temp"
-#      TZ: "Europe/Zagreb"
-#    command: --default-authentication-plugin=mysql_native_password
-#    ports:
-#      - "4306:3306"
+  temp_database:
+    image: mysql:8.0.33
+    container_name: temp-db
+    volumes:
+      - temp_db_data:/var/lib/mysql
+      - ./db_dumps:/db_dumps
+    networks:
+      - liberato-network
+    environment:
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "123"
+      MYSQL_ROOT_PASSWORD: "123"
+      MYSQL_DATABASE: "temp"
+      TZ: "Europe/Zagreb"
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "4306:3306"
 
   api:
     container_name: liberato-api
