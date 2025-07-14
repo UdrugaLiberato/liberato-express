@@ -2,13 +2,13 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cityRoutes from './routes/city-routes';
 import locationRoutes from './routes/location-routes';
-import categoryRoutes from "./routes/category-routes";
-import userRoutes from "./routes/user-routes";
+import categoryRoutes from './routes/category-routes';
+import userRoutes from './routes/user-routes';
 import cookieParser from 'cookie-parser';
-import questionRoutes from "./routes/question-routes";
-import answerRoutes from "./routes/answer-routes";
-import imageRoutes from "./routes/image-routes";
-import authRoutes from "./routes/auth-routes";
+import questionRoutes from './routes/question-routes';
+import answerRoutes from './routes/answer-routes';
+import imageRoutes from './routes/image-routes';
+import authRoutes from './routes/auth-routes';
 
 dotenv.config();
 
@@ -23,7 +23,6 @@ app.get('/', (request, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-
 
 app.use('/api/cities', cityRoutes);
 app.use('/api/locations', locationRoutes);

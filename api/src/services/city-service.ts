@@ -16,7 +16,7 @@ export const createCity = async (data: {
   name: string;
   latitude: number;
   longitude: number;
-  radiusInKm?: number|null;
+  radiusInKm?: number | null;
 }) => {
   return prisma.city.create({
     data: {

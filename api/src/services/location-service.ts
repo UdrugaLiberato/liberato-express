@@ -2,7 +2,10 @@ import prisma from '../config/prisma';
 import { GoogleMaps } from '../utils/google-maps';
 import { Express } from 'express';
 
-export const getAllLocations = async (filters: { city?: string; category?: string }) => {
+export const getAllLocations = async (filters: {
+  city?: string;
+  category?: string;
+}) => {
   const { city, category } = filters;
 
   const locations = await prisma.location.findMany({
@@ -51,7 +54,6 @@ export const getAllLocations = async (filters: { city?: string; category?: strin
   });
 };
 
-
 export const getLocationById = async (id: string) => {
   const location = await prisma.location.findUnique({
     where: { id },
@@ -86,7 +88,6 @@ export const getLocationById = async (id: string) => {
     answer: simplifiedAnswers,
   };
 };
-
 
 export const createLocation = async (
   body: any,
@@ -140,27 +141,28 @@ export const createLocation = async (
           src: `https://dev.udruga-liberato.hr/images/locations/${file.filename}`,
           name: file.originalname.split('.')[0],
           mime: file.mimetype,
-          locationId: location.id
+          locationId: location.id,
         },
-      })
-    )
+      }),
+    ),
   );
 
   if (body.qa) {
     const qaItems = body.qa.split(',');
-    await Promise.all(qaItems.map(async (item: string) => {
-      const [questionId, answer] = item.split(':');
-      await prisma.answer.create({
-        data: {
-          question: { connect: { id: questionId } },
-          answer: answer === 'true'? 1 : 0,
-          location: { connect: { id: location.id } },
-          createdAt: new Date(),
-        },
-      });
-    }));
+    await Promise.all(
+      qaItems.map(async (item: string) => {
+        const [questionId, answer] = item.split(':');
+        await prisma.answer.create({
+          data: {
+            question: { connect: { id: questionId } },
+            answer: answer === 'true' ? 1 : 0,
+            location: { connect: { id: location.id } },
+            createdAt: new Date(),
+          },
+        });
+      }),
+    );
   }
-
 
   const baseLocation = await prisma.location.findUnique({
     where: { id: location.id },
@@ -199,7 +201,6 @@ export const createLocation = async (
   };
 };
 
-
 export const updateLocation = async (
   id: string,
   body: Partial<{
@@ -214,9 +215,9 @@ export const updateLocation = async (
     featured?: boolean | string;
     qa?: string;
   }>,
-  files: Express.Multer.File[]
+  files: Express.Multer.File[],
 ) => {
-  if (!body) throw new Error("Empty body");
+  if (!body) throw new Error('Empty body');
 
   const dataToUpdate: any = {};
 
@@ -235,11 +236,13 @@ export const updateLocation = async (
   }
 
   if (body.published !== undefined) {
-    dataToUpdate.published = body.published === true || body.published === 'true' ? 1 : 0;
+    dataToUpdate.published =
+      body.published === true || body.published === 'true' ? 1 : 0;
   }
 
   if (body.featured !== undefined) {
-    dataToUpdate.featured = body.featured === true || body.featured === 'true' ? 1 : 0;
+    dataToUpdate.featured =
+      body.featured === true || body.featured === 'true' ? 1 : 0;
   }
 
   if (body.street !== undefined || body.city_id !== undefined) {
@@ -248,7 +251,10 @@ export const updateLocation = async (
       : null;
 
     const googleMaps = new GoogleMaps();
-    const geo = await googleMaps.getCoordinateForStreet(body.street ?? '', city?.name ?? '');
+    const geo = await googleMaps.getCoordinateForStreet(
+      body.street ?? '',
+      city?.name ?? '',
+    );
 
     if (!geo?.lat || !geo?.lng) {
       throw new Error(`Google Maps failed to find coordinates`);
@@ -279,14 +285,14 @@ export const updateLocation = async (
       files.map((file) =>
         prisma.image.create({
           data: {
-            id: Math.floor(Math.random() * 1000000000),
+            id: Math.floor(Math.random() * 1_000_000_000),
             src: `https://dev.udruga-liberato.hr/images/locations/${file.filename}`,
             name: file.originalname.split('.')[0],
             mime: file.mimetype,
             locationId: id,
           },
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -307,7 +313,7 @@ export const updateLocation = async (
             createdAt: new Date(),
           },
         });
-      })
+      }),
     );
   }
 
@@ -357,7 +363,6 @@ export const deleteLocation = async (id: string) => {
   });
 };
 
-
 // export const addLocationImage = async (
 //   locationId: string,
 //   files: Express.Multer.File[]
@@ -392,7 +397,6 @@ export const deleteLocation = async (id: string) => {
 //     },
 //   });
 // };
-
 
 // export const removeLocationImage = async (
 //   imageId: number,

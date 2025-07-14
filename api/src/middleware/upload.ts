@@ -1,16 +1,15 @@
-import multer from 'multer';
-import path from 'path';
+import multer, { FileFilterCallback } from 'multer';
+import path from 'node:path';
 import { Request } from 'express';
-import { FileFilterCallback } from 'multer';
 
 const storage = multer.diskStorage({
   destination: 'uploads/',
   filename: (
     req: Request,
     file: Express.Multer.File,
-    cb: (error: Error | null, filename: string) => void
+    cb: (error: Error | null, filename: string) => void,
   ) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });

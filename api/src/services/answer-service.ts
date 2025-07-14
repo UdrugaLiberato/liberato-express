@@ -1,50 +1,51 @@
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const getAll = async () => {
   return await prisma.answer.findMany({
     where: { deletedAt: null },
     include: {
       location: true,
-      question: true
-    }
+      question: true,
+    },
   });
-}
+};
 
 export const getById = async (id: string) => {
   return await prisma.answer.findUnique({
     where: { id },
     include: {
       location: true,
-      question: true
-    }
+      question: true,
+    },
   });
-}
+};
 
 export const create = async (data: any) => {
   return await prisma.answer.create({
     data: {
       ...data,
-      createdAt: new Date()
-    }
+      createdAt: new Date(),
+    },
   });
-}
+};
 
 export const update = async (id: string, data: any) => {
   return await prisma.answer.update({
     where: { id },
     data: {
       ...data,
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   });
-}
+};
 
 export const remove = async (id: string) => {
   return await prisma.answer.update({
     where: { id },
     data: {
-      deletedAt: new Date()
-    }
+      deletedAt: new Date(),
+    },
   });
-}
+};
