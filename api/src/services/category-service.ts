@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import { Express } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient()
 
@@ -7,7 +9,7 @@ export const getAll = () => {
     include: {
       question: true,
       location: true,
-      category_image: true
+      image: true
     }
   })
 }
@@ -18,23 +20,23 @@ export const getById = (id: string) => {
     include: {
       question: true,
       location: true,
-      category_image: true
+      image: true
     }
   })
 }
 
-export const create = async (data: {
-  name: string;
-  description?: string;
-  questions?: string;
-  category_image: string;
-}) => {
-  const { name, description, questions, category_image } = data;
+export const create = async (
+  name: string,
+  file: Express.Multer.File,
+  description?: string,
+  questions?: string,
+) => {
 
-  const image = await prisma.category_image.create({
+  const image = await prisma.image.create({
     data: {
-      src: category_image,
-      created_at: new Date(),
+      src: `https://dev.udruga-liberato.hr/images/locations/${file.filename}`,
+      name: file.originalname.split('.')[0],
+      mime: file.mimetype,
     },
   });
 
@@ -43,9 +45,9 @@ export const create = async (data: {
       name,
       description,
       created_at: new Date(),
-      category_image: {
-        connect: { id: image.id },
-      },
+      image: {
+        connect: {id: image.id}
+      }
     },
   });
 

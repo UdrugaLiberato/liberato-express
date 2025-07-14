@@ -16,29 +16,29 @@ router.post(
   upload.array('images'),
   LocationController.createLocation as RequestHandler
 );
-router.put(
-  '/:id',
-  authenticate,
-  checkPermissions,
-  upload.array('images'),
-  LocationController.updateLocation as RequestHandler
-);
+// router.put(
+//   '/:id',
+//   authenticate,
+//   checkPermissions,
+//   upload.array('images'),
+//   LocationController.updateLocation as RequestHandler
+// );
 router.delete('/:id', authenticate, checkPermissions, LocationController.deleteLocation as RequestHandler);
 
-router.post(
-  '/:id/images',
-  authenticate,
-  checkPermissions,
-  upload.array('images'),
-  LocationController.addLocationImage as RequestHandler
-);
-
-router.delete(
-  '/:id/images',
-  authenticate,
-  checkPermissions,
-  LocationController.removeLocationImage as RequestHandler
-);
+// router.post(
+//   '/:id/images',
+//   authenticate,
+//   checkPermissions,
+//   upload.array('images'),
+//   LocationController.addLocationImage as RequestHandler
+// );
+//
+// router.delete(
+//   '/:id/images',
+//   authenticate,
+//   checkPermissions,
+//   LocationController.removeLocationImage as RequestHandler
+// );
 
 
 export default router;

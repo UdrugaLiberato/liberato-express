@@ -4,8 +4,8 @@ const prisma = new PrismaClient()
 export const getAll = async () => {
   return await prisma.image.findMany({
     include: {
-      category_image: true,
-      image_location: true
+      category: true,
+      location: true
     }
   });
 }
@@ -14,8 +14,8 @@ export const getById = async (id: number) => {
   return await prisma.image.findUnique({
     where: { id },
     include: {
-      category_image: true,
-      image_location: true
+      category: true,
+      location: true
     }
   });
 }

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import * as CategoryService from '../services/category-service'
+import { Express } from 'express';
 
 export const getAllCategories = async (_req: Request, res: Response) => {
   const categories = await CategoryService.getAll();
@@ -21,14 +22,12 @@ export const createCategory = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required fields: name or category_image' });
     }
 
-    const category_image = file.filename;
-
-    const newCategory = await CategoryService.create({
+    const newCategory = await CategoryService.create(
       name,
+      file as Express.Multer.File,
       description,
-      category_image,
       questions,
-    });
+    );
 
     res.status(201).json(newCategory);
   } catch (error) {

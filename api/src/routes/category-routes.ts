@@ -1,4 +1,5 @@
 import express from 'express';
+import { Router, RequestHandler } from 'express';
 import {
   getAllCategories,
   getCategory,
@@ -18,7 +19,7 @@ router.post(
   authenticate,
   checkPermissions,
   upload.single('image'),
-  createCategory
+  createCategory as RequestHandler
 );
 
 router.delete('/:id', authenticate, checkPermissions, deleteCategory);

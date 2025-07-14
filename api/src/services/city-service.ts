@@ -2,7 +2,7 @@ import prisma from '../config/prisma';
 
 export const getAllCities = () => {
   return prisma.city.findMany({
-    where: { deletedAt: null },
+    where: { deleted_at: null },
   });
 };
 
@@ -66,7 +66,7 @@ export const deleteCity = async (id: string) => {
   return prisma.city.update({
     where: { id },
     data: {
-      deletedAt: new Date(),
+      deleted_at: new Date(),
     },
   });
 };

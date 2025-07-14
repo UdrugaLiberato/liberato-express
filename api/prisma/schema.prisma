@@ -11,7 +11,7 @@ datasource db {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model answer {
-  id          String    @id(map: "idx_16730_primary") @db.VarChar(255)
+  id          String    @id(map: "idx_16730_primary") @db.VarChar(255) @default(uuid())
   location_id String?   @db.VarChar(255)
   answer      Int       @db.SmallInt
   created_at  DateTime  @db.Timestamptz(6)
@@ -28,7 +28,7 @@ model answer {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model category {
-  id          String     @id(map: "idx_16735_primary") @db.VarChar(255)
+  id          String     @id(map: "idx_16735_primary") @db.VarChar(255) @default(uuid())
   name        String     @unique(map: "idx_16735_uniq_64c19c15e237e06") @db.VarChar(255)
   description String?
   created_at  DateTime   @db.Timestamptz(6)
@@ -43,7 +43,7 @@ model category {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model city {
-  id           String     @id(map: "idx_16740_primary") @db.VarChar(255)
+  id           String     @id(map: "idx_16740_primary") @db.VarChar(255) @default(uuid())
   name         String     @unique(map: "idx_16740_uniq_2d5b02345e237e06") @db.VarChar(255)
   latitude     Float
   longitude    Float
@@ -57,7 +57,7 @@ model city {
 }
 
 model image {
-  id          Int       @id(map: "idx_16745_primary")
+  id          Int       @id(map: "idx_16745_primary") @default(autoincrement())
   src         String    @db.VarChar(255)
   name        String    @db.VarChar(255)
   mime        String?   @db.VarChar(255)
@@ -73,7 +73,7 @@ model image {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model location {
-  id          String    @id(map: "idx_16750_primary") @db.VarChar(255)
+  id          String    @id(map: "idx_16750_primary") @db.VarChar(255) @default(uuid())
   category_id String    @db.VarChar(255)
   user_id     String?   @db.VarChar(255)
   city_id     String    @db.VarChar(255)
@@ -103,7 +103,7 @@ model location {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model question {
-  id          String    @id(map: "idx_16755_primary") @db.VarChar(255)
+  id          String    @id(map: "idx_16755_primary") @db.VarChar(255) @default(uuid())
   category_id String?   @db.VarChar(255)
   question    String    @db.VarChar(255)
   created_at  DateTime  @db.Timestamptz(6)
@@ -118,7 +118,7 @@ model question {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model user {
-  id           String     @id(map: "idx_16760_primary") @db.VarChar(255)
+  id           String     @id(map: "idx_16760_primary") @db.VarChar(255) @default(uuid())
   emailaddress String?    @unique(map: "idx_16760_uniq_8d93d649e7927c74") @db.VarChar(255)
   externalid   String?    @unique(map: "idx_16760_externalid") @db.VarChar(255)
   lastsigninat BigInt?

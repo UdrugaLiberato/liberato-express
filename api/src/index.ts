@@ -8,7 +8,6 @@ import cookieParser from 'cookie-parser';
 import questionRoutes from "./routes/question-routes";
 import answerRoutes from "./routes/answer-routes";
 import imageRoutes from "./routes/image-routes";
-import imageLocationRoutes from "./routes/image-location-routes";
 import authRoutes from "./routes/auth-routes";
 
 dotenv.config();
@@ -33,7 +32,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/answers', answerRoutes);
 app.use('/api/images', imageRoutes);
-app.use('/api/image_locations', imageLocationRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
