@@ -1,15 +1,15 @@
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export const getAll = () => {
   return prisma.user.findMany({
     include: {
       location: true,
-    }
-  })
-}
+    },
+  });
+};
 
 export const getById = (id: string) => {
   return prisma.user.findUnique({
@@ -18,23 +18,25 @@ export const getById = (id: string) => {
       location: {
         include: {
           category: true,
-        }
-      }
-    }
-  })
-}
+        },
+      },
+    },
+  });
+};
 
 export const create = async (data: any) => {
-  const hashedPassword = data.password? await bcrypt.hash(data.password, 10) : '';
+  const hashedPassword = data.password
+    ? await bcrypt.hash(data.password, 10)
+    : '';
   return prisma.user.create({
     data: {
       ...data,
       roles: data.roles || 'ROLE_USER',
       password: hashedPassword,
-      created_at: new Date()
-    }
-  })
-}
+      createdAt: new Date(),
+    },
+  });
+};
 
 export const createIncomplete = async (
   email: string,
@@ -42,43 +44,46 @@ export const createIncomplete = async (
   username: string,
   avatar: string,
 ) => {
-  const hashedPassword = password? await bcrypt.hash(password, 10) : '';
+  const hashedPassword = password ? await bcrypt.hash(password, 10) : '';
   return prisma.user.create({
     data: {
-      emailaddress: email,
-      username: username,
+      emailAddress: email,
+      username,
       roles: JSON.stringify(['ROLE_USER']),
       password: hashedPassword,
-      created_at: new Date(),
-      avatarurl: avatar
-    }
-  })
-}
+      createdAt: new Date(),
+      avatarUrl: avatar,
+    },
+  });
+};
 
 export const update = async (id: string, data: any) => {
   const updateData = {
     ...data,
-    updated_at: new Date()
-  }
+    updatedAt: new Date(),
+  };
 
   if (data.password) {
-    updateData.password = await bcrypt.hash(data.password, 10)
+    updateData.password = await bcrypt.hash(data.password, 10);
   }
 
   return prisma.user.update({
     where: { id },
-    data: updateData
-  })
-}
+    data: updateData,
+  });
+};
 
 export const remove = async (id: string) => {
-  const user = await prisma.user.findUnique({ where: { id }, include: { location: true } })
-  if (!user) throw new Error('User not found')
+  const user = await prisma.user.findUnique({
+    where: { id },
+    include: { location: true },
+  });
+  if (!user) throw new Error('User not found');
 
-  if (user.deleted_at) throw new Error('User already deactivated')
+  if (user.deletedAt) throw new Error('User already deactivated');
 
   return prisma.user.update({
     where: { id },
-    data: { deleted_at: new Date() }
-  })
-}
+    data: { deletedAt: new Date() },
+  });
+};

@@ -1,9 +1,14 @@
-import { Request, Response } from 'express';
+import { Request, Response, Express } from 'express';
 import * as LocationService from '../services/location-service';
-import { Express } from 'express';
 
-export const getLocations = async (_req: Request, res: Response) => {
-  const locations = await LocationService.getAllLocations();
+export const getLocations = async (req: Request, res: Response) => {
+  const { city, category } = req.query;
+
+  const locations = await LocationService.getAllLocations({
+    city: city as string | undefined,
+    category: category as string | undefined,
+  });
+
   res.json(locations);
 };
 
@@ -55,26 +60,29 @@ export const createLocation = async (req: Request, res: Response) => {
     return;
   }
   try {
-    const location = await LocationService.createLocation(req.body, req.files as Express.Multer.File[], req.user.id);
+    const location = await LocationService.createLocation(
+      req.body,
+      req.files as Express.Multer.File[],
+      req.user.id,
+    );
     res.status(201).json(location);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
 
-
-// export const updateLocation = async (req: Request, res: Response) => {
-//   try {
-//     const updated = await LocationService.updateLocation(
-//       req.params.id,
-//       req.body,
-//       req.files as Express.Multer.File[]
-//     );
-//     res.json(updated);
-//   } catch (error: any) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
+export const updateLocation = async (req: Request, res: Response) => {
+  try {
+    const updated = await LocationService.updateLocation(
+      req.params.id,
+      req.body,
+      req.files as Express.Multer.File[],
+    );
+    res.json(updated);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 export const deleteLocation = async (req: Request, res: Response) => {
   try {

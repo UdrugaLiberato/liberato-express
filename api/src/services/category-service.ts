@@ -1,18 +1,18 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 import { Express } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export const getAll = () => {
   return prisma.category.findMany({
     include: {
       question: true,
       location: true,
-      image: true
-    }
-  })
-}
+      image: true,
+    },
+  });
+};
 
 export const getById = (id: string) => {
   return prisma.category.findUnique({
@@ -20,10 +20,10 @@ export const getById = (id: string) => {
     include: {
       question: true,
       location: true,
-      image: true
-    }
-  })
-}
+      image: true,
+    },
+  });
+};
 
 export const create = async (
   name: string,
@@ -31,7 +31,6 @@ export const create = async (
   description?: string,
   questions?: string,
 ) => {
-
   const image = await prisma.image.create({
     data: {
       src: `https://dev.udruga-liberato.hr/images/locations/${file.filename}`,
@@ -44,20 +43,23 @@ export const create = async (
     data: {
       name,
       description,
-      created_at: new Date(),
+      createdAt: new Date(),
       image: {
-        connect: {id: image.id}
-      }
+        connect: { id: image.id },
+      },
     },
   });
 
   if (questions) {
-    const items = questions.split(',').map(q => q.trim()).filter(Boolean);
+    const items = questions
+      .split(',')
+      .map((q) => q.trim())
+      .filter(Boolean);
     await prisma.question.createMany({
-      data: items.map(question => ({
+      data: items.map((question) => ({
         question,
-        category_id: category.id,
-        created_at: new Date(),
+        categoryId: category.id,
+        createdAt: new Date(),
       })),
     });
   }
@@ -65,10 +67,9 @@ export const create = async (
   return category;
 };
 
-
 export const remove = (id: string) => {
   return prisma.category.update({
     where: { id },
-    data: { deleted_at: new Date() }
-  })
-}
+    data: { deletedAt: new Date() },
+  });
+};

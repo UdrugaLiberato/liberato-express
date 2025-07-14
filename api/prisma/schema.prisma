@@ -6,133 +6,134 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["latest"]
+  schemas  = ["public"]
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model answer {
-  id          String    @id(map: "idx_16730_primary") @db.VarChar(255) @default(uuid())
-  location_id String?   @db.VarChar(255)
-  answer      Int       @db.SmallInt
-  created_at  DateTime  @db.Timestamptz(6)
-  updated_at  DateTime? @db.Timestamptz(6)
-  deleted_at  DateTime? @db.Timestamptz(6)
-  question_id String?   @db.VarChar(255)
-  question    question? @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_dadd4a251e27f6bf")
-  location    location? @relation(fields: [location_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_dadd4a2564d218e")
+  id         String    @id(map: "idx_16730_primary") @db.VarChar(255) @default(uuid())
+  locationId String?   @map("location_id") @db.VarChar(255)
+  answer     Int       @db.SmallInt
+  createdAt  DateTime  @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  questionId String?   @map("question_id") @db.VarChar(255)
 
-  @@index([question_id], map: "idx_16730_idx_dadd4a251e27f6bf")
-  @@index([location_id], map: "idx_16730_idx_dadd4a2564d218e")
-  @@schema("latest")
+  question question? @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_dadd4a251e27f6bf")
+  location location? @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_dadd4a2564d218e")
+
+  @@index([questionId], map: "idx_16730_idx_dadd4a251e27f6bf")
+  @@index([locationId], map: "idx_16730_idx_dadd4a2564d218e")
+  @@schema("public")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model category {
-  id          String     @id(map: "idx_16735_primary") @db.VarChar(255) @default(uuid())
-  name        String     @unique(map: "idx_16735_uniq_64c19c15e237e06") @db.VarChar(255)
+  id          String    @id(map: "idx_16735_primary") @db.VarChar(255) @default(uuid())
+  name        String    @unique(map: "idx_16735_uniq_64c19c15e237e06") @db.VarChar(255)
   description String?
-  created_at  DateTime   @db.Timestamptz(6)
-  updated_at  DateTime?  @db.Timestamptz(6)
-  deleted_at  DateTime?  @db.Timestamptz(6)
-  image       image[]
-  location    location[]
-  question    question[]
+  createdAt   DateTime  @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  @@schema("latest")
+  image    image[]
+  location location[]
+  question question[]
+
+  @@schema("public")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model city {
-  id           String     @id(map: "idx_16740_primary") @db.VarChar(255) @default(uuid())
-  name         String     @unique(map: "idx_16740_uniq_2d5b02345e237e06") @db.VarChar(255)
-  latitude     Float
-  longitude    Float
-  created_at   DateTime   @db.Timestamptz(6)
-  updated_at   DateTime?  @db.Timestamptz(6)
-  deleted_at   DateTime?  @db.Timestamptz(6)
-  radius_in_km Int
-  location     location[]
+  id         String    @id(map: "idx_16740_primary") @db.VarChar(255) @default(uuid())
+  name       String    @unique(map: "idx_16740_uniq_2d5b02345e237e06") @db.VarChar(255)
+  latitude   Float
+  longitude  Float
+  createdAt  DateTime  @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  radiusInKm Int       @map("radius_in_km")
 
-  @@schema("latest")
+  location location[]
+
+  @@schema("public")
 }
 
 model image {
-  id          Int       @id(map: "idx_16745_primary") @default(autoincrement())
-  src         String    @db.VarChar(255)
-  name        String    @db.VarChar(255)
-  mime        String?   @db.VarChar(255)
-  category_id String?   @db.VarChar(255)
-  location_id String?   @db.VarChar(255)
-  category    category? @relation(fields: [category_id], references: [id], onUpdate: NoAction, map: "image_ibfk_1")
-  location    location? @relation(fields: [location_id], references: [id], onUpdate: NoAction, map: "image_ibfk_2")
+  id         Int     @id(map: "idx_16745_primary") @default(autoincrement())
+  src        String  @db.VarChar(255)
+  name       String  @db.VarChar(255)
+  mime       String? @db.VarChar(255)
+  categoryId String? @map("category_id") @db.VarChar(255)
+  locationId String? @map("location_id") @db.VarChar(255)
 
-  @@index([category_id], map: "idx_16745_category_id")
-  @@index([location_id], map: "idx_16745_location_id")
-  @@schema("latest")
+  category category? @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "image_ibfk_1")
+  location location? @relation(fields: [locationId], references: [id], onUpdate: NoAction, map: "image_ibfk_2")
+
+  @@index([categoryId], map: "idx_16745_category_id")
+  @@index([locationId], map: "idx_16745_location_id")
+  @@schema("public")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model location {
-  id          String    @id(map: "idx_16750_primary") @db.VarChar(255) @default(uuid())
-  category_id String    @db.VarChar(255)
-  user_id     String?   @db.VarChar(255)
-  city_id     String    @db.VarChar(255)
-  name        String    @db.VarChar(255)
-  street      String    @db.VarChar(255)
-  phone       String?   @db.VarChar(255)
-  email       String?   @db.VarChar(255)
-  published   Int       @db.SmallInt
-  featured    Int       @db.SmallInt
-  about       String?
-  latitude    Float
-  longitude   Float
-  created_at  DateTime  @db.Timestamptz(6)
-  updated_at  DateTime? @db.Timestamptz(6)
-  deleted_at  DateTime? @db.Timestamptz(6)
-  answer      answer[]
-  image       image[]
-  category    category  @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cb12469de2")
-  city        city      @relation(fields: [city_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cb8bac62af")
-  user        user?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cba76ed395")
+  id         String    @id(map: "idx_16750_primary") @db.VarChar(255) @default(uuid())
+  categoryId String    @map("category_id") @db.VarChar(255)
+  userId     String?   @map("user_id") @db.VarChar(255)
+  cityId     String    @map("city_id") @db.VarChar(255)
+  name       String    @db.VarChar(255)
+  street     String    @db.VarChar(255)
+  phone      String?   @db.VarChar(255)
+  email      String?   @db.VarChar(255)
+  published  Int       @db.SmallInt
+  featured   Int       @db.SmallInt
+  about      String?
+  latitude   Float
+  longitude  Float
+  createdAt  DateTime  @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  @@index([category_id], map: "idx_16750_idx_5e9e89cb12469de2")
-  @@index([city_id], map: "idx_16750_idx_5e9e89cb8bac62af")
-  @@index([user_id], map: "idx_16750_idx_5e9e89cba76ed395")
-  @@schema("latest")
+  answer   answer[]
+  image    image[]
+  category category @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cb12469de2")
+  city     city     @relation(fields: [cityId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cb8bac62af")
+  user     user?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cba76ed395")
+
+  @@index([categoryId], map: "idx_16750_idx_5e9e89cb12469de2")
+  @@index([cityId], map: "idx_16750_idx_5e9e89cb8bac62af")
+  @@index([userId], map: "idx_16750_idx_5e9e89cba76ed395")
+  @@schema("public")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model question {
-  id          String    @id(map: "idx_16755_primary") @db.VarChar(255) @default(uuid())
-  category_id String?   @db.VarChar(255)
-  question    String    @db.VarChar(255)
-  created_at  DateTime  @db.Timestamptz(6)
-  updated_at  DateTime? @db.Timestamptz(6)
-  deleted_at  DateTime? @db.Timestamptz(6)
-  answer      answer[]
-  category    category? @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_b6f7494e12469de2")
+  id         String    @id(map: "idx_16755_primary") @db.VarChar(255) @default(uuid())
+  categoryId String?   @map("category_id") @db.VarChar(255)
+  question   String    @db.VarChar(255)
+  createdAt  DateTime  @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  @@index([category_id], map: "idx_16755_idx_b6f7494e12469de2")
-  @@schema("latest")
+  answer   answer[]
+  category category? @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_b6f7494e12469de2")
+
+  @@index([categoryId], map: "idx_16755_idx_b6f7494e12469de2")
+  @@schema("public")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model user {
-  id           String     @id(map: "idx_16760_primary") @db.VarChar(255) @default(uuid())
-  emailaddress String?    @unique(map: "idx_16760_uniq_8d93d649e7927c74") @db.VarChar(255)
-  externalid   String?    @unique(map: "idx_16760_externalid") @db.VarChar(255)
-  lastsigninat BigInt?
-  lastactiveat BigInt?
-  banned       Boolean?   @default(false)
-  phone        String?    @db.VarChar(180)
+  id           String    @id(map: "idx_16760_primary") @db.VarChar(255) @default(uuid())
+  emailAddress String?   @map("emailaddress") @unique(map: "idx_16760_uniq_8d93d649e7927c74") @db.VarChar(255)
+  externalId   String?   @map("externalid") @unique(map: "idx_16760_externalid") @db.VarChar(255)
+  lastSignInAt BigInt?   @map("lastsigninat")
+  lastActiveAt BigInt?   @map("lastactiveat")
+  banned       Boolean?  @default(false)
+  phone        String?   @db.VarChar(180)
   roles        String
-  password     String     @db.VarChar(255)
-  username     String     @db.VarChar(255)
-  avatarurl    String?
-  created_at   DateTime   @db.Timestamptz(6)
-  updated_at   DateTime?  @db.Timestamptz(6)
-  deleted_at   DateTime?  @db.Timestamptz(6)
-  location     location[]
+  password     String    @db.VarChar(255)
+  username     String    @db.VarChar(255)
+  avatarUrl    String?   @map("avatarurl")
+  createdAt    DateTime  @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  @@schema("latest")
+  location location[]
+
+  @@schema("public")
 }

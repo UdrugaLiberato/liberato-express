@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
+
+dotenv.config({ path: '.env.test' });
 
 describe('Cities API', () => {
   let token: string;
@@ -19,7 +20,8 @@ describe('Cities API', () => {
 
     if (cookies) {
       const cookieList = Array.isArray(cookies) ? cookies : [cookies];
-      bearerCookie = cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
+      bearerCookie =
+        cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
     }
 
     if (bearerCookie) {
@@ -48,14 +50,14 @@ describe('Cities API', () => {
   let testCityName: string | null = null;
 
   it('should create a city', async () => {
-    const cityName = 'Test City ' + Math.random().toString();
+    const cityName = `Test City ${Math.random().toString()}`;
     const res = await request(app)
       .post('/api/cities')
       .set('Cookie', [`BEARER=${token}`])
       .send({
         name: cityName,
         latitude: 40.7128,
-        longitude: 74.0060,
+        longitude: 74.006,
         radiusInKm: 50,
       });
 
@@ -73,7 +75,7 @@ describe('Cities API', () => {
 
   it('should get test city', async () => {
     const res = await request(app)
-      .get('/api/cities/' + testCityId)
+      .get(`/api/cities/${testCityId}`)
       .set('Cookie', [`BEARER=${token}`]);
 
     if (res.statusCode !== 200) {
@@ -87,11 +89,10 @@ describe('Cities API', () => {
     testCityId = res.body.id;
   });
 
-
   it('should update test city name', async () => {
-    const updatedTestCityName = testCityName + ' Updated';
+    const updatedTestCityName = `${testCityName} Updated`;
     const res = await request(app)
-      .put('/api/cities/' + testCityId)
+      .put(`/api/cities/${testCityId}`)
       .set('Cookie', [`BEARER=${token}`])
       .send({
         name: updatedTestCityName,
@@ -108,7 +109,7 @@ describe('Cities API', () => {
 
   it('should delete test city', async () => {
     const res = await request(app)
-      .delete('/api/cities/' + testCityId)
+      .delete(`/api/cities/${testCityId}`)
       .set('Cookie', [`BEARER=${token}`]);
 
     if (res.statusCode !== 200) {
@@ -118,7 +119,5 @@ describe('Cities API', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty('id');
     expect(res.body.deletedAt).not.toBeNull();
-
   });
-
 });

@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
+
+dotenv.config({ path: '.env.test' });
 
 describe('Locations API', () => {
   let token: string;
@@ -21,7 +22,8 @@ describe('Locations API', () => {
 
     if (cookies) {
       const cookieList = Array.isArray(cookies) ? cookies : [cookies];
-      bearerCookie = cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
+      bearerCookie =
+        cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
     }
 
     if (bearerCookie) {
@@ -56,12 +58,12 @@ describe('Locations API', () => {
     const locationData = {
       categoryId: testCategoryId,
       cityId: testCityId,
-      name: 'Test Location ' + Date.now(),
-      street: '123 Test' + Date.now(),
+      name: `Test Location ${Date.now()}`,
+      street: `123 Test${Date.now()}`,
       published: true,
       featured: false,
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
       about: 'About test ...',
     };
 
@@ -92,7 +94,7 @@ describe('Locations API', () => {
 
   it('should update the location', async () => {
     const updatedData = {
-      name: 'Updated Test Location' + Date.now(),
+      name: `Updated Test Location${Date.now()}`,
       street: '456 Updated St',
     };
 

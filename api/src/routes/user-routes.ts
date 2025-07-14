@@ -4,10 +4,11 @@ import {
   getUser,
   createUser,
   updateUser,
-  deleteUser, getMyself
+  deleteUser,
+  getMyself,
 } from '../controllers/user-controller';
-import {authenticate} from "../middleware/authenticate";
-import {checkPermissions} from "../middleware/check-permissions";
+import { authenticate } from '../middleware/authenticate';
+import { checkPermissions } from '../middleware/check-permissions';
 
 const router = express.Router();
 
@@ -18,4 +19,4 @@ router.post('/', authenticate, checkPermissions, createUser);
 router.put('/:id', authenticate, checkPermissions, updateUser);
 router.delete('/:id', authenticate, checkPermissions, deleteUser);
 
-export default router
+export default router;

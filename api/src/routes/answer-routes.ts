@@ -4,11 +4,10 @@ import {
   getAnswer,
   createAnswer,
   updateAnswer,
-  deleteAnswer
+  deleteAnswer,
 } from '../controllers/answer-controller';
 import { authenticate } from '../middleware/authenticate';
 import { checkPermissions } from '../middleware/check-permissions';
-
 
 const router = express.Router();
 

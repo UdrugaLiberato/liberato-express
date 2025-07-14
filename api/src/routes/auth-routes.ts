@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import {login, googleLogin, register} from '../controllers/auth-controller';
-import {authenticate} from "../middleware/authenticate";
-import {checkPermissions} from "../middleware/check-permissions";
-import {upload} from "../middleware/upload";
-import * as LocationController from "../controllers/location-controller";
+import { login, googleLogin, register } from '../controllers/auth-controller';
+import { authenticate } from '../middleware/authenticate';
+import { checkPermissions } from '../middleware/check-permissions';
+import { upload } from '../middleware/upload';
+import * as LocationController from '../controllers/location-controller';
 
 const router = Router();
 

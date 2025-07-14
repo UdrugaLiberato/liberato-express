@@ -1,14 +1,13 @@
-import express from 'express';
-import { Router, RequestHandler } from 'express';
+import express, { Router, RequestHandler } from 'express';
 import {
   getAllCategories,
   getCategory,
   createCategory,
-  deleteCategory
+  deleteCategory,
 } from '../controllers/category-controller';
-import {authenticate} from "../middleware/authenticate";
-import {checkPermissions} from "../middleware/check-permissions";
-import {upload} from "../middleware/upload";
+import { authenticate } from '../middleware/authenticate';
+import { checkPermissions } from '../middleware/check-permissions';
+import { upload } from '../middleware/upload';
 
 const router = express.Router();
 
@@ -19,9 +18,9 @@ router.post(
   authenticate,
   checkPermissions,
   upload.single('image'),
-  createCategory as RequestHandler
+  createCategory as RequestHandler,
 );
 
 router.delete('/:id', authenticate, checkPermissions, deleteCategory);
 
-export default router
+export default router;

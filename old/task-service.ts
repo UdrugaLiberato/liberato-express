@@ -24,7 +24,7 @@ export const create = async (data: any) => {
   return await prisma.task.create({
     data: {
       ...data,
-      created_at: new Date()
+      createdAt: new Date()
     }
   });
 }
@@ -34,7 +34,7 @@ export const update = async (id: string, data: any) => {
     where: { id },
     data: {
       ...data,
-      updated_at: new Date()
+      updatedAt: new Date()
     }
   });
 }

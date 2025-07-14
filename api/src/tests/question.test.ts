@@ -1,14 +1,15 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 
 import request from 'supertest';
 import { app } from '../index';
 import prisma from '../config/prisma';
 
+dotenv.config({ path: '.env.test' });
+
 describe('Questions API', () => {
   let token: string;
   let testQuestionId: string | null = null;
-  let testQuestionContent: string | null = null;
+  const testQuestionContent: string | null = null;
 
   beforeAll(async () => {
     const res = await request(app)
@@ -20,7 +21,8 @@ describe('Questions API', () => {
 
     if (cookies) {
       const cookieList = Array.isArray(cookies) ? cookies : [cookies];
-      bearerCookie = cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
+      bearerCookie =
+        cookieList.find((cookie) => cookie.startsWith('BEARER=')) || '';
     }
 
     if (bearerCookie) {
@@ -54,7 +56,7 @@ describe('Questions API', () => {
       .set('Cookie', [`BEARER=${token}`])
       .send({
         question: 'test pitanje',
-        category_id: category.id,
+        categoryId: category.id,
       });
 
     expect(res.statusCode).toEqual(201);
