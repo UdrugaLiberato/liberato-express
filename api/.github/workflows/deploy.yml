@@ -1,29 +1,39 @@
-name: Deploy via SSH
+name: Deploy API via rsync
 
 on:
   push:
-    branches: ['main']
+    branches:
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Set up SSH
+      - name: Set up SSH key and known hosts
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan your-server-ip >> ~/.ssh/known_hosts
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-      - name: SSH into server and deploy
+          for host in ${{ secrets.WEB1 }} ${{ secrets.WEB2 }} ${{ secrets.WEB3 }}; do
+            ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+          done
+
+      - name: Deploy to web1
         run: |
-          ssh serenity@${{ secrets.SERVER_IP }} << 'EOF'
-            cd /home/serenity/liberato-express
-            git pull origin main
-            docker compose down
-            docker compose up -d --build
-          EOF
+          rsync -az ./api/ ${{ secrets.REMOTE_USER }}@${{ secrets.WEB1 }}:/home/stipo/app/
+          ssh ${{ secrets.REMOTE_USER }}@${{ secrets.WEB1 }} "cd /home/stipo/app && bun install && pm2 reload backend_map"
+
+      - name: Deploy to web2
+        run: |
+          rsync -az ./api/ ${{ secrets.REMOTE_USER }}@${{ secrets.WEB2 }}:/home/stipo/app/
+          ssh ${{ secrets.REMOTE_USER }}@${{ secrets.WEB2 }} "cd /home/stipo/app && bun install && pm2 reload backend_map"
+
+      - name: Deploy to web3
+        run: |
+          rsync -az ./api/ ${{ secrets.REMOTE_USER }}@${{ secrets.WEB3 }}:/home/stipo/app/
+          ssh ${{ secrets.REMOTE_USER }}@${{ secrets.WEB3 }} "cd /home/stipo/app && bun install && pm2 reload backend_map"
