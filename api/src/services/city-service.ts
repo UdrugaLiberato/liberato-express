@@ -16,14 +16,15 @@ export const createCity = async (data: {
   name: string;
   latitude: number;
   longitude: number;
-  radiusInKm?: number;
+  radiusInKm?: number|null;
 }) => {
   return prisma.city.create({
     data: {
       name: data.name,
       latitude: data.latitude,
       longitude: data.longitude,
-      radiusInKm: data.radiusInKm ?? 1,
+      radius_in_km: data.radiusInKm ?? 1,
+      created_at: new Date(),
     },
   });
 };
@@ -43,8 +44,8 @@ export const updateCity = async (
       name: data.name,
       latitude: data.latitude,
       longitude: data.longitude,
-      radiusInKm: data.radiusInKm,
-      updatedAt: new Date(),
+      radius_in_km: data.radiusInKm,
+      updated_at: new Date(),
     },
   });
 };

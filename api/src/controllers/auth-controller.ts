@@ -17,7 +17,7 @@ const COOKIE_EXPIRATION = parseInt(process.env.COOKIE_EXPIRATION || '3600000', 1
 const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { emailaddress: email } });
 
   if (!user) {
     res.status(401).json({ message: 'Invalid credentials' });
@@ -54,7 +54,7 @@ const login = async (req: Request, res: Response) => {
     // message: 'Login successful',
     role: user.roles,
     name: user.username,
-    email: user.email,
+    email: user.emailaddress,
     token: token,
     id: user.id,
   });
@@ -70,7 +70,7 @@ const register = async (req: Request, res: Response) => {
       return;
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { emailaddress: email } });
     if (existingUser) {
       res.status(400).json({ message: 'User already registered' });
       return;
@@ -88,47 +88,14 @@ const register = async (req: Request, res: Response) => {
 
     res.status(201).json({
       username: newUser.username,
-      email: newUser.email,
-      avatar: newUser.avatar,
+      email: newUser.emailaddress,
+      avatar: newUser.avatarurl,
       id: newUser.id,
     });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 };
-
-// const register = async (req: Request, res: Response) => {
-//   let {
-//     email,
-//     password,
-//     username,
-//     avatar
-//   } = req.body;
-//
-//   if (!email || !password || !username) {
-//     res.status(400).json({ message: 'Missing required fields' });
-//     return;
-//   }
-//
-//   const user = await prisma.user.findUnique({ where: { email } });
-//   if (user) {
-//     res.status(400).json({ message: 'User already registered' });
-//     return;
-//   }
-//
-//   if (!avatar) {
-//     avatar = '';
-//   }
-//
-//   const newUser = await userService.createIncomplete(email, password, username, avatar);
-//
-//   if (!newUser) {
-//     res.status(500).json({ message: 'Unexpected error' });
-//     return;
-//   }
-//
-//   res.status(201).send();
-// }
 
 const googleLogin = async (req: Request, res: Response) => {
   const { token } = req.body;
@@ -147,13 +114,13 @@ const googleLogin = async (req: Request, res: Response) => {
 
     const { email, name, picture, sub: googleId } = payload;
 
-    let user = await prisma.user.findUnique({ where: { email } });
+    let user = await prisma.user.findUnique({ where: { emailaddress: email } });
 
     if (!user) {
       console.log('User not found');
       user = await create({
         username: name,
-        email: email,
+        emailaddress: email,
         avatar: picture || '',
       });
     }

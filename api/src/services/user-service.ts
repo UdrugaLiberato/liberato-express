@@ -18,11 +18,6 @@ export const getById = (id: string) => {
       location: {
         include: {
           category: true,
-          image_location: {
-            include: {
-              image: true,
-            }
-          }
         }
       }
     }
@@ -50,12 +45,12 @@ export const createIncomplete = async (
   const hashedPassword = password? await bcrypt.hash(password, 10) : '';
   return prisma.user.create({
     data: {
-      email: email,
+      emailaddress: email,
       username: username,
       roles: JSON.stringify(['ROLE_USER']),
       password: hashedPassword,
       created_at: new Date(),
-      avatar: avatar
+      avatarurl: avatar
     }
   })
 }

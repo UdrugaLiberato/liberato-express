@@ -20,11 +20,11 @@ export const getMyself = async (req: Request, res: Response) => {
 
   res.json({
     id: user.id,
-    email: user.email,
+    email: user.emailaddress,
     phone: user.phone,
     roles: user.roles,
     username: user.username,
-    avatar: user.avatar,
+    avatar: user.avatarurl,
     createdAt: user.created_at,
     updatedAt: user.updated_at,
     deletedAt: user.deleted_at,
@@ -41,11 +41,11 @@ export const getUser = async (req: Request, res: Response) => {
 
   res.json({
     id: user.id,
-    email: user.email,
+    email: user.emailaddress,
     phone: user.phone,
     roles: user.roles,
     username: user.username,
-    avatar: user.avatar,
+    avatar: user.avatarurl,
     createdAt: user.updated_at,
     updatedAt: user.updated_at,
     deletedAt: user.deleted_at,
