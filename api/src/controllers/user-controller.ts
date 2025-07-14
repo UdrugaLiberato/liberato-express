@@ -20,14 +20,14 @@ export const getMyself = async (req: Request, res: Response) => {
 
   res.json({
     id: user.id,
-    email: user.emailaddress,
+    email: user.emailAddress,
     phone: user.phone,
     roles: user.roles,
     username: user.username,
-    avatar: user.avatarurl,
-    createdAt: user.created_at,
-    updatedAt: user.updated_at,
-    deletedAt: user.deleted_at,
+    avatar: user.avatarUrl,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    deletedAt: user.deletedAt,
     locations: user.location,
   })
 }
@@ -41,14 +41,14 @@ export const getUser = async (req: Request, res: Response) => {
 
   res.json({
     id: user.id,
-    email: user.emailaddress,
+    email: user.emailAddress,
     phone: user.phone,
     roles: user.roles,
     username: user.username,
-    avatar: user.avatarurl,
-    createdAt: user.updated_at,
-    updatedAt: user.updated_at,
-    deletedAt: user.deleted_at,
+    avatar: user.avatarUrl,
+    createdAt: user.updatedAt,
+    updatedAt: user.updatedAt,
+    deletedAt: user.deletedAt,
 
   })
 }

@@ -53,7 +53,7 @@ describe('Users API', () => {
       password: password,
       username: 'testuser_' + Math.floor(Math.random() * 10000),
       avatar: 'someavatar',
-      created_at: new Date().toISOString()
+      createdAt: new Date().toISOString()
     };
 
     const res = await request(app)

@@ -54,7 +54,7 @@ describe('Questions API', () => {
       .set('Cookie', [`BEARER=${token}`])
       .send({
         question: 'test pitanje',
-        category_id: category.id,
+        categoryId: category.id,
       });
 
     expect(res.statusCode).toEqual(201);

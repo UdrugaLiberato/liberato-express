@@ -63,18 +63,18 @@ export const createLocation = async (req: Request, res: Response) => {
 };
 
 
-// export const updateLocation = async (req: Request, res: Response) => {
-//   try {
-//     const updated = await LocationService.updateLocation(
-//       req.params.id,
-//       req.body,
-//       req.files as Express.Multer.File[]
-//     );
-//     res.json(updated);
-//   } catch (error: any) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
+export const updateLocation = async (req: Request, res: Response) => {
+  try {
+    const updated = await LocationService.updateLocation(
+      req.params.id,
+      req.body,
+      req.files as Express.Multer.File[]
+    );
+    res.json(updated);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 export const deleteLocation = async (req: Request, res: Response) => {
   try {

@@ -2,7 +2,7 @@ import prisma from '../config/prisma';
 
 export const getAllCities = () => {
   return prisma.city.findMany({
-    where: { deleted_at: null },
+    where: { deletedAt: null },
   });
 };
 
@@ -23,8 +23,8 @@ export const createCity = async (data: {
       name: data.name,
       latitude: data.latitude,
       longitude: data.longitude,
-      radius_in_km: data.radiusInKm ?? 1,
-      created_at: new Date(),
+      radiusInKm: data.radiusInKm ?? 1,
+      createdAt: new Date(),
     },
   });
 };
@@ -44,8 +44,8 @@ export const updateCity = async (
       name: data.name,
       latitude: data.latitude,
       longitude: data.longitude,
-      radius_in_km: data.radiusInKm,
-      updated_at: new Date(),
+      radiusInKm: data.radiusInKm,
+      updatedAt: new Date(),
     },
   });
 };
@@ -67,7 +67,7 @@ export const deleteCity = async (id: string) => {
   return prisma.city.update({
     where: { id },
     data: {
-      deleted_at: new Date(),
+      deletedAt: new Date(),
     },
   });
 };

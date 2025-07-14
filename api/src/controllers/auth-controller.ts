@@ -4,7 +4,6 @@ import jwt, { Secret } from 'jsonwebtoken';
 import prisma from "../config/prisma";
 import { OAuth2Client } from 'google-auth-library';
 import {create, createIncomplete} from "../services/user-service";
-import {createUser} from "./user-controller";
 import * as userService from "../services/user-service";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
@@ -17,7 +16,7 @@ const COOKIE_EXPIRATION = parseInt(process.env.COOKIE_EXPIRATION || '3600000', 1
 const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  const user = await prisma.user.findUnique({ where: { emailaddress: email } });
+  const user = await prisma.user.findUnique({ where: { emailAddress: email } });
 
   if (!user) {
     res.status(401).json({ message: 'Invalid credentials' });
@@ -54,7 +53,7 @@ const login = async (req: Request, res: Response) => {
     // message: 'Login successful',
     role: user.roles,
     name: user.username,
-    email: user.emailaddress,
+    email: user.emailAddress,
     token: token,
     id: user.id,
   });
@@ -70,13 +69,12 @@ const register = async (req: Request, res: Response) => {
       return;
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { emailaddress: email } });
+    const existingUser = await prisma.user.findUnique({ where: { emailAddress: email } });
     if (existingUser) {
       res.status(400).json({ message: 'User already registered' });
       return;
     }
 
-    // Handle avatar
     const avatar = file?.filename || '';
 
     const newUser = await userService.createIncomplete(email, password, username, avatar);
@@ -88,8 +86,8 @@ const register = async (req: Request, res: Response) => {
 
     res.status(201).json({
       username: newUser.username,
-      email: newUser.emailaddress,
-      avatar: newUser.avatarurl,
+      email: newUser.emailAddress,
+      avatar: newUser.avatarUrl,
       id: newUser.id,
     });
   } catch (error: any) {
@@ -114,13 +112,13 @@ const googleLogin = async (req: Request, res: Response) => {
 
     const { email, name, picture, sub: googleId } = payload;
 
-    let user = await prisma.user.findUnique({ where: { emailaddress: email } });
+    let user = await prisma.user.findUnique({ where: { emailAddress: email } });
 
     if (!user) {
       console.log('User not found');
       user = await create({
         username: name,
-        emailaddress: email,
+        emailAddress: email,
         avatar: picture || '',
       });
     }

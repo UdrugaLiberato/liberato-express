@@ -3,7 +3,7 @@ const prisma = new PrismaClient()
 
 export const getAll = async () => {
   return await prisma.question.findMany({
-    where: { deleted_at: null },
+    where: { deletedAt: null },
     include: {
       answer: true,
       category: true
@@ -25,7 +25,7 @@ export const create = async (data: any) => {
   return await prisma.question.create({
     data: {
       ...data,
-      created_at: new Date()
+      createdAt: new Date()
     }
   });
 }
@@ -35,7 +35,7 @@ export const update = async (id: string, data: any) => {
     where: { id },
     data: {
       ...data,
-      updated_at: new Date()
+      updatedAt: new Date()
     }
   });
 }
@@ -44,7 +44,7 @@ export const remove = async (id: string) => {
   return await prisma.question.update({
     where: { id },
     data: {
-      deleted_at: new Date()
+      deletedAt: new Date()
     }
   });
 }

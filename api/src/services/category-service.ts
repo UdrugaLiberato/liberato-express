@@ -44,7 +44,7 @@ export const create = async (
     data: {
       name,
       description,
-      created_at: new Date(),
+      createdAt: new Date(),
       image: {
         connect: {id: image.id}
       }
@@ -56,8 +56,8 @@ export const create = async (
     await prisma.question.createMany({
       data: items.map(question => ({
         question,
-        category_id: category.id,
-        created_at: new Date(),
+        categoryId: category.id,
+        createdAt: new Date(),
       })),
     });
   }
@@ -69,6 +69,6 @@ export const create = async (
 export const remove = (id: string) => {
   return prisma.category.update({
     where: { id },
-    data: { deleted_at: new Date() }
+    data: { deletedAt: new Date() }
   })
 }
