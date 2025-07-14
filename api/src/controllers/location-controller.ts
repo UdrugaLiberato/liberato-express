@@ -2,8 +2,14 @@ import { Request, Response } from 'express';
 import * as LocationService from '../services/location-service';
 import { Express } from 'express';
 
-export const getLocations = async (_req: Request, res: Response) => {
-  const locations = await LocationService.getAllLocations();
+export const getLocations = async (req: Request, res: Response) => {
+  const { city, category } = req.query;
+
+  const locations = await LocationService.getAllLocations({
+    city: city as string | undefined,
+    category: category as string | undefined,
+  });
+
   res.json(locations);
 };
 

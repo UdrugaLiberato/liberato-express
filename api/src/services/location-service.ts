@@ -2,9 +2,23 @@ import prisma from '../config/prisma';
 import { GoogleMaps } from '../utils/google-maps';
 import { Express } from 'express';
 
-export const getAllLocations = async () => {
+export const getAllLocations = async (filters: { city?: string; category?: string }) => {
+  const { city, category } = filters;
+
   const locations = await prisma.location.findMany({
-    where: { deletedAt: null },
+    where: {
+      deletedAt: null,
+      ...(city && {
+        city: {
+          name: city,
+        },
+      }),
+      ...(category && {
+        category: {
+          name: category,
+        },
+      }),
+    },
     include: {
       city: true,
       category: true,
@@ -36,6 +50,7 @@ export const getAllLocations = async () => {
     };
   });
 };
+
 
 export const getLocationById = async (id: string) => {
   const location = await prisma.location.findUnique({
