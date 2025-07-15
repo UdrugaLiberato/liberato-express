@@ -32,7 +32,7 @@ export const createCategory = async (req: Request, res: Response) => {
     res.status(201).json(newCategory);
   } catch (error) {
     console.error('Error creating category:', error);
-    res.status(500).json({ error: 'Failed to create category' });
+    res.status(500).json({ error: error });
   }
 };
 

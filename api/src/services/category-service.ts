@@ -31,22 +31,22 @@ export const create = async (
   description?: string,
   questions?: string,
 ) => {
-  const image = await prisma.image.create({
-    data: {
-      src: `https://dev.udruga-liberato.hr/images/locations/${file.filename}`,
-      name: file.originalname.split('.')[0],
-      mime: file.mimetype,
-    },
-  });
 
   const category = await prisma.category.create({
     data: {
-      name,
-      description,
+      name: name,
+      description: description,
       createdAt: new Date(),
-      image: {
-        connect: { id: image.id },
-      },
+    },
+  });
+
+  const image = await prisma.image.create({
+    data: {
+      id: Math.floor(Math.random() * 1_000_000_000),
+      src: `https://dev.udruga-liberato.hr/images/category/${file.filename}`,
+      name: file.originalname.split('.')[0],
+      mime: file.mimetype,
+      categoryId: category.id,
     },
   });
 

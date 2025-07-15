@@ -74,3 +74,19 @@ FROM location l
  LEFT JOIN answer existing ON existing.location_id = l.id
  AND existing.question_id = pu.id
 WHERE existing.id IS NULL;
+
+UPDATE "user" u
+SET avatarUrl = m.avatar_url
+    FROM (
+  SELECT id, (regexp_matches(avatarUrl, 's:3:"src";s:\d+:"([^"]+)"'))[1] AS avatar_url
+  FROM "user"
+  WHERE avatarUrl LIKE 'O:43:"Doctrine\\Common\\Collections\\ArrayCollection"%'
+) AS m
+WHERE u.id = m.id;
+
+delete from answer
+    using question
+where answer.question_id = question.id
+  and (question.question = 'Rampa' or question.question = 'Stepenice');
+
+delete from question where question = 'Rampa' or question='Stepenice';
