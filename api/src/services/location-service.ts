@@ -363,7 +363,7 @@ export const deleteLocation = async (id: string) => {
   });
 };
 
-export const getLocationByCityAndCategory = async (
+export const getLocationsByCityAndCategory = async (
   city: string,
   category: string,
 ) => {
