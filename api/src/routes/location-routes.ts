@@ -40,6 +40,11 @@ router.delete(
   LocationController.deleteLocation as RequestHandler,
 );
 
+router.get(
+  '/:city/:category',
+  LocationController.getLocationsByCityAndCategory as RequestHandler,
+);
+
 // router.post(
 //   '/:id/images',
 //   authenticate,

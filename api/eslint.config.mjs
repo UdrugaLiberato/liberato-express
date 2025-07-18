@@ -61,7 +61,7 @@ export default defineConfig([
       '@typescript-eslint/no-explicit-any': 'off',
       'unicorn/no-null': 'off',
       'import-esm/explicit-extension': 'off',
-      'import/order': 'off'
+      'import/order': 'off',
     },
   },
   {
