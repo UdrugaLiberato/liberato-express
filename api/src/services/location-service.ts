@@ -363,6 +363,16 @@ export const deleteLocation = async (id: string) => {
   });
 };
 
+export const getLocationByCityAndCategory = async (
+  city: string,
+  category: string,
+) => {
+  const locations = await prisma.location.findMany({
+    where: { city: { name: city }, category: { name: category } },
+  });
+  return locations;
+};
+
 // export const addLocationImage = async (
 //   locationId: string,
 //   files: Express.Multer.File[]
