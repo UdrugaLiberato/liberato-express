@@ -9,6 +9,7 @@ import questionRoutes from './routes/question-routes';
 import answerRoutes from './routes/answer-routes';
 import imageRoutes from './routes/image-routes';
 import authRoutes from './routes/auth-routes';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -17,6 +18,14 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
 
 app.get('/', (request, res) => {
   res.send('Hello World!');
@@ -36,4 +45,5 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
+// eslint-disable-next-line import/prefer-default-export
 export { app };
