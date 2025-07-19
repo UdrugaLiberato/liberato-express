@@ -12,7 +12,7 @@ export function checkPermissions(
   let matchedRoles: string[] | undefined;
 
   for (const [permissionPath, methods] of Object.entries(permissions)) {
-    const regex = new RegExp('^' + permissionPath.replace(/\*/g, '.*') + '$');
+    const regex = new RegExp(`^${permissionPath.replaceAll('*', '.*')}$`);
     if (regex.test(requestPath)) {
       matchedRoles = methods[method];
       break;

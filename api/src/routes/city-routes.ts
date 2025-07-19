@@ -12,6 +12,9 @@ router.get(
   checkPermissions,
   CityController.getCity as RequestHandler,
 );
+
+router.get('/:name', CityController.getCityByName as RequestHandler);
+
 router.get(
   '/',
   authenticate,

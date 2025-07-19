@@ -33,8 +33,8 @@ export const create = async (
 ) => {
   const category = await prisma.category.create({
     data: {
-      name: name,
-      description: description,
+      name,
+      description,
       createdAt: new Date(),
     },
   });
