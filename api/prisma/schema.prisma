@@ -119,6 +119,7 @@ model question {
 
 model user {
   id           String    @id(map: "idx_16760_primary") @db.VarChar(255) @default(uuid())
+  clerkId      String?   @map("clerk_id") @unique() @db.VarChar(255)
   emailAddress String?   @map("emailaddress") @unique(map: "idx_16760_uniq_8d93d649e7927c74") @db.VarChar(255)
   externalId   String?   @map("externalid") @unique(map: "idx_16760_externalid") @db.VarChar(255)
   lastSignInAt BigInt?   @map("lastsigninat")
