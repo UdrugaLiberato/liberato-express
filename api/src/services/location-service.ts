@@ -89,6 +89,47 @@ export const getLocationById = async (id: string) => {
   };
 };
 
+export const getLocationByName = async (name: string) => {
+  console.log(name);
+  const location = await prisma.location.findFirst({
+    where: {
+      name: {
+        contains: name,
+        mode: 'insensitive',
+      },
+      deletedAt: null,
+    },
+    include: {
+      city: true,
+      category: true,
+      user: { select: { id: true, username: true } },
+      answer: {
+        select: {
+          id: true,
+          answer: true,
+          question: { select: { id: true, question: true } },
+        },
+      },
+    },
+  });
+
+  if (!location) return null;
+
+  const simplifiedAnswers = (location.answer || [])
+    .filter((a) => a.question !== null)
+    .map((a) => ({
+      answerId: a.id,
+      questionId: a.question!.id,
+      question: a.question!.question,
+      answer: a.answer,
+    }));
+
+  return {
+    ...location,
+    answer: simplifiedAnswers,
+  };
+};
+
 export const createLocation = async (
   body: any,
   files: Express.Multer.File[],

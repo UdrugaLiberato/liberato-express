@@ -75,6 +75,12 @@ export const getLocationsByCityAndCategory = async (
   res.json(locations);
 };
 
+export const getLocationByName = async (req: Request, res: Response) => {
+  const { name } = req.params;
+  const location = await LocationService.getLocationByName(name);
+  res.json(location);
+};
+
 // export const addLocationImage = async (req: Request, res: Response) => {
 //   try {
 //     const locationId = req.params.id;

@@ -7,12 +7,12 @@ import { upload } from '../middleware/upload';
 
 const router = Router();
 
-router.get(
-  '/:id',
-  authenticate,
-  checkPermissions,
-  LocationController.getLocation as RequestHandler,
-);
+// router.get(
+//   '/:id',
+//   authenticate,
+//   checkPermissions,
+//   LocationController.getLocation as RequestHandler,
+// );
 router.get(
   '/',
   authenticate,
@@ -45,19 +45,6 @@ router.get(
   LocationController.getLocationsByCityAndCategory as RequestHandler,
 );
 
-// router.post(
-//   '/:id/images',
-//   authenticate,
-//   checkPermissions,
-//   upload.array('images'),
-//   LocationController.addLocationImage as RequestHandler
-// );
-//
-// router.delete(
-//   '/:id/images',
-//   authenticate,
-//   checkPermissions,
-//   LocationController.removeLocationImage as RequestHandler
-// );
+router.get('/:name', LocationController.getLocationByName as RequestHandler);
 
 export default router;
