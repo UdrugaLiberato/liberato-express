@@ -266,7 +266,7 @@ export const updateLocation = async (
 
   dataToUpdate.updatedAt = new Date();
 
-  const location = await prisma.location.update({
+  await prisma.location.update({
     where: { id },
     data: dataToUpdate,
     include: {
@@ -366,22 +366,13 @@ export const deleteLocation = async (id: string) => {
 export const getLocationsByCityAndCategory = async (
   city: string,
   category: string,
-) => {
-  const locations = await prisma.location.findMany({
-    where: { city: { name: city }, category: { name: category } },
-  });
-  return locations;
-};
-
-export const getLocationByCityAndCategoryAndCursor = async (
-  city: string,
-  category: string,
-  cursor: string,
+  cursor?: string,
 ) => {
   const pageSize = 10;
+
   const locations = await prisma.location.findMany({
     where: { city: { name: city }, category: { name: category } },
-    cursor: { id: cursor },
+    ...(cursor ? { cursor: { id: cursor } } : undefined),
     take: pageSize + 1,
   });
 
@@ -393,62 +384,3 @@ export const getLocationByCityAndCategoryAndCursor = async (
     nextCursor,
   };
 };
-
-// export const addLocationImage = async (
-//   locationId: string,
-//   files: Express.Multer.File[]
-// ) => {
-//   const imageCreates = await Promise.all(
-//     files.map((file) =>
-//       prisma.image.create({
-//         data: {
-//           src: file.filename,
-//           name: file.originalname,
-//           mime: file.mimetype || null,
-//         },
-//       })
-//     )
-//   );
-//
-//   const imageLocationLinks = imageCreates.map((img) => ({
-//     image_id: img.id,
-//     locationId: locationId,
-//   }));
-//
-//   await prisma.image_location.createMany({
-//     data: imageLocationLinks,
-//   });
-//
-//   return prisma.location.findUnique({
-//     where: { id: locationId },
-//     include: {
-//       image_location: {
-//         include: { image: true },
-//       },
-//     },
-//   });
-// };
-
-// export const removeLocationImage = async (
-//   imageId: number,
-//   locationId: string
-// ) => {
-//   await prisma.image_location.delete({
-//     where: {
-//       image_id_locationId: {
-//         image_id: imageId,
-//         locationId: locationId,
-//       },
-//     },
-//   });
-//
-//   const stillUsed = await prisma.image_location.findFirst({
-//     where: { image_id: imageId },
-//   });
-//
-//   if (!stillUsed) {
-//     await prisma.image.delete({ where: { id: imageId } });
-//   }
-//
-//   return { success: true };
-// };
