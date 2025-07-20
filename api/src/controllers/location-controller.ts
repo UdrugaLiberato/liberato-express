@@ -73,6 +73,19 @@ export const getLocationsByCityAndCategory = async (
   res.json(locations);
 };
 
+export const getLocationByCityAndCategoryAndCursor = async (
+  req: Request,
+  res: Response,
+) => {
+  const { city, category, cursor } = req.params;
+  const locations = await LocationService.getLocationByCityAndCategoryAndCursor(
+    city,
+    category,
+    cursor,
+  );
+  res.json(locations);
+};
+
 // export const addLocationImage = async (req: Request, res: Response) => {
 //   try {
 //     const locationId = req.params.id;

@@ -373,6 +373,27 @@ export const getLocationsByCityAndCategory = async (
   return locations;
 };
 
+export const getLocationByCityAndCategoryAndCursor = async (
+  city: string,
+  category: string,
+  cursor: string,
+) => {
+  const pageSize = 10;
+  const locations = await prisma.location.findMany({
+    where: { city: { name: city }, category: { name: category } },
+    cursor: { id: cursor },
+    take: pageSize + 1,
+  });
+
+  const nextCursor =
+    locations.length > pageSize ? locations[pageSize].id : null;
+
+  return {
+    locations: locations.slice(0, pageSize),
+    nextCursor,
+  };
+};
+
 // export const addLocationImage = async (
 //   locationId: string,
 //   files: Express.Multer.File[]
