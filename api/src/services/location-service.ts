@@ -90,7 +90,6 @@ export const getLocationById = async (id: string) => {
 };
 
 export const getLocationByName = async (name: string) => {
-  console.log(name);
   const location = await prisma.location.findFirst({
     where: {
       name: {
@@ -100,6 +99,7 @@ export const getLocationByName = async (name: string) => {
       deletedAt: null,
     },
     include: {
+      image: true,
       city: true,
       category: true,
       user: { select: { id: true, username: true } },
