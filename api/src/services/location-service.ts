@@ -371,9 +371,17 @@ export const getLocationsByCityAndCategory = async (
   const pageSize = 10;
 
   const locations = await prisma.location.findMany({
-    where: { city: { name: city }, category: { name: category } },
+    where: {
+      city: { name: city },
+      category: { name: category },
+      deletedAt: null,
+    },
     ...(cursor ? { cursor: { id: cursor } } : undefined),
     take: pageSize + 1,
+    include: {
+      image: true,
+    },
+    orderBy: { createdAt: 'desc' },
   });
 
   const nextCursor =
