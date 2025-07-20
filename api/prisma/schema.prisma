@@ -54,7 +54,7 @@ model city {
 }
 
 model image {
-  id         Int       @id(map: "idx_16874_primary")
+  id         Int       @id(map: "idx_16874_primary") @default(autoincrement())
   src        String    @db.VarChar(255)
   name       String    @db.VarChar(255)
   mime       String?   @db.VarChar(255)
