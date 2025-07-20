@@ -26,6 +26,14 @@ export const getCity = async (
   }
 };
 
+export const getCityByName = async (
+  request: Request,
+  res: Response,
+): Promise<void> => {
+  const city = await CityService.getCityByName(request.params.name);
+  res.json(city);
+};
+
 export const createCity = async (
   request: Request,
   res: Response,

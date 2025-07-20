@@ -12,6 +12,12 @@ export const getCityById = (id: string) => {
   });
 };
 
+export const getCityByName = (name: string) => {
+  return prisma.city.findUnique({
+    where: { name },
+  });
+};
+
 export const createCity = async (data: {
   name: string;
   latitude: number;
