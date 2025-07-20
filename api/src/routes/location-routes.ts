@@ -45,11 +45,6 @@ router.get(
   LocationController.getLocationsByCityAndCategory as RequestHandler,
 );
 
-router.get(
-  '/:city/:category/:cursor',
-  LocationController.getLocationByCityAndCategoryAndCursor as RequestHandler,
-);
-
 // router.post(
 //   '/:id/images',
 //   authenticate,

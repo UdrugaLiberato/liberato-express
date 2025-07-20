@@ -65,20 +65,9 @@ export const getLocationsByCityAndCategory = async (
   req: Request,
   res: Response,
 ) => {
+  const cursor = req.query.cursor as string | undefined;
   const { city, category } = req.params;
   const locations = await LocationService.getLocationsByCityAndCategory(
-    city,
-    category,
-  );
-  res.json(locations);
-};
-
-export const getLocationByCityAndCategoryAndCursor = async (
-  req: Request,
-  res: Response,
-) => {
-  const { city, category, cursor } = req.params;
-  const locations = await LocationService.getLocationByCityAndCategoryAndCursor(
     city,
     category,
     cursor,
