@@ -45,6 +45,9 @@ router.get(
   LocationController.getLocationsByCityAndCategory as RequestHandler,
 );
 
-router.get('/:name', LocationController.getLocationByName as RequestHandler);
+router.get(
+  '/:city/:category/:name',
+  LocationController.getLocationByCityAndCategoryAndName as RequestHandler,
+);
 
 export default router;
