@@ -75,9 +75,16 @@ export const getLocationsByCityAndCategory = async (
   res.json(locations);
 };
 
-export const getLocationByName = async (req: Request, res: Response) => {
-  const { name } = req.params;
-  const location = await LocationService.getLocationByName(name);
+export const getLocationByCityAndCategoryAndName = async (
+  req: Request,
+  res: Response,
+) => {
+  const { city, category, name } = req.params;
+  const location = await LocationService.getLocationByCityAndCategoryAndName(
+    city,
+    category,
+    name,
+  );
   res.json(location);
 };
 

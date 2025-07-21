@@ -89,9 +89,25 @@ export const getLocationById = async (id: string) => {
   };
 };
 
-export const getLocationByName = async (name: string) => {
+export const getLocationByCityAndCategoryAndName = async (
+  city: string,
+  category: string,
+  name: string,
+) => {
   const location = await prisma.location.findFirst({
     where: {
+      city: {
+        name: {
+          equals: city,
+          mode: 'insensitive',
+        },
+      },
+      category: {
+        name: {
+          equals: category,
+          mode: 'insensitive',
+        },
+      },
       name: {
         contains: name,
         mode: 'insensitive',
