@@ -342,7 +342,6 @@ export const updateLocation = async (
       files.map((file) =>
         prisma.image.create({
           data: {
-            id: Math.floor(Math.random() * 1_000_000_000),
             src: `https://dev.udruga-liberato.hr/images/locations/${file.filename}`,
             name: file.originalname.split('.')[0],
             mime: file.mimetype,
