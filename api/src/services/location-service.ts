@@ -170,7 +170,7 @@ export const createLocation = async (
 
   const location = await prisma.location.create({
     data: {
-      category: { connect: { id: body.categoryId } },
+      category: { connect: { id: body.category_id } },
       city: { connect: { id: body.city_id } },
       user: { connect: { id: userId } },
       name: body.name,
@@ -437,15 +437,42 @@ export const getLocationsByCityAndCategory = async (
     take: pageSize + 1,
     include: {
       image: true,
+      city: true,
+      category: true,
+      user: { select: { id: true, username: true } },
+      answer: {
+        select: {
+          id: true,
+          answer: true,
+          question: { select: { id: true, question: true } },
+        },
+      },
     },
     orderBy: { createdAt: 'desc' },
   });
 
-  const nextCursor =
-    locations.length > pageSize ? locations[pageSize].id : null;
+  const hasNextPage = locations.length > pageSize;
+  const nextCursor = hasNextPage ? locations[pageSize - 1].id : null;
+  const locationsToReturn = hasNextPage
+    ? locations.slice(0, pageSize)
+    : locations;
 
   return {
-    locations: locations.slice(0, pageSize),
+    locations: locationsToReturn.map((loc) => {
+      const simplifiedAnswers = (loc.answer || [])
+        .filter((a) => a.question !== null)
+        .map((a) => ({
+          answerId: a.id,
+          questionId: a.question!.id,
+          question: a.question!.question,
+          answer: a.answer,
+        }));
+
+      return {
+        ...loc,
+        answer: simplifiedAnswers,
+      };
+    }),
     nextCursor,
   };
 };
