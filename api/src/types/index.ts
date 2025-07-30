@@ -66,6 +66,18 @@ export interface UserResponse {
 }
 
 // Category Types
+export interface CategoryData {
+  name: string;
+  descriptionEN?: string;
+  descriptionHR?: string;
+}
+
+export interface CategoryUpdateData {
+  name?: string;
+  descriptionEN?: string;
+  descriptionHR?: string;
+}
+
 export interface CategoryFilters {
   name?: string;
   includeQuestions?: boolean;

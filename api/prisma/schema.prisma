@@ -26,15 +26,16 @@ model answer {
 }
 
 model category {
-  id          String     @id(map: "idx_16864_primary") @default(uuid()) @db.VarChar(255)
-  name        String     @unique(map: "idx_16864_uniq_64c19c15e237e06") @db.VarChar(255)
-  description String?
-  createdAt   DateTime   @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime?  @map("updated_at") @db.Timestamptz(6)
-  deletedAt   DateTime?  @map("deleted_at") @db.Timestamptz(6)
-  image       image[]
-  location    location[]
-  question    question[]
+  id           String     @id(map: "idx_16864_primary") @default(uuid()) @db.VarChar(255)
+  name         String     @unique(map: "idx_16864_uniq_64c19c15e237e06") @db.VarChar(255)
+  descriptionEN String?
+  descriptionHR String?
+  createdAt    DateTime   @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime?  @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  image        image[]
+  location     location[]
+  question     question[]
 
   @@schema("public")
 }

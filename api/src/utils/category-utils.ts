@@ -1,5 +1,5 @@
 import prisma from '../config/prisma';
-import { CategoryFilters } from '../types';
+import { CategoryFilters, CategoryData } from '../types';
 
 export const categoryInclude = {
   questions: true,
@@ -36,10 +36,9 @@ export const createCategoryQuestions = async (
   );
 };
 
-export const buildCategoryData = (data: any) => ({
+export const buildCategoryData = (data: CategoryData) => ({
   name: data.name,
-  description: data.description,
-  color: data.color,
-  icon: data.icon,
+  descriptionEN: data.descriptionEN,
+  descriptionHR: data.descriptionHR,
   createdAt: new Date(),
 });

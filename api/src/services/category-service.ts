@@ -1,5 +1,6 @@
 import prisma from '../config/prisma';
 import { Express } from 'express';
+import { CategoryData } from '../types';
 import {
   createCategoryImage,
   createCategoryQuestions,
@@ -28,11 +29,12 @@ export const getById = (id: string) => {
 export const create = async (
   name: string,
   file: Express.Multer.File,
-  description?: string,
+  descriptionEN?: string,
+  descriptionHR?: string,
   questions?: string,
 ) => {
   const category = await prisma.category.create({
-    data: buildCategoryData({ name, description }),
+    data: buildCategoryData({ name, descriptionEN, descriptionHR }),
   });
 
   await createCategoryImage(
