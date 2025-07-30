@@ -1,19 +1,13 @@
 import { Request, Response, Express } from 'express';
 import * as LocationService from '../services/location-service';
-
-const handleError = (
-  res: Response,
-  error: any,
-  defaultMessage = 'Server error',
-) => {
-  const message = error?.message || defaultMessage;
-  const status = error?.status || 500;
-  res.status(status).json({ message });
-};
-
-const sendSuccess = (res: Response, data: any, status = 200) => {
-  res.status(status).json(data);
-};
+import {
+  handleError,
+  sendSuccess,
+  sendCreated,
+  sendNoContent,
+  sendNotFound,
+  sendBadRequest,
+} from '../utils/controller-utils';
 
 export const getLocations = async (req: Request, res: Response) => {
   try {
@@ -32,7 +26,8 @@ export const getLocation = async (req: Request, res: Response) => {
   try {
     const location = await LocationService.getLocationById(req.params.id);
     if (!location) {
-      return res.status(404).json({ message: 'Location not found' });
+      sendNotFound(res, 'Location not found');
+      return;
     }
     sendSuccess(res, location);
   } catch (error) {
@@ -48,9 +43,10 @@ export const createLocation = async (req: Request, res: Response) => {
       '1ed198be-8109-68e4-8afe-cd8a4ea3d515',
     );
     if (!location) {
-      return res.status(400).json({ message: 'Invalid city ID' });
+      sendBadRequest(res, 'Invalid city ID');
+      return;
     }
-    sendSuccess(res, location, 201);
+    sendCreated(res, location);
   } catch (error) {
     handleError(res, error, 'Failed to create location');
   }
@@ -64,7 +60,8 @@ export const updateLocation = async (req: Request, res: Response) => {
       req.files as Express.Multer.File[],
     );
     if (!updated) {
-      return res.status(404).json({ message: 'Location not found' });
+      sendNotFound(res, 'Location not found');
+      return;
     }
     sendSuccess(res, updated);
   } catch (error) {
@@ -75,7 +72,7 @@ export const updateLocation = async (req: Request, res: Response) => {
 export const deleteLocation = async (req: Request, res: Response) => {
   try {
     await LocationService.deleteLocation(req.params.id);
-    res.status(204).send();
+    sendNoContent(res);
   } catch (error) {
     handleError(res, error, 'Failed to delete location');
   }
@@ -111,7 +108,8 @@ export const getLocationByCityAndCategoryAndName = async (
       name,
     );
     if (!location) {
-      return res.status(404).json({ message: 'Location not found' });
+      sendNotFound(res, 'Location not found');
+      return;
     }
     sendSuccess(res, location);
   } catch (error) {

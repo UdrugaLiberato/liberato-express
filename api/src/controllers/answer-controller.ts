@@ -1,19 +1,12 @@
 import { Request, Response } from 'express';
 import * as AnswerService from '../services/answer-service';
-
-const handleError = (
-  res: Response,
-  error: any,
-  defaultMessage = 'Server error',
-) => {
-  const message = error?.message || defaultMessage;
-  const status = error?.status || 500;
-  res.status(status).json({ message });
-};
-
-const sendSuccess = (res: Response, data: any, status = 200) => {
-  res.status(status).json(data);
-};
+import {
+  handleError,
+  sendSuccess,
+  sendCreated,
+  sendNoContent,
+  sendNotFound,
+} from '../utils/controller-utils';
 
 export const getAllAnswers = async (_req: Request, res: Response) => {
   try {
@@ -28,7 +21,7 @@ export const getAnswer = async (req: Request, res: Response) => {
   try {
     const answer = await AnswerService.getById(req.params.id);
     if (!answer) {
-      res.status(404).json({ message: 'Answer not found' });
+      sendNotFound(res, 'Answer not found');
       return;
     }
     sendSuccess(res, answer);
@@ -40,7 +33,7 @@ export const getAnswer = async (req: Request, res: Response) => {
 export const createAnswer = async (req: Request, res: Response) => {
   try {
     const newAnswer = await AnswerService.create(req.body);
-    sendSuccess(res, newAnswer, 201);
+    sendCreated(res, newAnswer);
   } catch (error) {
     handleError(res, error, 'Failed to create answer');
   }
@@ -58,7 +51,7 @@ export const updateAnswer = async (req: Request, res: Response) => {
 export const deleteAnswer = async (req: Request, res: Response) => {
   try {
     await AnswerService.remove(req.params.id);
-    res.status(204).send();
+    sendNoContent(res);
   } catch (error) {
     handleError(res, error, 'Failed to delete answer');
   }

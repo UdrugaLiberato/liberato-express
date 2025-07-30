@@ -1,62 +1,65 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import jwt, { Secret } from 'jsonwebtoken';
 import prisma from '../config/prisma';
-import { OAuth2Client } from 'google-auth-library';
-import { create, createIncomplete } from '../services/user-service';
-import * as userService from '../services/user-service';
+import { createIncomplete } from '../services/user-service';
+import {
+  generateToken,
+  setAuthCookie,
+  verifyPassword,
+  verifyGoogleToken,
+  AuthResponse,
+  RegisterResponse,
+} from '../utils/auth-utils';
+import {
+  handleError,
+  sendSuccess,
+  sendCreated,
+  sendUnauthorized,
+  sendBadRequest,
+  sendInternalError,
+  validateRequiredFields,
+  handleValidationError,
+} from '../utils/controller-utils';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
-const client = new OAuth2Client(GOOGLE_CLIENT_ID);
-
-const JWT_SECRET: Secret = process.env.JWT_SECRET || 'default_secret';
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
-const COOKIE_EXPIRATION = Number.parseInt(
-  process.env.COOKIE_EXPIRATION || '3600000',
-  10,
-);
 
 const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await prisma.user.findUnique({ where: { emailAddress: email } });
+    const user = await prisma.user.findUnique({
+      where: { emailAddress: email },
+    });
 
-  if (!user) {
-    res.status(401).json({ message: 'Invalid credentials' });
-    return;
+    if (!user) {
+      sendUnauthorized(res, 'Invalid credentials');
+      return;
+    }
+
+    if (!user.password) {
+      throw new Error('User password is null');
+    }
+
+    const validPassword = await verifyPassword(password, user.password);
+    if (!validPassword) {
+      sendUnauthorized(res, 'Invalid credentials');
+      return;
+    }
+
+    const token = generateToken(user.id, user.roles);
+    setAuthCookie(res, token);
+
+    const response: AuthResponse = {
+      role: user.roles,
+      name: user.username,
+      email: user.emailAddress,
+      token,
+      id: user.id,
+    };
+
+    sendSuccess(res, response);
+  } catch (error) {
+    handleError(res, error, 'Login failed');
   }
-
-  if (!user.password) {
-    throw new Error('User password is null');
-  }
-
-  const hash = user.password.replace(/^\$2y\$/, '$2b$'); // normalize prefix todo viktor @reminder
-
-  const validPassword = await bcrypt.compare(password, hash);
-  if (!validPassword) {
-    res.status(401).json({ message: 'Invalid credentials' });
-    return;
-  }
-
-  const token = jwt.sign({ id: user.id, role: user.roles }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRATION,
-  } as jwt.SignOptions);
-
-  res.cookie('BEARER', token, {
-    httpOnly: true,
-    secure: true, // process.env.NODE_ENV === 'production',
-    sameSite: 'none',
-    maxAge: COOKIE_EXPIRATION,
-  });
-
-  res.json({
-    // message: 'Login successful',
-    role: user.roles,
-    name: user.username,
-    email: user.emailAddress,
-    token,
-    id: user.id,
-  });
 };
 
 const register = async (req: Request, res: Response) => {
@@ -64,8 +67,13 @@ const register = async (req: Request, res: Response) => {
     const { email, password, username } = req.body;
     const file = req.file as Express.Multer.File | undefined;
 
-    if (!email || !password || !username) {
-      res.status(400).json({ message: 'Missing required fields' });
+    const missingFields = validateRequiredFields(req.body, [
+      'email',
+      'password',
+      'username',
+    ]);
+    if (missingFields.length > 0) {
+      handleValidationError(res, missingFields);
       return;
     }
 
@@ -73,83 +81,68 @@ const register = async (req: Request, res: Response) => {
       where: { emailAddress: email },
     });
     if (existingUser) {
-      res.status(400).json({ message: 'User already registered' });
+      sendBadRequest(res, 'User already registered');
       return;
     }
 
     const avatar = file?.filename || '';
 
-    const newUser = await userService.createIncomplete(
-      email,
-      password,
-      username,
-      avatar,
-    );
+    const newUser = await createIncomplete(email, password, username, avatar);
 
     if (!newUser) {
-      res.status(500).json({ message: 'Unexpected error' });
+      sendInternalError(res, 'Unexpected error');
       return;
     }
 
-    res.status(201).json({
+    const response: RegisterResponse = {
       username: newUser.username,
       email: newUser.emailAddress,
       avatar: newUser.avatarUrl,
       id: newUser.id,
-    });
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    };
+
+    sendCreated(res, response);
+  } catch (error) {
+    handleError(res, error, 'Registration failed');
   }
 };
 
 const googleLogin = async (req: Request, res: Response) => {
-  const { token } = req.body;
-
   try {
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: GOOGLE_CLIENT_ID,
-    });
+    const { token } = req.body;
 
-    const payload = ticket.getPayload();
+    const payload = await verifyGoogleToken(token, GOOGLE_CLIENT_ID);
     if (!payload) {
-      res.status(401).json({ message: 'Invalid Google token' });
+      sendUnauthorized(res, 'Invalid Google token');
       return;
     }
 
-    const { email, name, picture, sub: googleId } = payload;
+    const { email, name, picture } = payload;
+
+    if (!email) {
+      sendUnauthorized(res, 'Invalid Google token - no email');
+      return;
+    }
 
     let user = await prisma.user.findUnique({ where: { emailAddress: email } });
 
     if (!user) {
-      console.log('User not found');
-      user = await create({
-        username: name,
-        emailAddress: email,
-        avatar: picture || '',
-      });
+      const userName = name || 'User';
+      const userPicture = picture || '';
+      user = await createIncomplete(email, '', userName, userPicture);
     }
 
     if (!user) {
-      res.status(500).json({ message: 'Error' });
+      sendInternalError(res, 'Error creating user');
       return;
     }
 
-    const jwtToken = jwt.sign({ id: user.id, role: user.roles }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRATION,
-    } as jwt.SignOptions);
+    const jwtToken = generateToken(user.id, user.roles);
+    setAuthCookie(res, jwtToken);
 
-    res.cookie('BEARER', jwtToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
-      maxAge: COOKIE_EXPIRATION,
-    });
-
-    res.json({ message: 'Google login successful' });
+    sendSuccess(res, { message: 'Google login successful' });
   } catch (error) {
-    console.error('Google login error:', error);
-    res.status(401).json({ message: 'Authentication failed' });
+    handleError(res, error, 'Google authentication failed');
   }
 };
 
