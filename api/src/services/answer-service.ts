@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const getAll = async () => {
-  return await prisma.answer.findMany({
+  return prisma.answer.findMany({
     where: { deletedAt: null },
     include: {
       location: true,
@@ -13,7 +13,7 @@ export const getAll = async () => {
 };
 
 export const getById = async (id: string) => {
-  return await prisma.answer.findUnique({
+  return prisma.answer.findUnique({
     where: { id },
     include: {
       location: true,
@@ -23,7 +23,7 @@ export const getById = async (id: string) => {
 };
 
 export const create = async (data: any) => {
-  return await prisma.answer.create({
+  return prisma.answer.create({
     data: {
       ...data,
       createdAt: new Date(),
@@ -32,7 +32,7 @@ export const create = async (data: any) => {
 };
 
 export const update = async (id: string, data: any) => {
-  return await prisma.answer.update({
+  return prisma.answer.update({
     where: { id },
     data: {
       ...data,
@@ -42,7 +42,7 @@ export const update = async (id: string, data: any) => {
 };
 
 export const remove = async (id: string) => {
-  return await prisma.answer.update({
+  return prisma.answer.update({
     where: { id },
     data: {
       deletedAt: new Date(),
