@@ -3,6 +3,8 @@ import { CityData, CityUpdateData } from '../types';
 
 export const buildCityData = (data: CityData) => ({
   name: data.name,
+  descriptionEN: data.descriptionEN,
+  descriptionHR: data.descriptionHR,
   latitude: data.latitude,
   longitude: data.longitude,
   radiusInKm: data.radiusInKm ?? 1,

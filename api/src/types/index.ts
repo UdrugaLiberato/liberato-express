@@ -75,6 +75,8 @@ export interface CategoryFilters {
 // City Types
 export interface CityData {
   name: string;
+  descriptionEN?: string;
+  descriptionHR?: string;
   latitude: number;
   longitude: number;
   radiusInKm?: number | null;
@@ -82,6 +84,8 @@ export interface CityData {
 
 export interface CityUpdateData {
   name?: string;
+  descriptionEN?: string;
+  descriptionHR?: string;
   latitude?: number;
   longitude?: number;
   radiusInKm?: number;
