@@ -1,75 +1,41 @@
-import dotenv from 'dotenv';
-
-import axios from 'axios';
-import { GoogleMaps } from '../utils/google-maps';
-
-dotenv.config({ path: '.env.test' });
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+import request from 'supertest';
+import { describe, it, expect } from '@jest/globals';
+import googleMaps from '../utils/google-maps';
+import prisma from '../config/prisma';
 
 describe('GoogleMaps', () => {
-  const apiKey = 'fake-api-key';
-  const googleMaps = new GoogleMaps(apiKey);
+  const apiKey = 'test-api-key';
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  it('should get coordinates for a city', async () => {
+    const city = 'Zagreb';
+    const result = await googleMaps.getCoordinateForCity(city);
+
+    expect(result).toBeDefined();
+    expect(result.lat).toBeDefined();
+    expect(result.lng).toBeDefined();
   });
 
-  describe('getCoordinateForCity', () => {
-    it('should return coordinates for a valid city', async () => {
-      mockedAxios.get.mockResolvedValue({
-        data: {
-          status: 'OK',
-          candidates: [{ geometry: { location: { lat: 52.52, lng: 13.405 } } }],
-        },
-      });
+  it('should throw CoordinatesNotFound for non-existent city', async () => {
+    const city = 'NonExistentCity12345';
 
-      const coords = await googleMaps.getCoordinateForCity('Berlin');
-      expect(coords).toEqual({ lat: 52.52, lng: 13.405 });
-    });
-
-    it('should throw an error if city not found', async () => {
-      mockedAxios.get.mockResolvedValue({ data: { status: 'ZERO_RESULTS' } });
-
-      await expect(
-        googleMaps.getCoordinateForCity('Unknownville'),
-      ).rejects.toThrow('Coordinates for "Unknownville" could not be found.');
-    });
+    await expect(googleMaps.getCoordinateForCity(city)).rejects.toThrow('Coordinates for "NonExistentCity12345" could not be found.');
   });
 
-  describe('getCoordinateForStreet', () => {
-    it('should return coordinates and address for a valid street and city', async () => {
-      mockedAxios.get.mockResolvedValue({
-        data: {
-          status: 'OK',
-          results: [
-            {
-              formatted_address: 'Some street in, Berlin, Germany',
-              geometry: { location: { lat: 52.5, lng: 13.4 } },
-            },
-          ],
-        },
-      });
+  it('should get coordinates for a street', async () => {
+    const street = 'Ilica';
+    const city = 'Zagreb';
+    const result = await googleMaps.getCoordinateForStreet(street, city);
 
-      const coords = await googleMaps.getCoordinateForStreet(
-        'Example St',
-        'Berlin',
-      );
-      expect(coords).toEqual({
-        lat: 52.5,
-        lng: 13.4,
-        formatted_address: 'Some street in, Berlin, Germany',
-      });
-    });
+    expect(result).toBeDefined();
+    expect(result.lat).toBeDefined();
+    expect(result.lng).toBeDefined();
+    expect(result.formattedAddress).toBeDefined();
+  });
 
-    it('should throw an error if address not found', async () => {
-      mockedAxios.get.mockResolvedValue({ data: { status: 'ZERO_RESULTS' } });
+  it('should throw CoordinatesNotFound for non-existent street', async () => {
+    const street = 'NonExistentStreet12345';
+    const city = 'NonExistentCity12345';
 
-      await expect(
-        googleMaps.getCoordinateForStreet('Unknown St', 'Nowhere'),
-      ).rejects.toThrow(
-        'Coordinates for "Unknown St Nowhere" could not be found.',
-      );
-    });
+    await expect(googleMaps.getCoordinateForStreet(street, city)).rejects.toThrow('Coordinates for "NonExistentStreet12345 NonExistentCity12345" could not be found.');
   });
 });

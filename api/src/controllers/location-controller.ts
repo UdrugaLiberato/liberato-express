@@ -1,24 +1,37 @@
 import { Request, Response, Express } from 'express';
 import * as LocationService from '../services/location-service';
+import {
+  handleError,
+  sendSuccess,
+  sendCreated,
+  sendNoContent,
+  sendNotFound,
+  sendBadRequest,
+} from '../utils/controller-utils';
 
 export const getLocations = async (req: Request, res: Response) => {
-  const { city, category } = req.query;
-
-  const locations = await LocationService.getAllLocations({
-    city: city as string | undefined,
-    category: category as string | undefined,
-  });
-
-  res.json(locations);
+  try {
+    const { cityId, categoryId } = req.query;
+    const locations = await LocationService.getAllLocations({
+      cityId: cityId as string | undefined,
+      categoryId: categoryId as string | undefined,
+    });
+    sendSuccess(res, locations);
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 export const getLocation = async (req: Request, res: Response) => {
   try {
     const location = await LocationService.getLocationById(req.params.id);
-    if (!location) res.status(404).json({ message: 'Location not found' });
-    res.json(location);
-  } catch {
-    res.status(500).json({ message: 'Server error' });
+    if (!location) {
+      sendNotFound(res, 'Location not found');
+      return;
+    }
+    sendSuccess(res, location);
+  } catch (error) {
+    handleError(res, error);
   }
 };
 
@@ -29,9 +42,13 @@ export const createLocation = async (req: Request, res: Response) => {
       req.files as Express.Multer.File[],
       '1ed198be-8109-68e4-8afe-cd8a4ea3d515',
     );
-    res.status(201).json(location);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    if (!location) {
+      sendBadRequest(res, 'Invalid city ID');
+      return;
+    }
+    sendCreated(res, location);
+  } catch (error) {
+    handleError(res, error, 'Failed to create location');
   }
 };
 
@@ -42,18 +59,22 @@ export const updateLocation = async (req: Request, res: Response) => {
       req.body,
       req.files as Express.Multer.File[],
     );
-    res.json(updated);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    if (!updated) {
+      sendNotFound(res, 'Location not found');
+      return;
+    }
+    sendSuccess(res, updated);
+  } catch (error) {
+    handleError(res, error, 'Failed to update location');
   }
 };
 
 export const deleteLocation = async (req: Request, res: Response) => {
   try {
     await LocationService.deleteLocation(req.params.id);
-    res.status(204).send();
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    sendNoContent(res);
+  } catch (error) {
+    handleError(res, error, 'Failed to delete location');
   }
 };
 
@@ -61,57 +82,37 @@ export const getLocationsByCityAndCategory = async (
   req: Request,
   res: Response,
 ) => {
-  const cursor = req.query.cursor as string | undefined;
-  const { city, category } = req.params;
-  const locations = await LocationService.getLocationsByCityAndCategory(
-    city,
-    category,
-    cursor,
-  );
-  res.json(locations);
+  try {
+    const cursor = req.query.cursor as string | undefined;
+    const { city, category } = req.params;
+    const locations = await LocationService.getLocationsByCityAndCategory(
+      city,
+      category,
+      cursor,
+    );
+    sendSuccess(res, locations);
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 export const getLocationByCityAndCategoryAndName = async (
   req: Request,
   res: Response,
 ) => {
-  const { city, category, name } = req.params;
-  const location = await LocationService.getLocationByCityAndCategoryAndName(
-    city,
-    category,
-    name,
-  );
-  res.json(location);
+  try {
+    const { city, category, name } = req.params;
+    const location = await LocationService.getLocationByCityAndCategoryAndName(
+      city,
+      category,
+      name,
+    );
+    if (!location) {
+      sendNotFound(res, 'Location not found');
+      return;
+    }
+    sendSuccess(res, location);
+  } catch (error) {
+    handleError(res, error);
+  }
 };
-
-// export const addLocationImage = async (req: Request, res: Response) => {
-//   try {
-//     const locationId = req.params.id;
-//     const files = req.files as Express.Multer.File[];
-// ``
-//     if (!files?.length) {
-//       return res.status(400).json({ message: 'No files uploaded' });
-//     }
-//
-//     const updatedLocation = await LocationService.addLocationImage(locationId, files);
-//     res.json(updatedLocation);
-//   } catch (error: any) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-
-// export const removeLocationImage = async (req: Request, res: Response) => {
-//   try {
-//     const { imageId } = req.body;
-//     const locationId = req.params.id as string;
-//
-//     if (!imageId) {
-//       return res.status(400).json({ message: 'imageId is required' });
-//     }
-//
-//     await LocationService.removeLocationImage(imageId, locationId);
-//     res.status(204).send();
-//   } catch (error: any) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };

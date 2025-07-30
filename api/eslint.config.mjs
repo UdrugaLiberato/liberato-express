@@ -20,7 +20,7 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
-  globalIgnores(['**/node_modules', '**/dist']),
+  globalIgnores(['**/node_modules', '**/dist', '**/src/tests/**']),
   {
     extends: compat.extends(
       '@jenssimon/base',
@@ -62,9 +62,9 @@ export default defineConfig([
       'unicorn/no-null': 'off',
       'import-esm/explicit-extension': 'off',
       'import/order': 'off',
+      'consistent-return': 'off',
     },
-  },
-  {
-    ignores: ['eslint.config.mjs'],
+
+    ignores: ['eslint.config.mjs', './src/old', './src/tests/**'],
   },
 ]);

@@ -1,40 +1,27 @@
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
+import prisma from '../config/prisma';
+import {
+  userInclude,
+  userWithLocationInclude,
+  buildUserData,
+  buildUserUpdateData,
+} from '../utils/user-utils';
 
 export const getAll = () => {
   return prisma.user.findMany({
-    include: {
-      location: true,
-    },
+    include: userInclude,
   });
 };
 
 export const getById = (id: string) => {
   return prisma.user.findUnique({
     where: { id },
-    include: {
-      location: {
-        include: {
-          category: true,
-        },
-      },
-    },
+    include: userWithLocationInclude,
   });
 };
 
 export const create = async (data: any) => {
-  const hashedPassword = data.password
-    ? await bcrypt.hash(data.password, 10)
-    : '';
   return prisma.user.create({
-    data: {
-      ...data,
-      roles: data.roles || 'ROLE_USER',
-      password: hashedPassword,
-      createdAt: new Date(),
-    },
+    data: await buildUserData(data),
   });
 };
 
@@ -44,32 +31,20 @@ export const createIncomplete = async (
   username: string,
   avatar: string,
 ) => {
-  const hashedPassword = password ? await bcrypt.hash(password, 10) : '';
   return prisma.user.create({
-    data: {
+    data: await buildUserData({
       emailAddress: email,
       username,
-      roles: JSON.stringify(['ROLE_USER']),
-      password: hashedPassword,
-      createdAt: new Date(),
+      password,
       avatarUrl: avatar,
-    },
+    }),
   });
 };
 
 export const update = async (id: string, data: any) => {
-  const updateData = {
-    ...data,
-    updatedAt: new Date(),
-  };
-
-  if (data.password) {
-    updateData.password = await bcrypt.hash(data.password, 10);
-  }
-
   return prisma.user.update({
     where: { id },
-    data: updateData,
+    data: await buildUserUpdateData(data),
   });
 };
 

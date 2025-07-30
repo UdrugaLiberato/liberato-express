@@ -1,7 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload, VerifyErrors } from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { promisify } from 'node:util';
 
-export const authenticate = (
+const verifyToken = promisify(jwt.verify) as (
+  token: string,
+  secret: string,
+) => Promise<JwtPayload>;
+
+const authenticate = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -13,17 +19,13 @@ export const authenticate = (
     return;
   }
 
-  jwt.verify(
-    token,
-    process.env.JWT_SECRET as string,
-    (err: VerifyErrors | null, decoded: string | JwtPayload | undefined) => {
-      if (err || !decoded || typeof decoded !== 'object') {
-        res.sendStatus(403).json({ message: 'Invalid token' });
-        return;
-      }
-
-      req.user = decoded as { id: string; role: string };
-      next();
-    },
-  );
+  try {
+    const decoded = await verifyToken(token, process.env.JWT_SECRET as string);
+    req.user = decoded as { id: string; role: string };
+    next();
+  } catch {
+    res.status(403).json({ message: 'Invalid token' });
+  }
 };
+
+export default authenticate;

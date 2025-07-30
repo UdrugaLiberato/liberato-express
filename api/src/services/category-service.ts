@@ -1,14 +1,15 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma';
 import { Express } from 'express';
-import { v4 as uuidv4 } from 'uuid';
-
-const prisma = new PrismaClient();
+import {
+  createCategoryImage,
+  createCategoryQuestions,
+  buildCategoryData,
+} from '../utils/category-utils';
 
 export const getAll = () => {
   return prisma.category.findMany({
     include: {
       question: true,
-      location: true,
       image: true,
     },
   });
@@ -19,7 +20,6 @@ export const getById = (id: string) => {
     where: { id },
     include: {
       question: true,
-      location: true,
       image: true,
     },
   });
@@ -32,35 +32,21 @@ export const create = async (
   questions?: string,
 ) => {
   const category = await prisma.category.create({
-    data: {
-      name,
-      description,
-      createdAt: new Date(),
-    },
+    data: buildCategoryData({ name, description }),
   });
 
-  const image = await prisma.image.create({
-    data: {
-      id: Math.floor(Math.random() * 1_000_000_000),
-      src: `https://dev.udruga-liberato.hr/images/category/${file.filename}`,
-      name: file.originalname.split('.')[0],
-      mime: file.mimetype,
-      categoryId: category.id,
-    },
-  });
+  await createCategoryImage(
+    category.id,
+    `https://dev.udruga-liberato.hr/images/category/${file.filename}`,
+  );
 
   if (questions) {
-    const items = questions
+    const questionItems = questions
       .split(',')
       .map((q) => q.trim())
-      .filter(Boolean);
-    await prisma.question.createMany({
-      data: items.map((question) => ({
-        question,
-        categoryId: category.id,
-        createdAt: new Date(),
-      })),
-    });
+      .filter(Boolean)
+      .map((question) => ({ question }));
+    await createCategoryQuestions(category.id, questionItems);
   }
 
   return category;

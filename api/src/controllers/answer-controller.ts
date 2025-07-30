@@ -1,27 +1,58 @@
 import { Request, Response } from 'express';
 import * as AnswerService from '../services/answer-service';
+import {
+  handleError,
+  sendSuccess,
+  sendCreated,
+  sendNoContent,
+  sendNotFound,
+} from '../utils/controller-utils';
 
 export const getAllAnswers = async (_req: Request, res: Response) => {
-  const answers = await AnswerService.getAll();
-  res.json(answers);
+  try {
+    const answers = await AnswerService.getAll();
+    sendSuccess(res, answers);
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 export const getAnswer = async (req: Request, res: Response) => {
-  const answer = await AnswerService.getById(req.params.id);
-  res.json(answer);
+  try {
+    const answer = await AnswerService.getById(req.params.id);
+    if (!answer) {
+      sendNotFound(res, 'Answer not found');
+      return;
+    }
+    sendSuccess(res, answer);
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 export const createAnswer = async (req: Request, res: Response) => {
-  const newAnswer = await AnswerService.create(req.body);
-  res.status(201).json(newAnswer);
+  try {
+    const newAnswer = await AnswerService.create(req.body);
+    sendCreated(res, newAnswer);
+  } catch (error) {
+    handleError(res, error, 'Failed to create answer');
+  }
 };
 
 export const updateAnswer = async (req: Request, res: Response) => {
-  const updated = await AnswerService.update(req.params.id, req.body);
-  res.json(updated);
+  try {
+    const updated = await AnswerService.update(req.params.id, req.body);
+    sendSuccess(res, updated);
+  } catch (error) {
+    handleError(res, error, 'Failed to update answer');
+  }
 };
 
 export const deleteAnswer = async (req: Request, res: Response) => {
-  await AnswerService.remove(req.params.id);
-  res.status(200).send();
+  try {
+    await AnswerService.remove(req.params.id);
+    sendNoContent(res);
+  } catch (error) {
+    handleError(res, error, 'Failed to delete answer');
+  }
 };

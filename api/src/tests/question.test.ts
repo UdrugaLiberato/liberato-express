@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 
 import request from 'supertest';
-import { app } from '../index';
+import { describe, it, expect } from '@jest/globals';
+import app from '../index';
 import prisma from '../config/prisma';
 
 dotenv.config({ path: '.env.test' });

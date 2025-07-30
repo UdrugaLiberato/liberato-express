@@ -1,39 +1,38 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma';
+import {
+  imageInclude,
+  buildImageData,
+  buildImageUpdateData,
+} from '../utils/image-utils';
 
-const prisma = new PrismaClient();
-
-export const getAll = async () => {
-  return await prisma.image.findMany({
-    include: {
-      category: true,
-      location: true,
-    },
+export const getAll = () => {
+  return prisma.image.findMany({
+    include: imageInclude,
   });
 };
 
-export const getById = async (id: number) => {
-  return await prisma.image.findUnique({
+export const getById = (id: number) => {
+  return prisma.image.findUnique({
     where: { id },
-    include: {
-      category: true,
-      location: true,
-    },
+    include: imageInclude,
   });
 };
 
-export const create = async (data: any) => {
-  return await prisma.image.create({ data });
+export const create = (data: any) => {
+  return prisma.image.create({
+    data: buildImageData(data),
+  });
 };
 
-export const update = async (id: number, data: any) => {
-  return await prisma.image.update({
+export const update = (id: number, data: any) => {
+  return prisma.image.update({
     where: { id },
-    data,
+    data: buildImageUpdateData(data),
   });
 };
 
-export const remove = async (id: number) => {
-  return await prisma.image.delete({
+export const remove = (id: number) => {
+  return prisma.image.delete({
     where: { id },
   });
 };

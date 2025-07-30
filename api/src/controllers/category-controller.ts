@@ -1,14 +1,36 @@
-import { Request, Response, Express } from 'express';
+import { Request, Response } from 'express';
 import * as CategoryService from '../services/category-service';
+import {
+  handleError,
+  sendSuccess,
+  sendCreated,
+  sendNoContent,
+  sendNotFound,
+  sendBadRequest,
+  validateRequiredFields,
+  handleValidationError,
+} from '../utils/controller-utils';
 
 export const getAllCategories = async (_req: Request, res: Response) => {
-  const categories = await CategoryService.getAll();
-  res.json(categories);
+  try {
+    const categories = await CategoryService.getAll();
+    sendSuccess(res, categories);
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 export const getCategory = async (req: Request, res: Response) => {
-  const category = await CategoryService.getById(req.params.id);
-  res.json(category);
+  try {
+    const category = await CategoryService.getById(req.params.id);
+    if (!category) {
+      sendNotFound(res, 'Category not found');
+      return;
+    }
+    sendSuccess(res, category);
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 export const createCategory = async (req: Request, res: Response) => {
@@ -16,27 +38,35 @@ export const createCategory = async (req: Request, res: Response) => {
     const { name, description, questions } = req.body;
     const { file } = req;
 
-    if (!name || !file) {
-      return res
-        .status(400)
-        .json({ error: 'Missing required fields: name or category_image' });
+    const missingFields = validateRequiredFields(req.body, ['name']);
+    if (missingFields.length > 0) {
+      handleValidationError(res, missingFields);
+      return;
+    }
+
+    if (!file) {
+      sendBadRequest(res, 'Missing required fields: category_image');
+      return;
     }
 
     const newCategory = await CategoryService.create(
       name,
-      file as Express.Multer.File,
+      file,
       description,
       questions,
     );
 
-    res.status(201).json(newCategory);
+    sendCreated(res, newCategory);
   } catch (error) {
-    console.error('Error creating category:', error);
-    res.status(500).json({ error });
+    handleError(res, error, 'Failed to create category');
   }
 };
 
 export const deleteCategory = async (req: Request, res: Response) => {
-  await CategoryService.remove(req.params.id);
-  res.status(200).send();
+  try {
+    await CategoryService.remove(req.params.id);
+    sendNoContent(res);
+  } catch (error) {
+    handleError(res, error, 'Failed to delete category');
+  }
 };

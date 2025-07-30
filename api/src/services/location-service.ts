@@ -1,92 +1,35 @@
 import prisma from '../config/prisma';
-import { GoogleMaps } from '../utils/google-maps';
 import { Express } from 'express';
+import {
+  LocationFilters,
+  locationInclude,
+  addSimplifiedAnswers,
+  getCoordinates,
+  createImages,
+  createAnswers,
+  buildLocationUpdateData,
+  toInt,
+} from '../utils/location-utils';
 
-export const getAllLocations = async (filters: {
-  city?: string;
-  category?: string;
-}) => {
-  const { city, category } = filters;
+export const getAllLocations = async (filters: LocationFilters) => {
+  const { cityId, categoryId } = filters;
 
-  const locations = await prisma.location.findMany({
-    where: {
-      deletedAt: null,
-      ...(city && {
-        city: {
-          name: city,
-        },
-      }),
-      ...(category && {
-        category: {
-          name: category,
-        },
-      }),
-    },
-    include: {
-      city: true,
-      category: true,
-      user: { select: { id: true, username: true } },
-      answer: {
-        select: {
-          id: true,
-          answer: true,
-          question: { select: { id: true, question: true } },
-        },
-      },
-      image: true,
-    },
-  });
+  const where: any = {};
 
-  return locations.map((loc) => {
-    const simplifiedAnswers = (loc.answer || [])
-      .filter((a) => a.question !== null)
-      .map((a) => ({
-        answerId: a.id,
-        questionId: a.question!.id,
-        question: a.question!.question,
-        answer: a.answer,
-      }));
+  if (cityId) where.cityId = cityId;
+  if (categoryId) where.categoryId = categoryId;
 
-    return {
-      ...loc,
-      answer: simplifiedAnswers,
-    };
+  return prisma.location.findMany({
+    where,
+    include: locationInclude,
   });
 };
 
 export const getLocationById = async (id: string) => {
-  const location = await prisma.location.findUnique({
+  return prisma.location.findUnique({
     where: { id },
-    include: {
-      city: true,
-      category: true,
-      user: { select: { id: true, username: true } },
-      answer: {
-        select: {
-          id: true,
-          answer: true,
-          question: { select: { id: true, question: true } },
-        },
-      },
-      image: true,
-    },
+    include: locationInclude,
   });
-
-  if (!location) return null;
-
-  const simplifiedAnswers = (location.answer || [])
-    .filter((a) => a.question !== null)
-    .map((a) => ({
-      answerId: a.id,
-      questionId: a.question!.id,
-      question: a.question!.question,
-      answer: a.answer,
-    }));
-
-  return {
-    ...location,
-    answer: simplifiedAnswers,
-  };
 };
 
 export const getLocationByCityAndCategoryAndName = async (
@@ -94,56 +37,14 @@ export const getLocationByCityAndCategoryAndName = async (
   category: string,
   name: string,
 ) => {
-  const location = await prisma.location.findFirst({
+  return prisma.location.findFirst({
     where: {
-      city: {
-        name: {
-          equals: city,
-          mode: 'insensitive',
-        },
-      },
-      category: {
-        name: {
-          equals: category,
-          mode: 'insensitive',
-        },
-      },
-      name: {
-        contains: name,
-        mode: 'insensitive',
-      },
-      deletedAt: null,
+      city: { name: city },
+      category: { name: category },
+      name,
     },
-    include: {
-      image: true,
-      city: true,
-      category: true,
-      user: { select: { id: true, username: true } },
-      answer: {
-        select: {
-          id: true,
-          answer: true,
-          question: { select: { id: true, question: true } },
-        },
-      },
-    },
+    include: locationInclude,
   });
-
-  if (!location) return null;
-
-  const simplifiedAnswers = (location.answer || [])
-    .filter((a) => a.question !== null)
-    .map((a) => ({
-      answerId: a.id,
-      questionId: a.question!.id,
-      question: a.question!.question,
-      answer: a.answer,
-    }));
-
-  return {
-    ...location,
-    answer: simplifiedAnswers,
-  };
 };
 
 export const createLocation = async (
@@ -151,22 +52,13 @@ export const createLocation = async (
   files: Express.Multer.File[],
   userId: string,
 ) => {
-  const googleMaps = new GoogleMaps();
-
   const city = await prisma.city.findUnique({
     where: { id: body.city_id },
   });
 
-  if (!city) {
-    return null;
-  }
+  if (!city) return null;
 
-  const geo = await googleMaps.getCoordinateForStreet(body.street, city.name);
-  const formattedStreet = geo.formatted_address || body.street;
-
-  if (!geo?.lat || !geo?.lng) {
-    throw new Error(`Google Maps failed to find coordinates`);
-  }
+  const coordinates = await getCoordinates(`${body.street} ${city.name}`);
 
   const location = await prisma.location.create({
     data: {
@@ -174,14 +66,14 @@ export const createLocation = async (
       city: { connect: { id: body.city_id } },
       user: { connect: { id: userId } },
       name: body.name,
-      street: formattedStreet,
+      street: coordinates.formattedAddress,
       phone: body.phone,
       email: body.email,
       about: body.about,
-      latitude: geo.lat,
-      longitude: geo.lng,
+      latitude: coordinates.lat,
+      longitude: coordinates.lng,
       published: 1,
-      featured: body.featured === 'true' ? 1 : 0,
+      featured: toInt(body.featured),
       createdAt: new Date(),
     },
     include: {
@@ -191,71 +83,20 @@ export const createLocation = async (
     },
   });
 
-  await Promise.all(
-    files.map((file) =>
-      prisma.image.create({
-        data: {
-          src: `https://dev.udruga-liberato.hr/images/locations/${file.filename}`,
-          name: file.originalname.split('.')[0],
-          mime: file.mimetype,
-          locationId: location.id,
-        },
-      }),
-    ),
-  );
-
-  if (body.qa) {
-    const qaItems = body.qa.split(',');
-    await Promise.all(
-      qaItems.map(async (item: string) => {
-        const [questionId, answer] = item.split(':');
-        await prisma.answer.create({
-          data: {
-            question: { connect: { id: questionId } },
-            answer: answer === 'true' ? 1 : 0,
-            location: { connect: { id: location.id } },
-            createdAt: new Date(),
-          },
-        });
-      }),
-    );
+  if (files?.length) {
+    await createImages(files, location.id);
   }
 
-  const baseLocation = await prisma.location.findUnique({
+  if (body.qa) {
+    await createAnswers(body.qa, location.id);
+  }
+
+  const fullLocation = await prisma.location.findUnique({
     where: { id: location.id },
-    include: {
-      city: true,
-      category: true,
-      user: { select: { id: true, username: true } },
-      image: true,
-      answer: {
-        select: {
-          id: true,
-          answer: true,
-          question: {
-            select: {
-              id: true,
-              question: true,
-            },
-          },
-        },
-      },
-    },
+    include: locationInclude,
   });
 
-  const simplifiedAnswers = (baseLocation?.answer || [])
-    .filter((a) => a.question !== null)
-    .map((a) => ({
-      answerId: a.id,
-      questionId: a.question!.id,
-      question: a.question!.question,
-      answer: a.answer,
-    }));
-
-  return {
-    ...baseLocation,
-    answer: simplifiedAnswers,
-  };
+  return fullLocation ? addSimplifiedAnswers(fullLocation) : null;
 };
 
 export const updateLocation = async (
@@ -276,52 +117,20 @@ export const updateLocation = async (
 ) => {
   if (!body) throw new Error('Empty body');
 
-  const dataToUpdate: any = {};
-
-  if (body.name !== undefined) dataToUpdate.name = body.name;
-  if (body.street !== undefined) dataToUpdate.street = body.street;
-  if (body.phone !== undefined) dataToUpdate.phone = body.phone;
-  if (body.email !== undefined) dataToUpdate.email = body.email;
-  if (body.about !== undefined) dataToUpdate.about = body.about;
-
-  if (body.categoryId !== undefined) {
-    dataToUpdate.category = { connect: { id: body.categoryId } };
-  }
-
-  if (body.city_id !== undefined) {
-    dataToUpdate.city = { connect: { id: body.city_id } };
-  }
-
-  if (body.published !== undefined) {
-    dataToUpdate.published =
-      body.published === true || body.published === 'true' ? 1 : 0;
-  }
-
-  if (body.featured !== undefined) {
-    dataToUpdate.featured =
-      body.featured === true || body.featured === 'true' ? 1 : 0;
-  }
+  const dataToUpdate = buildLocationUpdateData(body);
 
   if (body.street !== undefined || body.city_id !== undefined) {
     const city = body.city_id
       ? await prisma.city.findUnique({ where: { id: body.city_id } })
       : null;
 
-    const googleMaps = new GoogleMaps();
-    const geo = await googleMaps.getCoordinateForStreet(
-      body.street ?? '',
-      city?.name ?? '',
+    const coordinates = await getCoordinates(
+      `${body.street ?? ''} ${city?.name ?? ''}`,
     );
 
-    if (!geo?.lat || !geo?.lng) {
-      throw new Error(`Google Maps failed to find coordinates`);
-    }
-
-    dataToUpdate.latitude = geo.lat;
-    dataToUpdate.longitude = geo.lng;
+    dataToUpdate.latitude = coordinates.lat;
+    dataToUpdate.longitude = coordinates.lng;
   }
-
-  dataToUpdate.updatedAt = new Date();
 
   await prisma.location.update({
     where: { id },
@@ -334,88 +143,27 @@ export const updateLocation = async (
   });
 
   if (files?.length) {
-    await prisma.image.deleteMany({
-      where: { locationId: id },
-    });
-
-    await Promise.all(
-      files.map((file) =>
-        prisma.image.create({
-          data: {
-            src: `https://dev.udruga-liberato.hr/images/locations/${file.filename}`,
-            name: file.originalname.split('.')[0],
-            mime: file.mimetype,
-            locationId: id,
-          },
-        }),
-      ),
-    );
+    await prisma.image.deleteMany({ where: { locationId: id } });
+    await createImages(files, id);
   }
 
   if (body.qa) {
-    await prisma.answer.deleteMany({
-      where: { locationId: id },
-    });
-
-    const qaItems = body.qa.split(',');
-    await Promise.all(
-      qaItems.map(async (item: string) => {
-        const [questionId, answer] = item.split(':');
-        await prisma.answer.create({
-          data: {
-            question: { connect: { id: questionId } },
-            answer: answer === 'true' ? 1 : 0,
-            location: { connect: { id } },
-            createdAt: new Date(),
-          },
-        });
-      }),
-    );
+    await prisma.answer.deleteMany({ where: { locationId: id } });
+    await createAnswers(body.qa, id);
   }
 
   const fullLocation = await prisma.location.findUnique({
     where: { id },
-    include: {
-      city: true,
-      category: true,
-      user: { select: { id: true, username: true } },
-      image: true,
-      answer: {
-        select: {
-          id: true,
-          answer: true,
-          question: {
-            select: {
-              id: true,
-              question: true,
-            },
-          },
-        },
-      },
-    },
+    include: locationInclude,
   });
 
-  const simplifiedAnswers = (fullLocation?.answer || [])
-    .filter((a) => a.question !== null)
-    .map((a) => ({
-      answerId: a.id,
-      questionId: a.question!.id,
-      question: a.question!.question,
-      answer: a.answer,
-    }));
-
-  return {
-    ...fullLocation,
-    answer: simplifiedAnswers,
-  };
+  return fullLocation ? addSimplifiedAnswers(fullLocation) : null;
 };
 
 export const deleteLocation = async (id: string) => {
   return prisma.location.update({
     where: { id },
-    data: {
-      deletedAt: new Date(),
-    },
+    data: { deletedAt: new Date() },
   });
 };
 
@@ -434,19 +182,7 @@ export const getLocationsByCityAndCategory = async (
     },
     ...(cursor ? { cursor: { id: cursor } } : undefined),
     take: pageSize + 1,
-    include: {
-      image: true,
-      city: true,
-      category: true,
-      user: { select: { id: true, username: true } },
-      answer: {
-        select: {
-          id: true,
-          answer: true,
-          question: { select: { id: true, question: true } },
-        },
-      },
-    },
+    include: locationInclude,
     orderBy: { createdAt: 'desc' },
   });
 
@@ -457,21 +193,9 @@ export const getLocationsByCityAndCategory = async (
     : locations;
 
   return {
-    locations: locationsToReturn.map((loc) => {
-      const simplifiedAnswers = (loc.answer || [])
-        .filter((a) => a.question !== null)
-        .map((a) => ({
-          answerId: a.id,
-          questionId: a.question!.id,
-          question: a.question!.question,
-          answer: a.answer,
-        }));
-
-      return {
-        ...loc,
-        answer: simplifiedAnswers,
-      };
-    }),
+    locations: locationsToReturn.map((location) =>
+      addSimplifiedAnswers(location),
+    ),
     nextCursor,
   };
 };

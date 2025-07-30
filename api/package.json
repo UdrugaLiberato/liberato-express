@@ -50,16 +50,17 @@
     "typescript-eslint": "^8.28.0"
   },
   "name": "liberato-express",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "index.js",
   "scripts": {
     "test:prepare": "sh ./src/scripts/reset-test-db.sh",
-    "test": "find dist/ -name '*.test.js' -delete && jest --no-cache",
+    "test": "find dist/ -name '*.test.js' -delete 2>/dev/null || true && jest --no-cache",
     "build": "tsc",
     "start": "ts-node src/index.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts"
   },
   "type": "commonjs",
