@@ -62,9 +62,10 @@ export default defineConfig([
       'unicorn/no-null': 'off',
       'import-esm/explicit-extension': 'off',
       'import/order': 'off',
+      'consistent-return': 'off',
     },
   },
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: ['eslint.config.mjs', './src/old'],
   },
 ]);
