@@ -4,6 +4,7 @@ import {
   buildCityUpdateData,
   validateCityDeletion,
 } from '../utils/city-utils';
+import { CityData, CityUpdateData } from '../types';
 
 export const getAllCities = () => {
   return prisma.city.findMany({
@@ -23,26 +24,13 @@ export const getCityByName = (name: string) => {
   });
 };
 
-export const createCity = async (data: {
-  name: string;
-  latitude: number;
-  longitude: number;
-  radiusInKm?: number | null;
-}) => {
+export const createCity = async (data: CityData) => {
   return prisma.city.create({
     data: buildCityData(data),
   });
 };
 
-export const updateCity = async (
-  id: string,
-  data: Partial<{
-    name: string;
-    latitude: number;
-    longitude: number;
-    radiusInKm: number;
-  }>,
-) => {
+export const updateCity = async (id: string, data: CityUpdateData) => {
   return prisma.city.update({
     where: { id },
     data: buildCityUpdateData(data),

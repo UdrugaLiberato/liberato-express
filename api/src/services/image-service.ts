@@ -4,6 +4,7 @@ import {
   buildImageData,
   buildImageUpdateData,
 } from '../utils/image-utils';
+import { ImageData, ImageUpdateData } from '../types';
 
 export const getAll = () => {
   return prisma.image.findMany({
@@ -18,13 +19,13 @@ export const getById = (id: number) => {
   });
 };
 
-export const create = (data: any) => {
+export const create = (data: ImageData) => {
   return prisma.image.create({
     data: buildImageData(data),
   });
 };
 
-export const update = (id: number, data: any) => {
+export const update = (id: number, data: ImageUpdateData) => {
   return prisma.image.update({
     where: { id },
     data: buildImageUpdateData(data),

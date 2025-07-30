@@ -1,38 +1,14 @@
 import prisma from '../config/prisma';
 import googleMaps from './google-maps';
-
-export interface LocationFilters {
-  cityId?: string;
-  categoryId?: string;
-  includeAnswers?: boolean;
-  includeImages?: boolean;
-  includeQuestions?: boolean;
-}
-
-export interface SimplifiedAnswer {
-  id: string;
-  answer: string;
-  questionId: string;
-}
-
-export interface LocationWithSimplifiedAnswers {
-  id: string;
-  name: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  cityId: string;
-  categoryId: string;
-  answers: SimplifiedAnswer[];
-}
+import { SimplifiedAnswer, LocationWithSimplifiedAnswers } from '../types';
 
 export const locationInclude = {
-  answers: {
+  answer: {
     include: {
       question: true,
     },
   },
-  images: true,
+  image: true,
   city: true,
   category: true,
 };
@@ -43,18 +19,20 @@ export const resetImageSequence = async () => {
 
 export const simplifyAnswers = (answers: any[]): SimplifiedAnswer[] => {
   return answers.map((answer) => ({
-    id: answer.id,
+    answerId: answer.id,
     answer: answer.answer,
     questionId: answer.questionId,
+    question: answer.question.question,
   }));
 };
 
 export const addSimplifiedAnswers = (
   location: any,
 ): LocationWithSimplifiedAnswers => {
+  const { answer, ...locationWithoutAnswer } = location;
   return {
-    ...location,
-    answers: simplifyAnswers(location.answers || []),
+    ...locationWithoutAnswer,
+    answers: simplifyAnswers(answer || []),
   };
 };
 
@@ -89,13 +67,37 @@ export const createAnswers = async (answers: string, locationId: string) => {
     .map((a) => a.trim())
     .filter(Boolean);
 
-  await prisma.answer.createMany({
-    data: items.map(() => ({
-      answer: 1,
-      locationId,
-      createdAt: new Date(),
-    })),
-  });
+  return Promise.all(
+    items.map(async (item) => {
+      const [questionId, answer] = item.split(':');
+      return prisma.answer.create({
+        data: {
+          question: { connect: { id: questionId } },
+          location: { connect: { id: locationId } },
+          answer: answer === 'true' ? 1 : 0,
+          createdAt: new Date(),
+        },
+      });
+    }),
+  );
+};
+
+export const toInt = (value: boolean | number | string): number => {
+  if (typeof value === 'boolean') {
+    return value ? 1 : 0;
+  }
+  if (typeof value === 'string') {
+    if (value.toLowerCase() === 'true' || value === '1') {
+      return 1;
+    }
+    if (value.toLowerCase() === 'false' || value === '0') {
+      return 0;
+    }
+    // Try to parse as number
+    const parsed = Number.parseInt(value, 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  return value;
 };
 
 export const buildLocationUpdateData = (data: any) => ({
@@ -105,12 +107,7 @@ export const buildLocationUpdateData = (data: any) => ({
   longitude: data.longitude,
   cityId: data.cityId,
   categoryId: data.categoryId,
+  featured: data.featured === undefined ? undefined : toInt(data.featured),
+  published: data.published === undefined ? undefined : toInt(data.published),
   updatedAt: new Date(),
 });
-
-export const toInt = (value: boolean | number): number => {
-  if (typeof value === 'boolean') {
-    return value ? 1 : 0;
-  }
-  return value;
-};

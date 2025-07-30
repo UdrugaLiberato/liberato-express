@@ -7,6 +7,8 @@ import {
   createLocation,
   updateLocation,
   deleteLocation,
+  getLocationByCityAndCategoryAndName,
+  getLocationsByCityAndCategory,
 } from '../controllers/location-controller';
 
 const router = Router();
@@ -16,5 +18,7 @@ router.get('/:id', getLocation);
 router.post('/', authenticate, upload.array('images', 5), createLocation);
 router.put('/:id', authenticate, upload.array('images', 5), updateLocation);
 router.delete('/:id', authenticate, deleteLocation);
+router.get('/:city/:category/:name', getLocationByCityAndCategoryAndName);
+router.get('/:city/:category', getLocationsByCityAndCategory);
 
 export default router;

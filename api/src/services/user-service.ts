@@ -5,6 +5,7 @@ import {
   buildUserData,
   buildUserUpdateData,
 } from '../utils/user-utils';
+import { UserData, UserUpdateData } from '../types';
 
 export const getAll = () => {
   return prisma.user.findMany({
@@ -19,7 +20,7 @@ export const getById = (id: string) => {
   });
 };
 
-export const create = async (data: any) => {
+export const create = async (data: UserData) => {
   return prisma.user.create({
     data: await buildUserData(data),
   });
@@ -41,7 +42,7 @@ export const createIncomplete = async (
   });
 };
 
-export const update = async (id: string, data: any) => {
+export const update = async (id: string, data: UserUpdateData) => {
   return prisma.user.update({
     where: { id },
     data: await buildUserUpdateData(data),

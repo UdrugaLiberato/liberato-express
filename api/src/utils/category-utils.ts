@@ -1,10 +1,5 @@
 import prisma from '../config/prisma';
-
-export interface CategoryFilters {
-  name?: string;
-  includeQuestions?: boolean;
-  includeImages?: boolean;
-}
+import { CategoryFilters } from '../types';
 
 export const categoryInclude = {
   questions: true,

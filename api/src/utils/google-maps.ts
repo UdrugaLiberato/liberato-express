@@ -4,7 +4,7 @@ import CoordinatesNotFound from '../exceptions/CoordinatesNotFound';
 const GOOGLE_API_KEY: string = process.env.GOOGLE_API_KEY!;
 
 class GoogleMaps {
-  constructor(private apiKey: string = GOOGLE_API_KEY) { }
+  constructor(private apiKey: string = GOOGLE_API_KEY) {}
 
   async getCoordinateForCity(
     city: string,
@@ -23,14 +23,23 @@ class GoogleMaps {
 
     const { data } = response;
 
-    if (data.status === 'ZERO_RESULTS') {
+    if (
+      data.status === 'ZERO_RESULTS' ||
+      !data.candidates ||
+      data.candidates.length === 0
+    ) {
       throw new CoordinatesNotFound(
         `Coordinates for "${city}" could not be found.`,
       );
     }
 
-    const { lat } = data.candidates[0].geometry.location;
-    const { lng } = data.candidates[0].geometry.location;
+    const candidate = data.candidates[0];
+    if (!candidate.geometry || !candidate.geometry.location) {
+      throw new CoordinatesNotFound(`Invalid response format for "${city}".`);
+    }
+
+    const { lat } = candidate.geometry.location;
+    const { lng } = candidate.geometry.location;
 
     return { lat, lng };
   }
@@ -53,16 +62,26 @@ class GoogleMaps {
 
     const { data } = response;
 
-    if (data.status === 'ZERO_RESULTS') {
+    if (
+      data.status === 'ZERO_RESULTS' ||
+      !data.results ||
+      data.results.length === 0
+    ) {
       throw new CoordinatesNotFound(
         `Coordinates for "${address}" could not be found.`,
       );
     }
 
     const result = data.results[0];
+    if (!result.geometry || !result.geometry.location) {
+      throw new CoordinatesNotFound(
+        `Invalid response format for "${address}".`,
+      );
+    }
+
     const { lat } = result.geometry.location;
     const { lng } = result.geometry.location;
-    const { formattedAddress } = result;
+    const formattedAddress = result.formatted_address || address;
 
     return { lat, lng, formattedAddress };
   }

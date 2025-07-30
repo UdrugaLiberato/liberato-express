@@ -1,18 +1,5 @@
 import prisma from '../config/prisma';
-
-export interface CityData {
-  name: string;
-  latitude: number;
-  longitude: number;
-  radiusInKm?: number | null;
-}
-
-export interface CityUpdateData {
-  name?: string;
-  latitude?: number;
-  longitude?: number;
-  radiusInKm?: number;
-}
+import { CityData, CityUpdateData } from '../types';
 
 export const buildCityData = (data: CityData) => ({
   name: data.name,

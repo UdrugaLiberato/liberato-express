@@ -1,35 +1,5 @@
 import bcrypt from 'bcryptjs';
-
-export interface UserData {
-  emailAddress: string;
-  username: string;
-  password?: string;
-  roles?: string;
-  avatarUrl?: string;
-  phone?: string;
-}
-
-export interface UserUpdateData {
-  emailAddress?: string;
-  username?: string;
-  password?: string;
-  roles?: string;
-  avatarUrl?: string;
-  phone?: string;
-}
-
-export interface UserResponse {
-  id: string;
-  email: string;
-  phone?: string;
-  roles: string;
-  username: string;
-  avatar?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date;
-  locations?: any[];
-}
+import { UserData, UserUpdateData, UserResponse } from '../types';
 
 export const userInclude = {
   location: true,

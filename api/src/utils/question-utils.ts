@@ -1,12 +1,4 @@
-export interface QuestionData {
-  question: string;
-  categoryId?: string;
-}
-
-export interface QuestionUpdateData {
-  question?: string;
-  categoryId?: string;
-}
+import { QuestionData, QuestionUpdateData } from '../types';
 
 export const questionInclude = {
   answer: true,
