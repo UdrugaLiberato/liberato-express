@@ -3,8 +3,8 @@ import CoordinatesNotFound from '../exceptions/CoordinatesNotFound';
 
 const GOOGLE_API_KEY: string = process.env.GOOGLE_API_KEY!;
 
-export class GoogleMaps {
-  constructor(private apiKey: string = GOOGLE_API_KEY) {}
+class GoogleMaps {
+  constructor(private apiKey: string = GOOGLE_API_KEY) { }
 
   async getCoordinateForCity(
     city: string,
@@ -38,7 +38,7 @@ export class GoogleMaps {
   async getCoordinateForStreet(
     street: string,
     city: string,
-  ): Promise<{ lat: number; lng: number; formatted_address: string }> {
+  ): Promise<{ lat: number; lng: number; formattedAddress: string }> {
     const address = `${street} ${city}`;
     const response = await axios.get(
       'https://maps.googleapis.com/maps/api/geocode/json',
@@ -62,8 +62,12 @@ export class GoogleMaps {
     const result = data.results[0];
     const { lat } = result.geometry.location;
     const { lng } = result.geometry.location;
-    const { formatted_address } = result;
+    const { formattedAddress } = result;
 
-    return { lat, lng, formatted_address };
+    return { lat, lng, formattedAddress };
   }
 }
+
+const googleMaps = new GoogleMaps();
+
+export default googleMaps;

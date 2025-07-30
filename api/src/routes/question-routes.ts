@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from 'express';
 import {
   getAllQuestions,
   getQuestion,
@@ -6,13 +6,13 @@ import {
   updateQuestion,
   deleteQuestion,
 } from '../controllers/question-controller';
-import { authenticate } from '../middleware/authenticate';
-import { checkPermissions } from '../middleware/check-permissions';
+import authenticate from '../middleware/authenticate';
+import checkPermissions from '../middleware/check-permissions';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/', authenticate, checkPermissions, getAllQuestions);
-router.get('/:id', authenticate, checkPermissions, getQuestion);
+router.get('/', getAllQuestions);
+router.get('/:id', getQuestion);
 router.post('/', authenticate, checkPermissions, createQuestion);
 router.put('/:id', authenticate, checkPermissions, updateQuestion);
 router.delete('/:id', authenticate, checkPermissions, deleteQuestion);

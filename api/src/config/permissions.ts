@@ -1,4 +1,4 @@
-export const permissions: Record<string, Record<string, string[]>> = {
+const permissions: Record<string, Record<string, string[]>> = {
   '/api/answers/*': {
     GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
     POST: ['ROLE_ADMIN'],
@@ -77,3 +77,5 @@ export const permissions: Record<string, Record<string, string[]>> = {
     POST: ['PUBLIC_ACCESS'],
   },
 };
+
+export default permissions;

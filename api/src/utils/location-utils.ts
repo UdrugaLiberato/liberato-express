@@ -1,110 +1,77 @@
 import prisma from '../config/prisma';
-import { GoogleMaps } from './google-maps';
+import googleMaps from './google-maps';
 
-// Types
 export interface LocationFilters {
-  city?: string;
-  category?: string;
+  cityId?: string;
+  categoryId?: string;
+  includeAnswers?: boolean;
+  includeImages?: boolean;
+  includeQuestions?: boolean;
 }
 
 export interface SimplifiedAnswer {
-  answerId: string;
+  id: string;
+  answer: string;
   questionId: string;
-  question: string;
-  answer: number;
 }
 
 export interface LocationWithSimplifiedAnswers {
   id: string;
   name: string;
-  street: string;
-  phone?: string;
-  email?: string;
-  about?: string;
+  address: string;
   latitude: number;
   longitude: number;
-  published: number;
-  featured: number;
-  createdAt: Date;
-  updatedAt?: Date;
-  deletedAt?: Date;
-  city: any;
-  category: any;
-  user?: { id: string; username: string };
-  image: any[];
-  answer: SimplifiedAnswer[];
+  cityId: string;
+  categoryId: string;
+  answers: SimplifiedAnswer[];
 }
 
-// Common Prisma include object for locations
 export const locationInclude = {
-  city: true,
-  category: true,
-  user: { select: { id: true, username: true } },
-  answer: {
-    select: {
-      id: true,
-      answer: true,
-      question: { select: { id: true, question: true } },
+  answers: {
+    include: {
+      question: true,
     },
   },
-  image: true,
+  images: true,
+  city: true,
+  category: true,
 };
 
-// Utility function to reset the auto-increment sequence for the image table
 export const resetImageSequence = async () => {
-  await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('image', 'id'), COALESCE((SELECT MAX(id) FROM image), 0) + 1, false)`;
+  await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('image', 'id'), (SELECT MAX(id) FROM image) + 1)`;
 };
 
-// Simplify answers from Prisma result
 export const simplifyAnswers = (answers: any[]): SimplifiedAnswer[] => {
-  return (answers || [])
-    .filter((a) => a.question !== null)
-    .map((a) => ({
-      answerId: a.id,
-      questionId: a.question!.id,
-      question: a.question!.question,
-      answer: a.answer,
-    }));
+  return answers.map((answer) => ({
+    id: answer.id,
+    answer: answer.answer,
+    questionId: answer.questionId,
+  }));
 };
 
-// Add simplified answers to location
 export const addSimplifiedAnswers = (
   location: any,
 ): LocationWithSimplifiedAnswers => {
   return {
     ...location,
-    answer: simplifyAnswers(location.answer),
+    answers: simplifyAnswers(location.answers || []),
   };
 };
 
-// Get coordinates from Google Maps
-export const getCoordinates = async (street: string, cityName: string) => {
-  const googleMaps = new GoogleMaps();
-  const geo = await googleMaps.getCoordinateForStreet(street, cityName);
-
-  if (!geo?.lat || !geo?.lng) {
-    throw new Error('Google Maps failed to find coordinates');
-  }
-
-  return {
-    latitude: geo.lat,
-    longitude: geo.lng,
-    formattedAddress: geo.formatted_address || street,
-  };
+export const getCoordinates = async (address: string) => {
+  return googleMaps.getCoordinateForStreet('', address);
 };
 
-// Create image records
 export const createImages = async (
   files: Express.Multer.File[],
   locationId: string,
 ) => {
   await resetImageSequence();
-
   return Promise.all(
     files.map((file) =>
       prisma.image.create({
         data: {
-          src: `https://dev.udruga-liberato.hr/images/locations/${file.filename}`,
+          src: `https://dev.udruga-liberato.hr/images/location/${file.filename}`,
           name: file.originalname.split('.')[0],
           mime: file.mimetype,
           locationId,
@@ -114,59 +81,36 @@ export const createImages = async (
   );
 };
 
-// Create answer records from QA string
-export const createAnswers = async (qaString: string, locationId: string) => {
-  const qaItems = qaString.split(',');
+export const createAnswers = async (answers: string, locationId: string) => {
+  if (!answers) return;
 
-  return Promise.all(
-    qaItems.map(async (item: string) => {
-      const [questionId, answer] = item.split(':');
-      return prisma.answer.create({
-        data: {
-          question: { connect: { id: questionId } },
-          answer: answer === 'true' ? 1 : 0,
-          location: { connect: { id: locationId } },
-          createdAt: new Date(),
-        },
-      });
-    }),
-  );
+  const items = answers
+    .split(',')
+    .map((a) => a.trim())
+    .filter(Boolean);
+
+  await prisma.answer.createMany({
+    data: items.map(() => ({
+      answer: 1,
+      locationId,
+      createdAt: new Date(),
+    })),
+  });
 };
 
-// Build location update data
-export const buildLocationUpdateData = (body: any) => {
-  const dataToUpdate: any = {};
+export const buildLocationUpdateData = (data: any) => ({
+  name: data.name,
+  address: data.address,
+  latitude: data.latitude,
+  longitude: data.longitude,
+  cityId: data.cityId,
+  categoryId: data.categoryId,
+  updatedAt: new Date(),
+});
 
-  if (body.name !== undefined) dataToUpdate.name = body.name;
-  if (body.street !== undefined) dataToUpdate.street = body.street;
-  if (body.phone !== undefined) dataToUpdate.phone = body.phone;
-  if (body.email !== undefined) dataToUpdate.email = body.email;
-  if (body.about !== undefined) dataToUpdate.about = body.about;
-
-  if (body.categoryId !== undefined) {
-    dataToUpdate.category = { connect: { id: body.categoryId } };
+export const toInt = (value: boolean | number): number => {
+  if (typeof value === 'boolean') {
+    return value ? 1 : 0;
   }
-
-  if (body.city_id !== undefined) {
-    dataToUpdate.city = { connect: { id: body.city_id } };
-  }
-
-  if (body.published !== undefined) {
-    dataToUpdate.published =
-      body.published === true || body.published === 'true' ? 1 : 0;
-  }
-
-  if (body.featured !== undefined) {
-    dataToUpdate.featured =
-      body.featured === true || body.featured === 'true' ? 1 : 0;
-  }
-
-  dataToUpdate.updatedAt = new Date();
-
-  return dataToUpdate;
-};
-
-// Convert boolean/string to integer
-export const toInt = (value: boolean | string): number => {
-  return value === true || value === 'true' ? 1 : 0;
+  return value;
 };

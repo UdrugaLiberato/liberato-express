@@ -1,7 +1,6 @@
 import prisma from '../config/prisma';
 import { Express } from 'express';
 import {
-  categoryInclude,
   createCategoryImage,
   createCategoryQuestions,
   buildCategoryData,
@@ -9,14 +8,20 @@ import {
 
 export const getAll = () => {
   return prisma.category.findMany({
-    include: categoryInclude,
+    include: {
+      question: true,
+      image: true,
+    },
   });
 };
 
 export const getById = (id: string) => {
   return prisma.category.findUnique({
     where: { id },
-    include: categoryInclude,
+    include: {
+      question: true,
+      image: true,
+    },
   });
 };
 
@@ -27,13 +32,21 @@ export const create = async (
   questions?: string,
 ) => {
   const category = await prisma.category.create({
-    data: buildCategoryData(name, description),
+    data: buildCategoryData({ name, description }),
   });
 
-  await createCategoryImage(file, category.id);
+  await createCategoryImage(
+    category.id,
+    `https://dev.udruga-liberato.hr/images/category/${file.filename}`,
+  );
 
   if (questions) {
-    await createCategoryQuestions(questions, category.id);
+    const questionItems = questions
+      .split(',')
+      .map((q) => q.trim())
+      .filter(Boolean)
+      .map((question) => ({ question }));
+    await createCategoryQuestions(category.id, questionItems);
   }
 
   return category;

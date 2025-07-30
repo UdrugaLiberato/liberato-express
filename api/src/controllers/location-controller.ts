@@ -11,10 +11,10 @@ import {
 
 export const getLocations = async (req: Request, res: Response) => {
   try {
-    const { city, category } = req.query;
+    const { cityId, categoryId } = req.query;
     const locations = await LocationService.getAllLocations({
-      city: city as string | undefined,
-      category: category as string | undefined,
+      cityId: cityId as string | undefined,
+      categoryId: categoryId as string | undefined,
     });
     sendSuccess(res, locations);
   } catch (error) {

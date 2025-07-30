@@ -12,27 +12,24 @@ import {
 } from '../utils/location-utils';
 
 export const getAllLocations = async (filters: LocationFilters) => {
-  const { city, category } = filters;
+  const { cityId, categoryId } = filters;
 
-  const locations = await prisma.location.findMany({
-    where: {
-      deletedAt: null,
-      ...(city && { city: { name: city } }),
-      ...(category && { category: { name: category } }),
-    },
+  const where: any = {};
+
+  if (cityId) where.cityId = cityId;
+  if (categoryId) where.categoryId = categoryId;
+
+  return prisma.location.findMany({
+    where,
     include: locationInclude,
   });
-
-  return locations.map((location) => addSimplifiedAnswers(location));
 };
 
 export const getLocationById = async (id: string) => {
-  const location = await prisma.location.findUnique({
+  return prisma.location.findUnique({
     where: { id },
     include: locationInclude,
   });
-
-  return location ? addSimplifiedAnswers(location) : null;
 };
 
 export const getLocationByCityAndCategoryAndName = async (
@@ -40,17 +37,14 @@ export const getLocationByCityAndCategoryAndName = async (
   category: string,
   name: string,
 ) => {
-  const location = await prisma.location.findFirst({
+  return prisma.location.findFirst({
     where: {
-      city: { name: { equals: city, mode: 'insensitive' } },
-      category: { name: { equals: category, mode: 'insensitive' } },
-      name: { contains: name, mode: 'insensitive' },
-      deletedAt: null,
+      city: { name: city },
+      category: { name: category },
+      name,
     },
     include: locationInclude,
   });
-
-  return location ? addSimplifiedAnswers(location) : null;
 };
 
 export const createLocation = async (
@@ -64,7 +58,7 @@ export const createLocation = async (
 
   if (!city) return null;
 
-  const coordinates = await getCoordinates(body.street, city.name);
+  const coordinates = await getCoordinates(`${body.street} ${city.name}`);
 
   const location = await prisma.location.create({
     data: {
@@ -76,8 +70,8 @@ export const createLocation = async (
       phone: body.phone,
       email: body.email,
       about: body.about,
-      latitude: coordinates.latitude,
-      longitude: coordinates.longitude,
+      latitude: coordinates.lat,
+      longitude: coordinates.lng,
       published: 1,
       featured: toInt(body.featured),
       createdAt: new Date(),
@@ -131,12 +125,11 @@ export const updateLocation = async (
       : null;
 
     const coordinates = await getCoordinates(
-      body.street ?? '',
-      city?.name ?? '',
+      `${body.street ?? ''} ${city?.name ?? ''}`,
     );
 
-    dataToUpdate.latitude = coordinates.latitude;
-    dataToUpdate.longitude = coordinates.longitude;
+    dataToUpdate.latitude = coordinates.lat;
+    dataToUpdate.longitude = coordinates.lng;
   }
 
   await prisma.location.update({

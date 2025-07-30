@@ -1,18 +1,18 @@
-import express from 'express';
+import { Router } from 'express';
 import {
   getAllCategories,
   getCategory,
   createCategory,
   deleteCategory,
 } from '../controllers/category-controller';
-import { authenticate } from '../middleware/authenticate';
-import { checkPermissions } from '../middleware/check-permissions';
-import { upload } from '../middleware/upload';
+import authenticate from '../middleware/authenticate';
+import checkPermissions from '../middleware/check-permissions';
+import upload from '../middleware/upload';
 
-const router = express.Router();
+const router = Router();
 
 router.get('/', getAllCategories);
-router.get('/:id', authenticate, checkPermissions, getCategory);
+router.get('/:id', getCategory);
 router.post(
   '/',
   authenticate,

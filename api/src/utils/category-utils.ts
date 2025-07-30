@@ -1,54 +1,50 @@
 import prisma from '../config/prisma';
-import { Express } from 'express';
 
 export interface CategoryFilters {
   name?: string;
-  description?: string;
+  includeQuestions?: boolean;
+  includeImages?: boolean;
 }
 
 export const categoryInclude = {
-  question: true,
-  location: true,
-  image: true,
+  questions: true,
+  images: true,
 };
 
 export const createCategoryImage = async (
-  file: Express.Multer.File,
   categoryId: string,
+  imageUrl: string,
 ) => {
   return prisma.image.create({
     data: {
-      id: Math.floor(Math.random() * 1_000_000_000),
-      src: `https://dev.udruga-liberato.hr/images/category/${file.filename}`,
-      name: file.originalname.split('.')[0],
-      mime: file.mimetype,
+      src: imageUrl,
+      name: 'category-image',
+      mime: 'image/jpeg',
       categoryId,
     },
   });
 };
 
 export const createCategoryQuestions = async (
-  questions: string,
   categoryId: string,
+  questions: any[],
 ) => {
-  if (!questions) return;
-
-  const items = questions
-    .split(',')
-    .map((q) => q.trim())
-    .filter(Boolean);
-
-  await prisma.question.createMany({
-    data: items.map((question) => ({
-      question,
-      categoryId,
-      createdAt: new Date(),
-    })),
-  });
+  return Promise.all(
+    questions.map((question) =>
+      prisma.question.create({
+        data: {
+          ...question,
+          categoryId,
+        },
+      }),
+    ),
+  );
 };
 
-export const buildCategoryData = (name: string, description?: string) => ({
-  name,
-  description,
+export const buildCategoryData = (data: any) => ({
+  name: data.name,
+  description: data.description,
+  color: data.color,
+  icon: data.icon,
   createdAt: new Date(),
 });

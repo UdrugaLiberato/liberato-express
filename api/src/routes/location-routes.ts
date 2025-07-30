@@ -1,43 +1,20 @@
-import { Router, RequestHandler } from 'express';
-import * as LocationController from '../controllers/location-controller';
-import { authenticate } from '../middleware/authenticate';
-import { upload } from '../middleware/upload';
+import { Router } from 'express';
+import authenticate from '../middleware/authenticate';
+import upload from '../middleware/upload';
+import {
+  getLocations,
+  getLocation,
+  createLocation,
+  updateLocation,
+  deleteLocation,
+} from '../controllers/location-controller';
 
 const router = Router();
 
-router.get(
-  '/:city/:category',
-  LocationController.getLocationsByCityAndCategory as RequestHandler,
-);
-
-router.get(
-  '/:city/:category/:name',
-  LocationController.getLocationByCityAndCategoryAndName as RequestHandler,
-);
-
-router.get(
-  '/',
-  authenticate,
-  LocationController.getLocations as RequestHandler,
-);
-
-router.post(
-  '/',
-  upload.array('images'),
-  LocationController.createLocation as RequestHandler,
-);
-
-router.put(
-  '/:id',
-  authenticate,
-  upload.array('images'),
-  LocationController.updateLocation as RequestHandler,
-);
-
-router.delete(
-  '/:id',
-  authenticate,
-  LocationController.deleteLocation as RequestHandler,
-);
+router.get('/', getLocations);
+router.get('/:id', getLocation);
+router.post('/', authenticate, upload.array('images', 5), createLocation);
+router.put('/:id', authenticate, upload.array('images', 5), updateLocation);
+router.delete('/:id', authenticate, deleteLocation);
 
 export default router;

@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from 'express';
 import {
   getAllImages,
   getImage,
@@ -6,13 +6,13 @@ import {
   updateImage,
   deleteImage,
 } from '../controllers/image-controller';
-import { authenticate } from '../middleware/authenticate';
-import { checkPermissions } from '../middleware/check-permissions';
+import authenticate from '../middleware/authenticate';
+import checkPermissions from '../middleware/check-permissions';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/', authenticate, checkPermissions, getAllImages);
-router.get('/:id', authenticate, checkPermissions, getImage);
+router.get('/', getAllImages);
+router.get('/:id', getImage);
 router.post('/', authenticate, checkPermissions, createImage);
 router.put('/:id', authenticate, checkPermissions, updateImage);
 router.delete('/:id', authenticate, checkPermissions, deleteImage);
