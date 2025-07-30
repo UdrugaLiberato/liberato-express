@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma';
 
-const prisma = new PrismaClient();
-
-export const getAll = async () => {
-  return await prisma.question.findMany({
+export const getAll = () => {
+  return prisma.question.findMany({
     where: { deletedAt: null },
     include: {
       answer: true,
@@ -12,8 +10,8 @@ export const getAll = async () => {
   });
 };
 
-export const getById = async (id: string) => {
-  return await prisma.question.findUnique({
+export const getById = (id: string) => {
+  return prisma.question.findUnique({
     where: { id },
     include: {
       answer: true,
@@ -22,8 +20,8 @@ export const getById = async (id: string) => {
   });
 };
 
-export const create = async (data: any) => {
-  return await prisma.question.create({
+export const create = (data: any) => {
+  return prisma.question.create({
     data: {
       ...data,
       createdAt: new Date(),
@@ -31,8 +29,8 @@ export const create = async (data: any) => {
   });
 };
 
-export const update = async (id: string, data: any) => {
-  return await prisma.question.update({
+export const update = (id: string, data: any) => {
+  return prisma.question.update({
     where: { id },
     data: {
       ...data,
@@ -41,8 +39,8 @@ export const update = async (id: string, data: any) => {
   });
 };
 
-export const remove = async (id: string) => {
-  return await prisma.question.update({
+export const remove = (id: string) => {
+  return prisma.question.update({
     where: { id },
     data: {
       deletedAt: new Date(),

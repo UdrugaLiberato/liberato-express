@@ -1,4 +1,4 @@
- {
+{
   "dependencies": {
     "@prisma/client": "^6.5.0",
     "@types/bcrypt": "^5.0.2",
@@ -60,6 +60,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts"
   },
   "type": "commonjs",

@@ -44,7 +44,7 @@ export const createCategory = async (req: Request, res: Response) => {
 
     if (!name || !file) {
       res.status(400).json({
-        message: 'Missing required fields: name or category_image'
+        message: 'Missing required fields: name or category_image',
       });
       return;
     }

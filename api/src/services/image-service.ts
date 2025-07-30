@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma';
 
-const prisma = new PrismaClient();
-
-export const getAll = async () => {
-  return await prisma.image.findMany({
+export const getAll = () => {
+  return prisma.image.findMany({
     include: {
       category: true,
       location: true,
@@ -11,8 +9,8 @@ export const getAll = async () => {
   });
 };
 
-export const getById = async (id: number) => {
-  return await prisma.image.findUnique({
+export const getById = (id: number) => {
+  return prisma.image.findUnique({
     where: { id },
     include: {
       category: true,
@@ -21,19 +19,19 @@ export const getById = async (id: number) => {
   });
 };
 
-export const create = async (data: any) => {
-  return await prisma.image.create({ data });
+export const create = (data: any) => {
+  return prisma.image.create({ data });
 };
 
-export const update = async (id: number, data: any) => {
-  return await prisma.image.update({
+export const update = (id: number, data: any) => {
+  return prisma.image.update({
     where: { id },
     data,
   });
 };
 
-export const remove = async (id: number) => {
-  return await prisma.image.delete({
+export const remove = (id: number) => {
+  return prisma.image.delete({
     where: { id },
   });
 };

@@ -1,6 +1,11 @@
 import prisma from '../config/prisma';
 import { Express } from 'express';
-import { categoryInclude, createCategoryImage, createCategoryQuestions, buildCategoryData } from '../utils/category-utils';
+import {
+  categoryInclude,
+  createCategoryImage,
+  createCategoryQuestions,
+  buildCategoryData,
+} from '../utils/category-utils';
 
 export const getAll = () => {
   return prisma.category.findMany({

@@ -1,4 +1,9 @@
 import prisma from '../config/prisma';
+import {
+  buildCityData,
+  buildCityUpdateData,
+  validateCityDeletion,
+} from '../utils/city-utils';
 
 export const getAllCities = () => {
   return prisma.city.findMany({
@@ -25,13 +30,7 @@ export const createCity = async (data: {
   radiusInKm?: number | null;
 }) => {
   return prisma.city.create({
-    data: {
-      name: data.name,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      radiusInKm: data.radiusInKm ?? 1,
-      createdAt: new Date(),
-    },
+    data: buildCityData(data),
   });
 };
 
@@ -46,29 +45,12 @@ export const updateCity = async (
 ) => {
   return prisma.city.update({
     where: { id },
-    data: {
-      name: data.name,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      radiusInKm: data.radiusInKm,
-      updatedAt: new Date(),
-    },
+    data: buildCityUpdateData(data),
   });
 };
 
 export const deleteCity = async (id: string) => {
-  const city = await prisma.city.findUnique({
-    where: { id },
-    include: { location: true },
-  });
-
-  if (!city) {
-    throw new Error('City not found');
-  }
-
-  if (city.location.length > 0) {
-    throw new Error('City has linked locations and cannot be deleted');
-  }
+  await validateCityDeletion(id);
 
   return prisma.city.update({
     where: { id },

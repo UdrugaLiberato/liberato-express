@@ -47,11 +47,8 @@ export const createCategoryQuestions = async (
   });
 };
 
-export const buildCategoryData = (
-  name: string,
-  description?: string,
-) => ({
+export const buildCategoryData = (name: string, description?: string) => ({
   name,
   description,
   createdAt: new Date(),
-}); 
+});
