@@ -1,14 +1,40 @@
-import { Request, Response, Express } from 'express';
+import { Request, Response } from 'express';
 import * as CategoryService from '../services/category-service';
 
+const handleError = (
+  res: Response,
+  error: any,
+  defaultMessage = 'Server error',
+) => {
+  const message = error?.message || defaultMessage;
+  const status = error?.status || 500;
+  res.status(status).json({ message });
+};
+
+const sendSuccess = (res: Response, data: any, status = 200) => {
+  res.status(status).json(data);
+};
+
 export const getAllCategories = async (_req: Request, res: Response) => {
-  const categories = await CategoryService.getAll();
-  res.json(categories);
+  try {
+    const categories = await CategoryService.getAll();
+    sendSuccess(res, categories);
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 export const getCategory = async (req: Request, res: Response) => {
-  const category = await CategoryService.getById(req.params.id);
-  res.json(category);
+  try {
+    const category = await CategoryService.getById(req.params.id);
+    if (!category) {
+      res.status(404).json({ message: 'Category not found' });
+      return;
+    }
+    sendSuccess(res, category);
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 export const createCategory = async (req: Request, res: Response) => {
@@ -17,26 +43,30 @@ export const createCategory = async (req: Request, res: Response) => {
     const { file } = req;
 
     if (!name || !file) {
-      return res
-        .status(400)
-        .json({ error: 'Missing required fields: name or category_image' });
+      res.status(400).json({
+        message: 'Missing required fields: name or category_image'
+      });
+      return;
     }
 
     const newCategory = await CategoryService.create(
       name,
-      file as Express.Multer.File,
+      file,
       description,
       questions,
     );
 
-    res.status(201).json(newCategory);
+    sendSuccess(res, newCategory, 201);
   } catch (error) {
-    console.error('Error creating category:', error);
-    res.status(500).json({ error });
+    handleError(res, error, 'Failed to create category');
   }
 };
 
 export const deleteCategory = async (req: Request, res: Response) => {
-  await CategoryService.remove(req.params.id);
-  res.status(200).send();
+  try {
+    await CategoryService.remove(req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    handleError(res, error, 'Failed to delete category');
+  }
 };
