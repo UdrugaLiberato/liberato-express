@@ -35,7 +35,7 @@ export const getCategory = async (req: Request, res: Response) => {
 
 export const createCategory = async (req: Request, res: Response) => {
   try {
-    const { name, description, questions } = req.body;
+    const { name, descriptionEN, descriptionHR, questions } = req.body;
     const { file } = req;
 
     const missingFields = validateRequiredFields(req.body, ['name']);
@@ -52,7 +52,8 @@ export const createCategory = async (req: Request, res: Response) => {
     const newCategory = await CategoryService.create(
       name,
       file,
-      description,
+      descriptionEN,
+      descriptionHR,
       questions,
     );
 

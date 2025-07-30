@@ -8,6 +8,7 @@ import {
   sendNotFound,
   sendBadRequest,
 } from '../utils/controller-utils';
+import { LocationCreateData, LocationUpdateData } from '../types';
 
 export const getLocations = async (req: Request, res: Response) => {
   try {
@@ -38,7 +39,7 @@ export const getLocation = async (req: Request, res: Response) => {
 export const createLocation = async (req: Request, res: Response) => {
   try {
     const location = await LocationService.createLocation(
-      req.body,
+      req.body as LocationCreateData,
       req.files as Express.Multer.File[],
       '1ed198be-8109-68e4-8afe-cd8a4ea3d515',
     );
@@ -56,7 +57,7 @@ export const updateLocation = async (req: Request, res: Response) => {
   try {
     const updated = await LocationService.updateLocation(
       req.params.id,
-      req.body,
+      req.body as LocationUpdateData,
       req.files as Express.Multer.File[],
     );
     if (!updated) {

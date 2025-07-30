@@ -5,6 +5,7 @@ import {
   buildQuestionUpdateData,
   buildQuestionDeleteData,
 } from '../utils/question-utils';
+import { QuestionData, QuestionUpdateData } from '../types';
 
 export const getAll = () => {
   return prisma.question.findMany({
@@ -20,13 +21,13 @@ export const getById = (id: string) => {
   });
 };
 
-export const create = (data: any) => {
+export const create = (data: QuestionData) => {
   return prisma.question.create({
     data: buildQuestionData(data),
   });
 };
 
-export const update = (id: string, data: any) => {
+export const update = (id: string, data: QuestionUpdateData) => {
   return prisma.question.update({
     where: { id },
     data: buildQuestionUpdateData(data),

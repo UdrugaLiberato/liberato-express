@@ -1,7 +1,6 @@
 import prisma from '../config/prisma';
 import { Express } from 'express';
 import {
-  LocationFilters,
   locationInclude,
   addSimplifiedAnswers,
   getCoordinates,
@@ -10,6 +9,11 @@ import {
   buildLocationUpdateData,
   toInt,
 } from '../utils/location-utils';
+import {
+  LocationFilters,
+  LocationCreateData,
+  LocationUpdateData,
+} from '../types';
 
 export const getAllLocations = async (filters: LocationFilters) => {
   const { cityId, categoryId } = filters;
@@ -19,17 +23,21 @@ export const getAllLocations = async (filters: LocationFilters) => {
   if (cityId) where.cityId = cityId;
   if (categoryId) where.categoryId = categoryId;
 
-  return prisma.location.findMany({
+  const locations = await prisma.location.findMany({
     where,
     include: locationInclude,
   });
+
+  return locations.map((location) => addSimplifiedAnswers(location));
 };
 
 export const getLocationById = async (id: string) => {
-  return prisma.location.findUnique({
+  const location = await prisma.location.findUnique({
     where: { id },
     include: locationInclude,
   });
+
+  return location ? addSimplifiedAnswers(location) : null;
 };
 
 export const getLocationByCityAndCategoryAndName = async (
@@ -37,7 +45,7 @@ export const getLocationByCityAndCategoryAndName = async (
   category: string,
   name: string,
 ) => {
-  return prisma.location.findFirst({
+  const location = await prisma.location.findFirst({
     where: {
       city: { name: city },
       category: { name: category },
@@ -45,10 +53,12 @@ export const getLocationByCityAndCategoryAndName = async (
     },
     include: locationInclude,
   });
+
+  return location ? addSimplifiedAnswers(location) : null;
 };
 
 export const createLocation = async (
-  body: any,
+  body: LocationCreateData,
   files: Express.Multer.File[],
   userId: string,
 ) => {
@@ -58,7 +68,25 @@ export const createLocation = async (
 
   if (!city) return null;
 
-  const coordinates = await getCoordinates(`${body.street} ${city.name}`);
+  let coordinates;
+  if (body.latitude && body.longitude) {
+    coordinates = {
+      lat: body.latitude,
+      lng: body.longitude,
+      formattedAddress: `${body.street} ${city.name}`,
+    };
+  } else {
+    try {
+      coordinates = await getCoordinates(`${body.street} ${city.name}`);
+    } catch {
+      // Fallback to default coordinates if geocoding fails
+      coordinates = {
+        lat: city.latitude,
+        lng: city.longitude,
+        formattedAddress: `${body.street} ${city.name}`,
+      };
+    }
+  }
 
   const location = await prisma.location.create({
     data: {
@@ -66,14 +94,14 @@ export const createLocation = async (
       city: { connect: { id: body.city_id } },
       user: { connect: { id: userId } },
       name: body.name,
-      street: coordinates.formattedAddress,
-      phone: body.phone,
-      email: body.email,
-      about: body.about,
+      street: coordinates.formattedAddress || `${body.street} ${city.name}`,
+      phone: body.phone || '',
+      email: body.email || '',
+      about: body.about || '',
       latitude: coordinates.lat,
       longitude: coordinates.lng,
       published: 1,
-      featured: toInt(body.featured),
+      featured: toInt(body.featured || false),
       createdAt: new Date(),
     },
     include: {
@@ -101,18 +129,7 @@ export const createLocation = async (
 
 export const updateLocation = async (
   id: string,
-  body: Partial<{
-    name?: string;
-    street?: string;
-    phone?: string;
-    email?: string;
-    about?: string;
-    categoryId?: string;
-    city_id?: string;
-    published?: boolean | string;
-    featured?: boolean | string;
-    qa?: string;
-  }>,
+  body: LocationUpdateData,
   files: Express.Multer.File[],
 ) => {
   if (!body) throw new Error('Empty body');

@@ -6,9 +6,8 @@ import {
   setAuthCookie,
   verifyPassword,
   verifyGoogleToken,
-  AuthResponse,
-  RegisterResponse,
 } from '../utils/auth-utils';
+import { AuthResponse, RegisterResponse } from '../types';
 import {
   handleError,
   sendSuccess,

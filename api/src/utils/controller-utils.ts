@@ -1,10 +1,5 @@
 import { Response } from 'express';
-
-export interface ApiResponse<T = any> {
-  data?: T;
-  message?: string;
-  status: number;
-}
+import { ApiResponse } from '../types';
 
 export const handleError = (
   res: Response,

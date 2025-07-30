@@ -18,7 +18,9 @@ describe('GoogleMaps', () => {
   it('should throw CoordinatesNotFound for non-existent city', async () => {
     const city = 'NonExistentCity12345';
 
-    await expect(googleMaps.getCoordinateForCity(city)).rejects.toThrow('Coordinates for "NonExistentCity12345" could not be found.');
+    await expect(googleMaps.getCoordinateForCity(city)).rejects.toThrow(
+      'Coordinates for "NonExistentCity12345" could not be found.',
+    );
   });
 
   it('should get coordinates for a street', async () => {
@@ -36,6 +38,10 @@ describe('GoogleMaps', () => {
     const street = 'NonExistentStreet12345';
     const city = 'NonExistentCity12345';
 
-    await expect(googleMaps.getCoordinateForStreet(street, city)).rejects.toThrow('Coordinates for "NonExistentStreet12345 NonExistentCity12345" could not be found.');
+    await expect(
+      googleMaps.getCoordinateForStreet(street, city),
+    ).rejects.toThrow(
+      'Coordinates for "NonExistentStreet12345 NonExistentCity12345" could not be found.',
+    );
   });
 });

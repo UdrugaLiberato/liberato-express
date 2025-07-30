@@ -1,16 +1,4 @@
-export interface ImageData {
-  src: string;
-  name: string;
-  mime: string;
-  categoryId?: string;
-  locationId?: string;
-}
-
-export interface ImageUpdateData {
-  src?: string;
-  name?: string;
-  mime?: string;
-}
+import { ImageData, ImageUpdateData } from '../types';
 
 export const imageInclude = {
   category: true,

@@ -1,33 +1,12 @@
 import bcrypt from 'bcrypt';
 import jwt, { Secret } from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
-
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  email: string;
-  password: string;
-  username: string;
-  avatar?: string;
-}
-
-export interface AuthResponse {
-  role: string;
-  name: string;
-  email: string | null;
-  token: string;
-  id: string;
-}
-
-export interface RegisterResponse {
-  username: string;
-  email: string | null;
-  avatar?: string | null;
-  id: string;
-}
+import {
+  LoginData,
+  RegisterData,
+  AuthResponse,
+  RegisterResponse,
+} from '../types';
 
 const JWT_SECRET: Secret = process.env.JWT_SECRET || 'default_secret';
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
