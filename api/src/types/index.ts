@@ -131,8 +131,8 @@ export interface ImageUpdateData {
 
 // Location Types
 export interface LocationFilters {
-  cityId?: string;
-  categoryId?: string;
+  city?: string;
+  category?: string;
   includeAnswers?: boolean;
   includeImages?: boolean;
   includeQuestions?: boolean;

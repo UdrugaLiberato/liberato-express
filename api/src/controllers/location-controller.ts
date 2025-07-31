@@ -12,10 +12,10 @@ import { LocationCreateData, LocationUpdateData } from '../types';
 
 export const getLocations = async (req: Request, res: Response) => {
   try {
-    const { cityId, categoryId } = req.query;
+    const { city, category } = req.query;
     const locations = await LocationService.getAllLocations({
-      cityId: cityId as string | undefined,
-      categoryId: categoryId as string | undefined,
+      city: city as string | undefined,
+      category: category as string | undefined,
     });
     sendSuccess(res, locations);
   } catch (error) {
