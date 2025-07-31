@@ -16,18 +16,18 @@ import {
 } from '../types';
 
 export const getAllLocations = async (filters: LocationFilters) => {
-  const { cityId, categoryId } = filters;
+  const { city, category } = filters;
 
   const where: any = {};
 
-  if (cityId) where.cityId = cityId;
-  if (categoryId) where.categoryId = categoryId;
+  if (city) where.city = { name: city };
+  if (category) where.category = { name: category };
 
   const locations = await prisma.location.findMany({
     where,
     include: locationInclude,
   });
-
+  
   return locations.map((location) => addSimplifiedAnswers(location));
 };
 
