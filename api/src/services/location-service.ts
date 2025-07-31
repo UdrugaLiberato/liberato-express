@@ -22,12 +22,14 @@ export const getAllLocations = async (filters: LocationFilters) => {
 
   if (city) where.city = { name: city };
   if (category) where.category = { name: category };
+  where.published = 1;
+  where.deletedAt = null;
 
   const locations = await prisma.location.findMany({
     where,
     include: locationInclude,
   });
-  
+
   return locations.map((location) => addSimplifiedAnswers(location));
 };
 
@@ -45,12 +47,16 @@ export const getLocationByCityAndCategoryAndName = async (
   category: string,
   name: string,
 ) => {
+  const where: any = {
+    city: { name: city },
+    category: { name: category },
+    name,
+    published: 1,
+    deletedAt: null,
+  };
+
   const location = await prisma.location.findFirst({
-    where: {
-      city: { name: city },
-      category: { name: category },
-      name,
-    },
+    where,
     include: locationInclude,
   });
 
@@ -180,7 +186,7 @@ export const updateLocation = async (
 export const deleteLocation = async (id: string) => {
   return prisma.location.update({
     where: { id },
-    data: { deletedAt: new Date() },
+    data: { published: 0, deletedAt: new Date() },
   });
 };
 
