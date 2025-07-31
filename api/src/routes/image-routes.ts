@@ -15,6 +15,6 @@ router.get('/', getAllImages);
 router.get('/:id', getImage);
 router.post('/', authenticate, checkPermissions, createImage);
 router.put('/:id', authenticate, checkPermissions, updateImage);
-router.delete('/:id', authenticate, checkPermissions, deleteImage);
+router.delete('/:id', deleteImage);
 
 export default router;

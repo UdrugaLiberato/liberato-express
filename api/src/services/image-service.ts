@@ -8,6 +8,9 @@ import { ImageData, ImageUpdateData } from '../types';
 
 export const getAll = () => {
   return prisma.image.findMany({
+    where: {
+      deletedAt: null,
+    },
     include: imageInclude,
   });
 };
@@ -33,7 +36,10 @@ export const update = (id: number, data: ImageUpdateData) => {
 };
 
 export const remove = (id: number) => {
-  return prisma.image.delete({
+  return prisma.image.update({
     where: { id },
+    data: {
+      deletedAt: new Date(),
+    },
   });
 };

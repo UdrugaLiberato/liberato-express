@@ -11,6 +11,7 @@ export const buildImageData = (data: ImageData) => ({
   mime: data.mime,
   categoryId: data.categoryId,
   locationId: data.locationId,
+  createdAt: new Date(),
 });
 
 export const buildImageUpdateData = (data: ImageUpdateData) => ({
