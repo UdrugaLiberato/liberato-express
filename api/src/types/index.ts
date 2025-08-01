@@ -94,6 +94,10 @@ export interface CityData {
   radiusInKm?: number | null;
 }
 
+export interface CityFilters {
+  name?: string;
+}
+
 export interface CityUpdateData {
   name?: string;
   descriptionEN?: string;
@@ -133,6 +137,8 @@ export interface ImageUpdateData {
 export interface LocationFilters {
   city?: string;
   category?: string;
+  cursor?: string | null;
+  name?: string;
   includeAnswers?: boolean;
   includeImages?: boolean;
   includeQuestions?: boolean;

@@ -1,5 +1,4 @@
 import { Response } from 'express';
-import { ApiResponse } from '../types';
 
 export const handleError = (
   res: Response,

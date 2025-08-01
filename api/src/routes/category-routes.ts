@@ -4,6 +4,7 @@ import {
   getCategory,
   createCategory,
   deleteCategory,
+  getCategoryByName,
 } from '../controllers/category-controller';
 import authenticate from '../middleware/authenticate';
 import checkPermissions from '../middleware/check-permissions';
@@ -13,6 +14,7 @@ const router = Router();
 
 router.get('/', getAllCategories);
 router.get('/:id', getCategory);
+router.get('/name/:name', getCategoryByName);
 router.post(
   '/',
   authenticate,

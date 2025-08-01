@@ -1,5 +1,5 @@
 import prisma from '../config/prisma';
-import { CategoryFilters, CategoryData } from '../types';
+import { CategoryData } from '../types';
 
 export const categoryInclude = {
   questions: true,

@@ -4,7 +4,7 @@ import {
   buildCityUpdateData,
   validateCityDeletion,
 } from '../utils/city-utils';
-import { CityData, CityUpdateData } from '../types';
+import { CityData, CityUpdateData, CityFilters } from '../types';
 
 export const getAllCities = () => {
   return prisma.city.findMany({
@@ -18,9 +18,32 @@ export const getCityById = (id: string) => {
   });
 };
 
-export const getCityByName = (name: string) => {
-  return prisma.city.findUnique({
-    where: { name },
+export const getCityByName = async (filters: CityFilters) => {
+  let { name } = filters;
+  if (name && name.includes('-')) {
+    name = name.replaceAll('-', ' ');
+  }
+
+  if (!name) return null;
+
+  const exactMatch = await prisma.city.findFirst({
+    where: {
+      name: {
+        mode: 'insensitive',
+        equals: name,
+      },
+    },
+  });
+
+  if (exactMatch) return exactMatch;
+
+  return prisma.city.findFirst({
+    where: {
+      name: {
+        mode: 'insensitive',
+        contains: name,
+      },
+    },
   });
 };
 

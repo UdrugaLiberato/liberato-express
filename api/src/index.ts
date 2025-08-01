@@ -35,14 +35,14 @@ app.get('/', (request, res) => {
   res.send('Hello World!');
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/cities', cityRoutes);
-app.use('/api/locations', locationRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/questions', questionRoutes);
-app.use('/api/answers', answerRoutes);
-app.use('/api/images', imageRoutes);
+app.use('/auth', authRoutes);
+app.use('/cities', cityRoutes);
+app.use('/locations', locationRoutes);
+app.use('/categories', categoryRoutes);
+app.use('/users', userRoutes);
+app.use('/questions', questionRoutes);
+app.use('/answers', answerRoutes);
+app.use('/images', imageRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
