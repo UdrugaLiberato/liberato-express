@@ -19,13 +19,13 @@ export const getAllLocations = async (filters: LocationFilters) => {
   let { city, category, name } = filters;
 
   if (city && city.includes('-')) {
-    city = city.replace('-', ' ');
+    city = city.replaceAll('-', ' ');
   }
   if (category && category.includes('-')) {
-    category = category.replace('-', ' ');
+    category = category.replaceAll('-', ' ');
   }
   if (name && name.includes('-')) {
-    name = name.replace('-', ' ');
+    name = name.replaceAll('-', ' ');
   }
 
   const where: any = {};
@@ -75,14 +75,14 @@ export const getLocationByCityAndCategoryAndName = async (
   let { city, category, name } = filters;
 
   if (city && city.includes('-')) {
-    city = city.replace('-', ' ');
+    city = city.replaceAll('-', ' ');
   }
   if (category && category.includes('-')) {
-    category = category.replace('-', ' ');
+    category = category.replaceAll('-', ' ');
   }
 
   if (name && name.includes('-')) {
-    name = name.replace('-', ' ');
+    name = name.replaceAll('-', ' ');
   }
 
   const where: any = {
@@ -243,10 +243,10 @@ export const getLocationsByCityAndCategory = async (
   const { cursor } = filters;
 
   if (city && city.includes('-')) {
-    city = city.replace('-', ' ');
+    city = city.replaceAll('-', ' ');
   }
   if (category && category.includes('-')) {
-    category = category.replace('-', ' ');
+    category = category.replaceAll('-', ' ');
   }
 
   const pageSize = 10;
