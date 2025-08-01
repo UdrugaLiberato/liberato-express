@@ -17,7 +17,6 @@ import {
 
 export const getAllLocations = async (filters: LocationFilters) => {
   let { city, category, name } = filters;
-  const { cursor } = filters;
 
   if (city && city.includes('-')) {
     city = city.replaceAll('-', ' ');
@@ -53,27 +52,12 @@ export const getAllLocations = async (filters: LocationFilters) => {
   where.published = 1;
   where.deletedAt = null;
 
-  const pageSize = 10;
-
   const locations = await prisma.location.findMany({
     where,
-    ...(cursor ? { cursor: { id: cursor } } : undefined),
-    take: pageSize + 1,
     include: locationInclude,
   });
 
-  const hasNextPage = locations.length > pageSize;
-  const nextCursor = hasNextPage ? locations[pageSize - 1].id : null;
-  const locationsToReturn = hasNextPage
-    ? locations.slice(0, pageSize)
-    : locations;
-
-  return {
-    locations: locationsToReturn.map((location) =>
-      addSimplifiedAnswers(location),
-    ),
-    nextCursor,
-  };
+  return locations.map((location) => addSimplifiedAnswers(location));
 };
 
 export const getLocationById = async (id: string) => {
