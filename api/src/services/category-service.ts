@@ -1,11 +1,14 @@
 import prisma from '../config/prisma';
 import { Express } from 'express';
-import { CategoryData } from '../types';
 import {
   createCategoryImage,
   createCategoryQuestions,
   buildCategoryData,
 } from '../utils/category-utils';
+
+interface CategoryFilters {
+  name?: string;
+}
 
 export const getAll = () => {
   return prisma.category.findMany({
@@ -19,6 +22,23 @@ export const getAll = () => {
 export const getById = (id: string) => {
   return prisma.category.findUnique({
     where: { id },
+    include: {
+      question: true,
+      image: true,
+    },
+  });
+};
+
+export const getByName = (filters: CategoryFilters) => {
+  let { name } = filters;
+  if (name && name.includes('-')) {
+    name = name.replace('-', ' ');
+  }
+
+  if (!name) return null;
+
+  return prisma.category.findFirst({
+    where: { name: { mode: 'insensitive', contains: name } },
     include: {
       question: true,
       image: true,

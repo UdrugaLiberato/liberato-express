@@ -6,6 +6,10 @@ import {
 } from '../utils/city-utils';
 import { CityData, CityUpdateData } from '../types';
 
+interface CityFilters {
+  name?: string;
+}
+
 export const getAllCities = () => {
   return prisma.city.findMany({
     where: { deletedAt: null },
@@ -18,9 +22,21 @@ export const getCityById = (id: string) => {
   });
 };
 
-export const getCityByName = (name: string) => {
-  return prisma.city.findUnique({
-    where: { name },
+export const getCityByName = (filters: CityFilters) => {
+  let { name } = filters;
+  if (name && name.includes('-')) {
+    name = name.replace('-', ' ');
+  }
+
+  if (!name) return null;
+
+  return prisma.city.findFirst({
+    where: {
+      name: {
+        mode: 'insensitive',
+        contains: name,
+      },
+    },
   });
 };
 

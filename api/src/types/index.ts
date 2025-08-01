@@ -133,6 +133,8 @@ export interface ImageUpdateData {
 export interface LocationFilters {
   city?: string;
   category?: string;
+  cursor?: string | null;
+  name?: string;
   includeAnswers?: boolean;
   includeImages?: boolean;
   includeQuestions?: boolean;

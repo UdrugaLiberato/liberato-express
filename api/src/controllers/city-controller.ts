@@ -35,7 +35,7 @@ export const getCity = async (request: Request, res: Response) => {
 
 export const getCityByName = async (request: Request, res: Response) => {
   try {
-    const city = await CityService.getCityByName(request.params.name);
+    const city = await CityService.getCityByName({ name: request.params.name });
     if (!city) {
       sendNotFound(res, 'City not found');
       return;

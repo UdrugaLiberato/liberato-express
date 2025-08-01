@@ -86,11 +86,11 @@ export const getLocationsByCityAndCategory = async (
   try {
     const cursor = req.query.cursor as string | undefined;
     const { city, category } = req.params;
-    const locations = await LocationService.getLocationsByCityAndCategory(
+    const locations = await LocationService.getLocationsByCityAndCategory({
       city,
       category,
       cursor,
-    );
+    });
     sendSuccess(res, locations);
   } catch (error) {
     handleError(res, error);
@@ -103,11 +103,11 @@ export const getLocationByCityAndCategoryAndName = async (
 ) => {
   try {
     const { city, category, name } = req.params;
-    const location = await LocationService.getLocationByCityAndCategoryAndName(
+    const location = await LocationService.getLocationByCityAndCategoryAndName({
       city,
       category,
       name,
-    );
+    });
     if (!location) {
       sendNotFound(res, 'Location not found');
       return;

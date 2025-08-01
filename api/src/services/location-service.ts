@@ -16,7 +16,17 @@ import {
 } from '../types';
 
 export const getAllLocations = async (filters: LocationFilters) => {
-  const { city, category } = filters;
+  let { city, category, name } = filters;
+
+  if (city && city.includes('-')) {
+    city = city.replace('-', ' ');
+  }
+  if (category && category.includes('-')) {
+    category = category.replace('-', ' ');
+  }
+  if (name && name.includes('-')) {
+    name = name.replace('-', ' ');
+  }
 
   const where: any = {};
 
@@ -33,6 +43,11 @@ export const getAllLocations = async (filters: LocationFilters) => {
         mode: 'insensitive',
         contains: category,
       },
+    };
+  if (name)
+    where.name = {
+      mode: 'insensitive',
+      contains: name,
     };
   where.published = 1;
   where.deletedAt = null;
@@ -55,14 +70,33 @@ export const getLocationById = async (id: string) => {
 };
 
 export const getLocationByCityAndCategoryAndName = async (
-  city: string,
-  category: string,
-  name: string,
+  filters: LocationFilters,
 ) => {
+  let { city, category, name } = filters;
+
+  if (city && city.includes('-')) {
+    city = city.replace('-', ' ');
+  }
+  if (category && category.includes('-')) {
+    category = category.replace('-', ' ');
+  }
+
+  if (name && name.includes('-')) {
+    name = name.replace('-', ' ');
+  }
+
   const where: any = {
-    city: { name: city },
-    category: { name: category },
-    name,
+    city: {
+      name: {
+        mode: 'insensitive',
+        contains: city,
+      },
+    },
+    category: { name: { mode: 'insensitive', contains: category } },
+    name: {
+      mode: 'insensitive',
+      contains: name,
+    },
     published: 1,
     deletedAt: null,
   };
@@ -203,16 +237,25 @@ export const deleteLocation = async (id: string) => {
 };
 
 export const getLocationsByCityAndCategory = async (
-  city: string,
-  category: string,
-  cursor?: string,
+  filters: LocationFilters,
 ) => {
+  let { city, category } = filters;
+  const { cursor } = filters;
+
+  if (city && city.includes('-')) {
+    city = city.replace('-', ' ');
+  }
+  if (category && category.includes('-')) {
+    category = category.replace('-', ' ');
+  }
+
   const pageSize = 10;
 
   const locations = await prisma.location.findMany({
     where: {
-      city: { name: city },
-      category: { name: category },
+      city: { name: { mode: 'insensitive', contains: city } },
+      category: { name: { mode: 'insensitive', contains: category } },
+      published: 1,
       deletedAt: null,
     },
     ...(cursor ? { cursor: { id: cursor } } : undefined),
