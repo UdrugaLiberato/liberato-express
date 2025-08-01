@@ -20,8 +20,20 @@ export const getAllLocations = async (filters: LocationFilters) => {
 
   const where: any = {};
 
-  if (city) where.city = { name: city };
-  if (category) where.category = { name: category };
+  if (city)
+    where.city = {
+      name: {
+        mode: 'insensitive',
+        contains: city,
+      },
+    };
+  if (category)
+    where.category = {
+      name: {
+        mode: 'insensitive',
+        contains: category,
+      },
+    };
   where.published = 1;
   where.deletedAt = null;
 

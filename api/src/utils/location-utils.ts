@@ -8,7 +8,11 @@ export const locationInclude = {
       question: true,
     },
   },
-  image: true,
+  image: {
+    where: {
+      deletedAt: null,
+    },
+  },
   city: true,
   category: true,
 };
