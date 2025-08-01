@@ -32,7 +32,7 @@ export const getById = (id: string) => {
 export const getByName = (filters: CategoryFilters) => {
   let { name } = filters;
   if (name && name.includes('-')) {
-    name = name.replace('-', ' ');
+    name = name.replaceAll('-', ' ');
   }
 
   if (!name) return null;
