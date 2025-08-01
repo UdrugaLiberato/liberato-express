@@ -4,11 +4,7 @@ import {
   buildCityUpdateData,
   validateCityDeletion,
 } from '../utils/city-utils';
-import { CityData, CityUpdateData } from '../types';
-
-interface CityFilters {
-  name?: string;
-}
+import { CityData, CityUpdateData, CityFilters } from '../types';
 
 export const getAllCities = () => {
   return prisma.city.findMany({
@@ -25,7 +21,7 @@ export const getCityById = (id: string) => {
 export const getCityByName = async (filters: CityFilters) => {
   let { name } = filters;
   if (name && name.includes('-')) {
-    name = name.replace('-', ' ');
+    name = name.replaceAll('-', ' ');
   }
 
   if (!name) return null;
@@ -48,7 +44,6 @@ export const getCityByName = async (filters: CityFilters) => {
         contains: name,
       },
     },
-    take: 1,
   });
 };
 
