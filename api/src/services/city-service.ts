@@ -30,7 +30,6 @@ export const getCityByName = async (filters: CityFilters) => {
 
   if (!name) return null;
 
-  // First try exact match (case-insensitive)
   const exactMatch = await prisma.city.findFirst({
     where: {
       name: {
@@ -42,7 +41,6 @@ export const getCityByName = async (filters: CityFilters) => {
 
   if (exactMatch) return exactMatch;
 
-  // If no exact match, try partial match but limit results
   return prisma.city.findFirst({
     where: {
       name: {
@@ -50,7 +48,7 @@ export const getCityByName = async (filters: CityFilters) => {
         contains: name,
       },
     },
-    take: 1, // Limit to prevent multiple results
+    take: 1,
   });
 };
 
