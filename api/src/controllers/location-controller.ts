@@ -12,10 +12,12 @@ import { LocationCreateData, LocationUpdateData } from '../types';
 
 export const getLocations = async (req: Request, res: Response) => {
   try {
-    const { city, category } = req.query;
+    const { city, category, name, cursor } = req.query;
     const locations = await LocationService.getAllLocations({
       city: city as string | undefined,
       category: category as string | undefined,
+      name: name as string | undefined,
+      cursor: cursor as string | undefined,
     });
     sendSuccess(res, locations);
   } catch (error) {
@@ -102,10 +104,11 @@ export const getLocationByCityAndCategoryAndName = async (
   res: Response,
 ) => {
   try {
-    const { city, category, name } = req.params;
+    const { city, category, name, cursor } = req.params;
     const location = await LocationService.getLocationByCityAndCategoryAndName({
       city,
       category,
+      cursor,
       name,
     });
     if (!location) {
