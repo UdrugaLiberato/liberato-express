@@ -17,18 +17,9 @@ import {
 } from '../types';
 
 export const getAllLocations = async (filters: LocationFilters) => {
-  let { city, category, name } = filters;
+  const { city, category, name, cursor } = filters;
 
-  if (city && city.includes('-')) {
-    city = city.replaceAll('-', ' ');
-  }
-  if (category && category.includes('-')) {
-    category = category.replaceAll('-', ' ');
-  }
-  if (name && name.includes('-')) {
-    name = name.replaceAll('-', ' ');
-  }
-
+  const pageSize = 10;
   const where: any = {};
 
   if (city)
@@ -53,12 +44,67 @@ export const getAllLocations = async (filters: LocationFilters) => {
   where.published = 1;
   where.deletedAt = null;
 
+  if (city !== undefined && category !== undefined) {
+    const locations = await prisma.location.findMany({
+      where,
+      ...(cursor ? { cursor: { id: cursor } } : undefined),
+      take: pageSize + 1,
+      include: locationInclude,
+      orderBy: { featured: 'desc' },
+    });
+
+    const hasNextPage = locations.length > pageSize;
+    const nextCursor = hasNextPage ? locations[pageSize - 1].id : null;
+    const locationsToReturn = hasNextPage
+      ? locations.slice(0, pageSize)
+      : locations;
+
+    return {
+      locations: locationsToReturn.map((location) =>
+        addSimplifiedAnswers(location),
+      ),
+      nextCursor,
+    };
+  }
+
   const locations = await prisma.location.findMany({
-    where,
-    include: locationInclude,
+    select: {
+      id: true,
+      cityId: true,
+      name: true,
+      street: true,
+      featured: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      city: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      image: {
+        select: {
+          id: true,
+          src: true,
+          mime: true,
+          name: true,
+        },
+        where: {
+          deletedAt: null,
+        },
+      },
+    },
+    where: {
+      deletedAt: null,
+    },
+    orderBy: { featured: 'desc' },
   });
 
-  return locations.map((location) => addSimplifiedAnswers(location));
+  return locations;
 };
 
 export const getLocationById = async (id: string) => {
