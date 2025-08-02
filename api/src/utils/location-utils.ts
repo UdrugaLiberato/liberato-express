@@ -115,3 +115,16 @@ export const buildLocationUpdateData = (data: any) => ({
   published: data.published === undefined ? undefined : toInt(data.published),
   updatedAt: new Date(),
 });
+
+export const fromPascalWithDashes = (input: string): string => {
+  return input
+    .split('-') // split on dashes first
+    .map((part) =>
+      part
+        .replaceAll(/([a-z])([A-Z])/g, '$1 $2')
+        .replaceAll(/([A-Z])([A-Z][a-z])/g, '$1 $2')
+        .toLowerCase(),
+    )
+    .join(' - ')
+    .replace(/^./, (c) => c.toUpperCase());
+};

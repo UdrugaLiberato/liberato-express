@@ -8,6 +8,7 @@ import {
   createAnswers,
   buildLocationUpdateData,
   toInt,
+  fromPascalWithDashes,
 } from '../utils/location-utils';
 import {
   LocationFilters,
@@ -74,15 +75,13 @@ export const getLocationByCityAndCategoryAndName = async (
 ) => {
   let { city, category, name } = filters;
 
+  name = fromPascalWithDashes(name as string);
+
   if (city && city.includes('-')) {
     city = city.replaceAll('-', ' ');
   }
   if (category && category.includes('-')) {
     category = category.replaceAll('-', ' ');
-  }
-
-  if (name && name.includes('-')) {
-    name = name.replaceAll('-', ' ');
   }
 
   const where: any = {
