@@ -74,6 +74,18 @@ export const getAllLocations = async (filters: LocationFilters) => {
       name: true,
       street: true,
       featured: true,
+      answer: {
+        select: {
+          id: true,
+          answer: true,
+          question: {
+            select: {
+              id: true,
+              question: true,
+            },
+          },
+        },
+      },
       category: {
         select: {
           id: true,
@@ -104,7 +116,7 @@ export const getAllLocations = async (filters: LocationFilters) => {
     orderBy: { featured: 'desc' },
   });
 
-  return locations;
+  return locations.map((location) => addSimplifiedAnswers(location));
 };
 
 export const getLocationById = async (id: string) => {

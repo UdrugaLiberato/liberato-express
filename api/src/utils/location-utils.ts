@@ -25,7 +25,7 @@ export const simplifyAnswers = (answers: any[]): SimplifiedAnswer[] => {
   return answers.map((answer) => ({
     answerId: answer.id,
     answer: answer.answer,
-    questionId: answer.questionId,
+    questionId: answer.question.id,
     question: answer.question.question,
   }));
 };
