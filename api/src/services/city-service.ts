@@ -9,6 +9,9 @@ import { CityData, CityUpdateData, CityFilters } from '../types';
 export const getAllCities = () => {
   return prisma.city.findMany({
     where: { deletedAt: null },
+    include: {
+      images: true,
+    },
   });
 };
 
@@ -43,6 +46,9 @@ export const getCityByName = async (filters: CityFilters) => {
         mode: 'insensitive',
         contains: name,
       },
+    },
+    include: {
+      images: true,
     },
   });
 };
