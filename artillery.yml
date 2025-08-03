@@ -1,0 +1,45 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Warm up phase"
+    - duration: 120
+      arrivalRate: 10
+      name: "Sustained load"
+    - duration: 60
+      arrivalRate: 20
+      name: "Peak load"
+    - duration: 60
+      arrivalRate: 5
+      name: "Cool down"
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+  plugins:
+    expect: {}
+    metrics-by-endpoint: {}
+
+scenarios:
+  - name: "Location API Load Test"
+    weight: 70
+    flow:
+      - get:
+          url: "/locations"
+          expect:
+            - statusCode: 200
+      - think: 2
+      - get:
+          url: "/locations"
+          expect:
+            - statusCode: 200
+      - think: 1
+      - get:
+          url: "/categories"
+          expect:
+            - statusCode: 200
+      - think: 1
+      - get:
+          url: "/cities"
+          expect:
+            - statusCode: 200
