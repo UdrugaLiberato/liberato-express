@@ -1,27 +1,97 @@
 import { NextFunction, Request, Response } from 'express';
-import { createClient } from 'redis';
+import { createClient, RedisClientType } from 'redis';
 
-const client = createClient()
-  .on('error', (err: Error) => console.log('Redis Client Error', err))
-  .on('connect', () => console.log('Redis Client Connected'));
+// Redis client instance
+let client: RedisClientType | null = null;
+let isConnecting = false;
+let connectionPromise: Promise<void> | null = null;
 
-// Initialize Redis
-client.connect();
+// Initialize Redis client with proper error handling and connection management
+const initializeRedis = async (): Promise<RedisClientType> => {
+  if (client && client.isReady) {
+    return client;
+  }
 
+  if (isConnecting && connectionPromise) {
+    await connectionPromise;
+    return client!;
+  }
+
+  isConnecting = true;
+  connectionPromise = (async () => {
+    try {
+      client = createClient({
+        // Add retry strategy for better resilience
+        socket: {
+          reconnectStrategy: (retries) => {
+            if (retries > 10) {
+              console.error('Redis connection failed after 10 retries');
+              return false; // Stop retrying
+            }
+            return Math.min(retries * 100, 3000); // Exponential backoff with max 3s
+          },
+        },
+      });
+
+      client.on('error', (err: Error) => {
+        console.error('Redis Client Error:', err);
+      });
+
+      client.on('connect', () => {
+        console.log('Redis Client Connected');
+      });
+
+      client.on('ready', () => {
+        console.log('Redis Client Ready');
+      });
+
+      client.on('end', () => {
+        console.log('Redis Client Disconnected');
+      });
+
+      await client.connect();
+    } catch (error) {
+      console.error('Failed to connect to Redis:', error);
+      client = null;
+      throw error;
+    } finally {
+      isConnecting = false;
+    }
+  })();
+
+  await connectionPromise;
+  return client!;
+};
+
+// Cache middleware with proper Redis connection handling
 const cache = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Ensure Redis is connected before proceeding
+    const redisClient = await initializeRedis();
+
     const key = 'locations';
-    const cachedData = await client.get(key);
+    const cachedData = await redisClient.get(key);
+
     if (cachedData) {
       console.log('Cache hit');
       res.json(JSON.parse(cachedData) as any);
       return;
     }
+
     console.log('Cache miss');
     next();
   } catch (error) {
     console.error('Cache error:', error);
+    // If Redis is unavailable, continue without cache
     next();
+  }
+};
+
+// Graceful shutdown function
+export const closeRedisConnection = async (): Promise<void> => {
+  if (client && client.isReady) {
+    await client.quit();
+    console.log('Redis connection closed gracefully');
   }
 };
 

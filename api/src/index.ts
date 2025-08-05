@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import { closeRedisConnection } from './middleware/cache';
 
 // Routes
 import authRoutes from './routes/auth-routes';
@@ -44,8 +45,32 @@ app.use('/questions', questionRoutes);
 app.use('/answers', answerRoutes);
 app.use('/images', imageRoutes);
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+// Graceful shutdown handling
+const gracefulShutdown = async (signal: string) => {
+  console.log(`\nReceived ${signal}. Starting graceful shutdown...`);
+
+  server.close(async () => {
+    console.log('HTTP server closed');
+
+    try {
+      await closeRedisConnection();
+      console.log('Graceful shutdown completed');
+
+      process.exit(0);
+    } catch (error) {
+      console.error('Error during graceful shutdown:', error);
+
+      process.exit(1);
+    }
+  });
+};
+
+// Handle different shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 export default app;
