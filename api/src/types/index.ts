@@ -199,3 +199,12 @@ declare module 'express' {
     };
   }
 }
+
+export interface UploadResponseData {
+  files: Array<{
+    path: string;
+    name?: string;
+    size?: number;
+    fileType?: string;
+  }>;
+}

@@ -1,6 +1,7 @@
 import prisma from '../config/prisma';
 import googleMaps from './google-maps';
 import { SimplifiedAnswer, LocationWithSimplifiedAnswers } from '../types';
+import env from '../config/env';
 
 export const locationInclude = {
   answer: {
@@ -15,10 +16,6 @@ export const locationInclude = {
   },
   city: true,
   category: true,
-};
-
-export const resetImageSequence = async () => {
-  await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('image', 'id'), (SELECT MAX(id) FROM image) + 1)`;
 };
 
 export const simplifyAnswers = (answers: any[]): SimplifiedAnswer[] => {
@@ -44,11 +41,29 @@ export const getCoordinates = async (address: string) => {
   return googleMaps.getCoordinateForStreet('', address);
 };
 
+export const createLocationImage = async (
+  locationId: string,
+  image: {
+    path: string;
+    name?: string;
+    size?: number;
+    fileType?: string;
+  },
+) => {
+  return prisma.image.create({
+    data: {
+      src: `${env.STORE_URL}${image.path}`,
+      name: image.name || 'location-image',
+      mime: image.fileType || 'application/octet-stream',
+      locationId,
+    },
+  });
+};
+
 export const createImages = async (
   files: Express.Multer.File[],
   locationId: string,
 ) => {
-  await resetImageSequence();
   return Promise.all(
     files.map((file) =>
       prisma.image.create({

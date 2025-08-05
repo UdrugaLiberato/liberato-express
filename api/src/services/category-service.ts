@@ -4,17 +4,10 @@ import {
   createCategoryQuestions,
   buildCategoryData,
 } from '../utils/category-utils';
+import { UploadResponseData } from '../types';
 
 interface CategoryFilters {
   name?: string;
-}
-
-interface UploadResponseData {
-  files: Array<{
-    path: string;
-    filename?: string;
-    originalname?: string;
-  }>;
 }
 
 export const getAll = () => {
@@ -55,7 +48,7 @@ export const getByName = (filters: CategoryFilters) => {
 
 export const create = async (
   name: string,
-  uploadResponseData: UploadResponseData,
+  uploadResponseData: UploadResponseData | null,
   descriptionEN?: string,
   descriptionHR?: string,
   questions?: string,
@@ -64,9 +57,13 @@ export const create = async (
     data: buildCategoryData({ name, descriptionEN, descriptionHR }),
   });
 
-  // Create category image using the upload response data
-  if (uploadResponseData && uploadResponseData.files[0].path) {
-    await createCategoryImage(category.id, uploadResponseData.files[0].path);
+  if (
+    uploadResponseData &&
+    Array.isArray(uploadResponseData.files) &&
+    uploadResponseData.files.length > 0 &&
+    uploadResponseData.files[0].path
+  ) {
+    await createCategoryImage(category.id, uploadResponseData.files[0]);
   }
 
   if (questions) {
@@ -79,6 +76,20 @@ export const create = async (
   }
 
   return category;
+};
+
+export const updateWithImage = async (
+  categoryId: string,
+  uploadResponseData: UploadResponseData,
+) => {
+  if (
+    uploadResponseData &&
+    Array.isArray(uploadResponseData.files) &&
+    uploadResponseData.files.length > 0 &&
+    uploadResponseData.files[0].path
+  ) {
+    await createCategoryImage(categoryId, uploadResponseData.files[0]);
+  }
 };
 
 export const remove = (id: string) => {

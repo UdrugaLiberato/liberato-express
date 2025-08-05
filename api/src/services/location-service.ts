@@ -5,6 +5,7 @@ import {
   addSimplifiedAnswers,
   getCoordinates,
   createImages,
+  createLocationImage,
   createAnswers,
   buildLocationUpdateData,
   toInt,
@@ -14,6 +15,7 @@ import {
   LocationFilters,
   LocationCreateData,
   LocationUpdateData,
+  UploadResponseData,
 } from '../types';
 
 export const getAllLocations = async (filters: LocationFilters) => {
@@ -286,6 +288,57 @@ export const updateLocation = async (
   });
 
   return fullLocation ? addSimplifiedAnswers(fullLocation) : null;
+};
+
+export const updateWithImage = async (
+  locationId: string,
+  uploadResponseData: UploadResponseData,
+) => {
+  try {
+    // Validate input parameters
+    if (!locationId) {
+      const error = 'Location ID is required';
+      console.error('updateWithImage validation failed:', error);
+      throw new Error(error);
+    }
+
+    if (!uploadResponseData) {
+      const error = 'Upload response data is required';
+      console.error('updateWithImage validation failed:', error);
+      throw new Error(error);
+    }
+
+    if (
+      !Array.isArray(uploadResponseData.files) ||
+      uploadResponseData.files.length === 0
+    ) {
+      const error = 'No files found in upload response data';
+      console.error('updateWithImage validation failed:', error);
+      throw new Error(error);
+    }
+
+    // Process all files in the upload response
+    const imageCreationPromises = uploadResponseData.files
+      .filter((file) => file.path) // Only process files with valid paths
+      .map((file) => createLocationImage(locationId, file));
+
+    if (imageCreationPromises.length === 0) {
+      const error = 'No valid file paths found in upload response';
+      console.error('updateWithImage validation failed:', error);
+      throw new Error(error);
+    }
+
+    await Promise.all(imageCreationPromises);
+    console.log(
+      `Successfully processed ${imageCreationPromises.length} images for location ${locationId}`,
+    );
+  } catch (error: any) {
+    console.error(
+      `Error in updateWithImage for location ${locationId}:`,
+      error,
+    );
+    throw error; // Re-throw to allow caller to handle the error
+  }
 };
 
 export const deleteLocation = async (id: string) => {

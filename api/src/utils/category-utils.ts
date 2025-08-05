@@ -1,6 +1,6 @@
 import prisma from '../config/prisma';
 import { CategoryData } from '../types';
-import { resetImageSequence } from './location-utils';
+import env from '../config/env';
 
 export const categoryInclude = {
   questions: true,
@@ -9,14 +9,18 @@ export const categoryInclude = {
 
 export const createCategoryImage = async (
   categoryId: string,
-  imageUrl: string,
+  image: {
+    path: string;
+    name?: string;
+    size?: number;
+    fileType?: string;
+  },
 ) => {
-  await resetImageSequence();
   return prisma.image.create({
     data: {
-      src: imageUrl,
-      name: 'category-image',
-      mime: 'image/jpeg',
+      src: `${env.STORE_URL}${image.path}`,
+      name: image.name || 'category-image',
+      mime: image.fileType || 'application/octet-stream',
       categoryId,
     },
   });
