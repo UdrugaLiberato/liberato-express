@@ -59,10 +59,10 @@ const gracefulShutdown = async (signal: string) => {
     try {
       await closeRedisConnection();
       console.log('Graceful shutdown completed');
-      process.kill(process.pid, 'SIGTERM');
+      process.exit(0);
     } catch (error) {
       console.error('Error during graceful shutdown:', error);
-      process.kill(process.pid, 'SIGTERM');
+      process.exit(1);
     }
   });
 };
