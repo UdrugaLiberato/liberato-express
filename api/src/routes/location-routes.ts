@@ -14,7 +14,7 @@ import cache from '../middleware/cache';
 
 const router = Router();
 
-router.get('/', cache, getLocations);
+router.get('/', cache(), getLocations);
 router.get('/:id', getLocation);
 router.post('/', authenticate, upload.array('images', 5), createLocation);
 router.put('/:id', authenticate, upload.array('images', 5), updateLocation);

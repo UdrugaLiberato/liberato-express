@@ -9,6 +9,14 @@ interface CategoryFilters {
   name?: string;
 }
 
+interface UploadResponseData {
+  files: Array<{
+    path: string;
+    filename?: string;
+    originalname?: string;
+  }>;
+}
+
 export const getAll = () => {
   return prisma.category.findMany({
     include: {
@@ -47,7 +55,7 @@ export const getByName = (filters: CategoryFilters) => {
 
 export const create = async (
   name: string,
-  uploadResponseData: any,
+  uploadResponseData: UploadResponseData,
   descriptionEN?: string,
   descriptionHR?: string,
   questions?: string,
@@ -55,10 +63,6 @@ export const create = async (
   const category = await prisma.category.create({
     data: buildCategoryData({ name, descriptionEN, descriptionHR }),
   });
-
-  console.log(uploadResponseData);
-  console.log(uploadResponseData.files);
-  console.log(uploadResponseData.files.path);
 
   // Create category image using the upload response data
   if (uploadResponseData && uploadResponseData.files[0].path) {
