@@ -12,6 +12,7 @@ import {
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'node:fs';
+import env from '../config/env';
 
 // Async function to handle image upload in background
 const processImageUploadAsync = async (
@@ -29,12 +30,13 @@ const processImageUploadAsync = async (
     formData.append('requestType', 'categories');
 
     const uploadResponse = await axios.post(
-      'https://store.udruga-liberato.hr/upload',
+      `${env.STORE_URL}/upload`,
       formData,
       {
         headers: {
           ...formData.getHeaders(),
         },
+        timeout: 30_000, // 30 second timeout
       },
     );
 
@@ -42,11 +44,25 @@ const processImageUploadAsync = async (
     await CategoryService.updateWithImage(categoryId, uploadResponse.data);
 
     console.log(`Image uploaded successfully for category ${categoryId}`);
-  } catch (uploadError) {
+  } catch (uploadError: any) {
     console.error(
       `Failed to upload image for category ${categoryId}:`,
       uploadError,
     );
+
+    // Log more detailed error information for debugging
+    if (uploadError?.response) {
+      console.error('Upload service responded with:', {
+        status: uploadError.response.status,
+        statusText: uploadError.response.statusText,
+        data: uploadError.response.data,
+        url: `${env.STORE_URL}/upload`,
+      });
+    } else if (uploadError?.request) {
+      console.error('Upload service request failed:', uploadError.message);
+    } else {
+      console.error('Upload error:', uploadError?.message || 'Unknown error');
+    }
   } finally {
     // Clean up local file
     if (file.path && fs.existsSync(file.path)) {

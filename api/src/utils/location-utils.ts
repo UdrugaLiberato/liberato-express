@@ -1,6 +1,7 @@
 import prisma from '../config/prisma';
 import googleMaps from './google-maps';
 import { SimplifiedAnswer, LocationWithSimplifiedAnswers } from '../types';
+import env from '../config/env';
 
 export const locationInclude = {
   answer: {
@@ -38,6 +39,25 @@ export const addSimplifiedAnswers = (
 
 export const getCoordinates = async (address: string) => {
   return googleMaps.getCoordinateForStreet('', address);
+};
+
+export const createLocationImage = async (
+  locationId: string,
+  image: {
+    path: string;
+    name?: string;
+    size?: number;
+    fileType?: string;
+  },
+) => {
+  return prisma.image.create({
+    data: {
+      src: `${env.STORE_URL}${image.path}`,
+      name: image.name || 'location-image',
+      mime: image.fileType || 'application/octet-stream',
+      locationId,
+    },
+  });
 };
 
 export const createImages = async (

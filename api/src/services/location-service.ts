@@ -5,6 +5,7 @@ import {
   addSimplifiedAnswers,
   getCoordinates,
   createImages,
+  createLocationImage,
   createAnswers,
   buildLocationUpdateData,
   toInt,
@@ -14,6 +15,7 @@ import {
   LocationFilters,
   LocationCreateData,
   LocationUpdateData,
+  UploadResponseData,
 } from '../types';
 
 export const getAllLocations = async (filters: LocationFilters) => {
@@ -286,6 +288,20 @@ export const updateLocation = async (
   });
 
   return fullLocation ? addSimplifiedAnswers(fullLocation) : null;
+};
+
+export const updateWithImage = async (
+  locationId: string,
+  uploadResponseData: UploadResponseData,
+) => {
+  if (
+    uploadResponseData &&
+    Array.isArray(uploadResponseData.files) &&
+    uploadResponseData.files.length > 0 &&
+    uploadResponseData.files[0].path
+  ) {
+    await createLocationImage(locationId, uploadResponseData.files[0]);
+  }
 };
 
 export const deleteLocation = async (id: string) => {
