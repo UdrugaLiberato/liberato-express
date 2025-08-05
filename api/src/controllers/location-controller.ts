@@ -148,7 +148,7 @@ export const updateLocation = async (req: Request, res: Response) => {
 
     // Process image uploads asynchronously if files are provided
     if (files && files.length > 0) {
-      await Promise.all(
+      Promise.allSettled(
         files.map((file) => processImageUploadAsync(updated.id, file)),
       );
     }
