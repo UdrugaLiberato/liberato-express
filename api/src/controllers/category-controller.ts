@@ -6,13 +6,54 @@ import {
   sendCreated,
   sendNoContent,
   sendNotFound,
-  sendBadRequest,
   validateRequiredFields,
   handleValidationError,
 } from '../utils/controller-utils';
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'node:fs';
+
+// Async function to handle image upload in background
+const processImageUploadAsync = async (
+  categoryId: string,
+  file: {
+    path: string;
+    filename?: string;
+    originalname?: string;
+    mime?: string;
+  },
+) => {
+  try {
+    const formData = new FormData();
+    formData.append('files', fs.createReadStream(file.path));
+    formData.append('requestType', 'categories');
+
+    const uploadResponse = await axios.post(
+      'https://store.udruga-liberato.hr/upload',
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+        },
+      },
+    );
+
+    // Update category with image info once upload is complete
+    await CategoryService.updateWithImage(categoryId, uploadResponse.data);
+
+    console.log(`Image uploaded successfully for category ${categoryId}`);
+  } catch (uploadError) {
+    console.error(
+      `Failed to upload image for category ${categoryId}:`,
+      uploadError,
+    );
+  } finally {
+    // Clean up local file
+    if (file.path && fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
+  }
+};
 
 export const getAllCategories = async (_req: Request, res: Response) => {
   try {
@@ -60,57 +101,22 @@ export const createCategory = async (req: Request, res: Response) => {
       return;
     }
 
-    if (!file) {
-      sendBadRequest(res, 'Missing required fields: category_image');
-      return;
-    }
-
-    // Send image to external upload service
-    let uploadResponse;
-    try {
-      const formData = new FormData();
-      formData.append('files', fs.createReadStream(file.path));
-      formData.append('requestType', 'categories');
-
-      uploadResponse = await axios.post(
-        'https://store.udruga-liberato.hr/upload',
-        formData,
-        {
-          headers: {
-            ...formData.getHeaders(),
-          },
-        },
-      );
-
-      // console.log('Upload response:', uploadResponse.data);
-    } catch (uploadError) {
-      console.error('Upload service error:', uploadError);
-      // Clean up local file
-      if (file.path && fs.existsSync(file.path)) {
-        fs.unlinkSync(file.path);
-      }
-      handleError(
-        res,
-        uploadError,
-        'Failed to upload image to external service',
-      );
-      return;
-    }
-
+    // Create category immediately without waiting for image upload
     const newCategory = await CategoryService.create(
       name,
-      uploadResponse.data,
+      null, // No image data initially
       descriptionEN,
       descriptionHR,
       questions,
     );
 
-    // Clean up local file after successful upload
-    if (file.path && fs.existsSync(file.path)) {
-      fs.unlinkSync(file.path);
-    }
-
+    // Send response immediately
     sendCreated(res, newCategory);
+
+    // Process image upload asynchronously if file is provided
+    if (file) {
+      processImageUploadAsync(newCategory.id, file);
+    }
   } catch (error) {
     handleError(res, error, 'Failed to create category');
   }

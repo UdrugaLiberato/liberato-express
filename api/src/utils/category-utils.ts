@@ -9,14 +9,19 @@ export const categoryInclude = {
 
 export const createCategoryImage = async (
   categoryId: string,
-  imageUrl: string,
+  image: {
+    path: string;
+    name?: string;
+    size?: number;
+    fileType?: string;
+  },
 ) => {
   await resetImageSequence();
   return prisma.image.create({
     data: {
-      src: imageUrl,
-      name: 'category-image',
-      mime: 'image/jpeg',
+      src: `https://store.udruga-liberato.hr${image.path}`,
+      name: image.name || 'category-image',
+      mime: image.fileType,
       categoryId,
     },
   });
