@@ -6,10 +6,6 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is not set');
 }
 
-if (!process.env.STORE_URL) {
-  throw new Error('STORE_URL is not set');
-}
-
 if (!process.env.GOOGLE_API_KEY) {
   throw new Error('GOOGLE_API_KEY is not set');
 }
@@ -34,8 +30,23 @@ if (!process.env.GOOGLE_CLIENT_ID) {
   throw new Error('GOOGLE_CLIENT_ID is not set');
 }
 
-const env = {
-  PORT: process.env.PORT || 3000,
+interface EnvConfig {
+  PORT: number;
+  NODE_ENV: string;
+  DATABASE_URL: string;
+  STORE_URL: string;
+  GOOGLE_API_KEY: string;
+  CLERK_WEBHOOK_SIGNING_SECRET: string;
+  CLERK_PUBLISHABLE_KEY: string;
+  CLERK_SECRET_KEY: string;
+  JWT_SECRET: string;
+  JWT_EXPIRATION: string;
+  COOKIE_EXPIRATION: number;
+  GOOGLE_CLIENT_ID: string;
+}
+
+const env: EnvConfig = {
+  PORT: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
   NODE_ENV: process.env.NODE_ENV || 'development',
   DATABASE_URL: process.env.DATABASE_URL,
   STORE_URL: process.env.STORE_URL || 'https://store.udruga-liberato.hr',
