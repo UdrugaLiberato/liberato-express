@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { promisify } from 'node:util';
+import env from '../config/env';
 
 const verifyToken = promisify(jwt.verify) as (
   token: string,
@@ -20,7 +21,7 @@ const authenticate = async (
   }
 
   try {
-    const decoded = await verifyToken(token, process.env.JWT_SECRET as string);
+    const decoded = await verifyToken(token, env.JWT_SECRET as string);
     req.user = decoded as { id: string; role: string };
     next();
   } catch {

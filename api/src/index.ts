@@ -1,8 +1,8 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { closeRedisConnection } from './middleware/cache';
+import env from './config/env';
 
 // Routes
 import authRoutes from './routes/auth-routes';
@@ -14,10 +14,8 @@ import questionRoutes from './routes/question-routes';
 import answerRoutes from './routes/answer-routes';
 import imageRoutes from './routes/image-routes';
 
-dotenv.config();
-
 const app = express();
-const port = process.env.PORT || 3000;
+const port = env.PORT;
 
 // Middleware
 app.use(express.json());

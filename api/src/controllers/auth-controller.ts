@@ -18,8 +18,9 @@ import {
   validateRequiredFields,
   handleValidationError,
 } from '../utils/controller-utils';
+import env from '../config/env';
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
+const { GOOGLE_CLIENT_ID } = env;
 
 const login = async (req: Request, res: Response) => {
   try {

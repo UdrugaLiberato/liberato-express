@@ -1,13 +1,11 @@
 import bcrypt from 'bcrypt';
 import jwt, { Secret } from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
+import env from '../config/env';
 
-const JWT_SECRET: Secret = process.env.JWT_SECRET || 'default_secret';
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
-const COOKIE_EXPIRATION = Number.parseInt(
-  process.env.COOKIE_EXPIRATION || '3600000',
-  10,
-);
+const { JWT_SECRET } = env;
+const { JWT_EXPIRATION } = env;
+const { COOKIE_EXPIRATION } = env;
 
 export const normalizeHash = (hash: string): string => {
   return hash.replace(/^\$2y\$/, '$2b$');

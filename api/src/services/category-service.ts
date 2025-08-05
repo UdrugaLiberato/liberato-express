@@ -57,7 +57,12 @@ export const create = async (
     data: buildCategoryData({ name, descriptionEN, descriptionHR }),
   });
 
-  if (uploadResponseData && uploadResponseData.files[0].path) {
+  if (
+    uploadResponseData &&
+    Array.isArray(uploadResponseData.files) &&
+    uploadResponseData.files.length > 0 &&
+    uploadResponseData.files[0].path
+  ) {
     await createCategoryImage(category.id, uploadResponseData.files[0]);
   }
 
@@ -77,7 +82,12 @@ export const updateWithImage = async (
   categoryId: string,
   uploadResponseData: UploadResponseData,
 ) => {
-  if (uploadResponseData && uploadResponseData.files[0].path) {
+  if (
+    uploadResponseData &&
+    Array.isArray(uploadResponseData.files) &&
+    uploadResponseData.files.length > 0 &&
+    uploadResponseData.files[0].path
+  ) {
     await createCategoryImage(categoryId, uploadResponseData.files[0]);
   }
 };

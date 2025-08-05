@@ -17,10 +17,6 @@ export const locationInclude = {
   category: true,
 };
 
-export const resetImageSequence = async () => {
-  await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('image', 'id'), (SELECT MAX(id) FROM image) + 1)`;
-};
-
 export const simplifyAnswers = (answers: any[]): SimplifiedAnswer[] => {
   return answers.map((answer) => ({
     answerId: answer.id,
@@ -48,7 +44,6 @@ export const createImages = async (
   files: Express.Multer.File[],
   locationId: string,
 ) => {
-  await resetImageSequence();
   return Promise.all(
     files.map((file) =>
       prisma.image.create({

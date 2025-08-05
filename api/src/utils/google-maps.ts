@@ -1,7 +1,8 @@
 import axios from 'axios';
 import CoordinatesNotFound from '../exceptions/CoordinatesNotFound';
+import env from '../config/env';
 
-const GOOGLE_API_KEY: string = process.env.GOOGLE_API_KEY!;
+const { GOOGLE_API_KEY } = env;
 
 class GoogleMaps {
   constructor(private apiKey: string = GOOGLE_API_KEY) {}
