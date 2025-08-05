@@ -59,9 +59,11 @@ const gracefulShutdown = async (signal: string) => {
     try {
       await closeRedisConnection();
       console.log('Graceful shutdown completed');
+      // eslint-disable-next-line unicorn/no-process-exit
       process.exit(0);
     } catch (error) {
       console.error('Error during graceful shutdown:', error);
+      // eslint-disable-next-line unicorn/no-process-exit
       process.exit(1);
     }
   });
