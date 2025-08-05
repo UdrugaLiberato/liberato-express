@@ -10,7 +10,6 @@ interface CategoryFilters {
   name?: string;
 }
 
-
 export const getAll = () => {
   return prisma.category.findMany({
     include: {

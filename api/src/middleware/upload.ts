@@ -25,17 +25,16 @@ const imageFileFilter = (
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed'), false);
+    cb(new Error('Only image files are allowed'));
   }
 };
 
 // Default upload configuration (for backward compatibility)
-const upload = multer({ 
+const upload = multer({
   storage,
   fileFilter: imageFileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-    files: 1, // Maximum 1 file per request
+    fileSize: 100 * 1024 * 1024, // 100MB limit
   },
 });
 
@@ -44,7 +43,7 @@ export const categoryImageUpload = multer({
   storage,
   fileFilter: imageFileFilter,
   limits: {
-    fileSize: 2 * 1024 * 1024, // 2MB limit for category images
+    fileSize: 20 * 1024 * 1024, // 20MB limit for category images
     files: 1,
   },
 });
@@ -54,7 +53,7 @@ export const locationImagesUpload = multer({
   storage,
   fileFilter: imageFileFilter,
   limits: {
-    fileSize: 3 * 1024 * 1024, // 3MB per image
+    fileSize: 15 * 1024 * 1024, // 15MB per image
     files: 5, // Maximum 5 images per location
   },
 });
@@ -64,7 +63,7 @@ export const avatarUpload = multer({
   storage,
   fileFilter: imageFileFilter,
   limits: {
-    fileSize: 1 * 1024 * 1024, // 1MB limit for avatars
+    fileSize: 5 * 1024 * 1024, // 5MB limit for avatars
     files: 1,
   },
 });
