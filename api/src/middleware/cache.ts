@@ -67,49 +67,50 @@ const initializeRedis = async (): Promise<RedisClientType> => {
 };
 
 // Cache middleware with proper Redis connection handling
-const cache =
-  (key: string = 'locations', ttl: number = 3600) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      // Ensure Redis is connected before proceeding
-      const redisClient = await initializeRedis();
+const cache = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Ensure Redis is connected before proceeding
+    const redisClient = await initializeRedis();
 
-      if (!redisClient.isReady) {
-        console.log('Redis client not connected, skipping cache');
-        return next();
-      }
-
-      const cachedData = await redisClient.get(key);
-
-      if (cachedData) {
-        console.log('Cache hit');
-        res.json(JSON.parse(cachedData) as any);
-        return;
-      }
-
-      console.log('Cache miss');
-
-      // Store the original res.json to intercept response
-      const originalJson = res.json.bind(res);
-      res.json = (data: any) => {
-        // Store in cache asynchronously without blocking the response
-        (async () => {
-          try {
-            await redisClient.setEx(key, ttl, JSON.stringify(data));
-          } catch (error) {
-            console.error('Error setting cache:', error);
-          }
-        })();
-        return originalJson(data);
-      };
-
-      next();
-    } catch (error) {
-      console.error('Cache error:', error);
-      // If Redis is unavailable, continue without cache
-      next();
+    if (!redisClient.isReady) {
+      console.log('Redis client not connected, skipping cache');
+      return next();
     }
-  };
+
+    const key = req.baseUrl + JSON.stringify(req.query);
+    const ttl = 3600;
+
+    const cachedData = await redisClient.get(key);
+
+    if (cachedData) {
+      console.log('Cache hit');
+      res.json(JSON.parse(cachedData) as any);
+      return;
+    }
+
+    console.log('Cache miss');
+
+    // Store the original res.json to intercept response
+    const originalJson = res.json.bind(res);
+    res.json = (data: any) => {
+      // Store in cache asynchronously without blocking the response
+      (async () => {
+        try {
+          await redisClient.setEx(key, ttl, JSON.stringify(data));
+        } catch (error) {
+          console.error('Error setting cache:', error);
+        }
+      })();
+      return originalJson(data);
+    };
+
+    next();
+  } catch (error) {
+    console.error('Cache error:', error);
+    // If Redis is unavailable, continue without cache
+    next();
+  }
+};
 
 // Graceful shutdown function
 export const closeRedisConnection = async (): Promise<void> => {

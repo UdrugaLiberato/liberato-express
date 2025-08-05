@@ -19,8 +19,12 @@ import {
 export const getAllLocations = async (filters: LocationFilters) => {
   const { city, category, name, cursor } = filters;
 
-  const pageSize = 10;
-  const where: any = {};
+  const pageSize = 1000;
+
+  const where: any = {
+    published: 1,
+    deletedAt: null,
+  };
 
   if (city)
     where.city = {
@@ -41,10 +45,8 @@ export const getAllLocations = async (filters: LocationFilters) => {
       mode: 'insensitive',
       contains: name,
     };
-  where.published = 1;
-  where.deletedAt = null;
 
-  if (city !== undefined && category !== undefined) {
+  if (city !== undefined || category !== undefined || name !== undefined) {
     const locations = await prisma.location.findMany({
       where,
       ...(cursor ? { cursor: { id: cursor } } : undefined),
