@@ -294,13 +294,50 @@ export const updateWithImage = async (
   locationId: string,
   uploadResponseData: UploadResponseData,
 ) => {
-  if (
-    uploadResponseData &&
-    Array.isArray(uploadResponseData.files) &&
-    uploadResponseData.files.length > 0 &&
-    uploadResponseData.files[0].path
-  ) {
-    await createLocationImage(locationId, uploadResponseData.files[0]);
+  try {
+    // Validate input parameters
+    if (!locationId) {
+      const error = 'Location ID is required';
+      console.error('updateWithImage validation failed:', error);
+      throw new Error(error);
+    }
+
+    if (!uploadResponseData) {
+      const error = 'Upload response data is required';
+      console.error('updateWithImage validation failed:', error);
+      throw new Error(error);
+    }
+
+    if (
+      !Array.isArray(uploadResponseData.files) ||
+      uploadResponseData.files.length === 0
+    ) {
+      const error = 'No files found in upload response data';
+      console.error('updateWithImage validation failed:', error);
+      throw new Error(error);
+    }
+
+    // Process all files in the upload response
+    const imageCreationPromises = uploadResponseData.files
+      .filter((file) => file.path) // Only process files with valid paths
+      .map((file) => createLocationImage(locationId, file));
+
+    if (imageCreationPromises.length === 0) {
+      const error = 'No valid file paths found in upload response';
+      console.error('updateWithImage validation failed:', error);
+      throw new Error(error);
+    }
+
+    await Promise.all(imageCreationPromises);
+    console.log(
+      `Successfully processed ${imageCreationPromises.length} images for location ${locationId}`,
+    );
+  } catch (error: any) {
+    console.error(
+      `Error in updateWithImage for location ${locationId}:`,
+      error,
+    );
+    throw error; // Re-throw to allow caller to handle the error
   }
 };
 

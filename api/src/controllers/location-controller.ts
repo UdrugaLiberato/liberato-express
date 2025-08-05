@@ -119,7 +119,9 @@ export const createLocation = async (req: Request, res: Response) => {
 
     // Process image uploads asynchronously if files are provided
     if (files && files.length > 0) {
-      files.map((file) => processImageUploadAsync(location.id, file));
+      Promise.allSettled(
+        files.map((file) => processImageUploadAsync(location.id, file)),
+      );
     }
   } catch (error) {
     handleError(res, error, 'Failed to create location');
@@ -146,7 +148,9 @@ export const updateLocation = async (req: Request, res: Response) => {
 
     // Process image uploads asynchronously if files are provided
     if (files && files.length > 0) {
-      files.map((file) => processImageUploadAsync(updated.id, file));
+      await Promise.all(
+        files.map((file) => processImageUploadAsync(updated.id, file)),
+      );
     }
   } catch (error) {
     handleError(res, error, 'Failed to update location');
