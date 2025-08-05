@@ -1,5 +1,4 @@
 import prisma from '../config/prisma';
-import { Express } from 'express';
 import {
   createCategoryImage,
   createCategoryQuestions,
@@ -48,7 +47,7 @@ export const getByName = (filters: CategoryFilters) => {
 
 export const create = async (
   name: string,
-  file: Express.Multer.File,
+  uploadResponseData: any,
   descriptionEN?: string,
   descriptionHR?: string,
   questions?: string,
@@ -57,10 +56,14 @@ export const create = async (
     data: buildCategoryData({ name, descriptionEN, descriptionHR }),
   });
 
-  await createCategoryImage(
-    category.id,
-    `https://dev.udruga-liberato.hr/images/category/${file.filename}`,
-  );
+  console.log(uploadResponseData);
+  console.log(uploadResponseData.files);
+  console.log(uploadResponseData.files.path);
+
+  // Create category image using the upload response data
+  if (uploadResponseData && uploadResponseData.files[0].path) {
+    await createCategoryImage(category.id, uploadResponseData.files[0].path);
+  }
 
   if (questions) {
     const questionItems = questions

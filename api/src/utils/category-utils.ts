@@ -1,5 +1,6 @@
 import prisma from '../config/prisma';
 import { CategoryData } from '../types';
+import { resetImageSequence } from './location-utils';
 
 export const categoryInclude = {
   questions: true,
@@ -10,6 +11,7 @@ export const createCategoryImage = async (
   categoryId: string,
   imageUrl: string,
 ) => {
+  await resetImageSequence();
   return prisma.image.create({
     data: {
       src: imageUrl,
@@ -30,6 +32,7 @@ export const createCategoryQuestions = async (
         data: {
           ...question,
           categoryId,
+          createdAt: new Date(),
         },
       }),
     ),

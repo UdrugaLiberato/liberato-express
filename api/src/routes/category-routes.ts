@@ -15,13 +15,7 @@ const router = Router();
 router.get('/', getAllCategories);
 router.get('/:id', getCategory);
 router.get('/name/:name', getCategoryByName);
-router.post(
-  '/',
-  authenticate,
-  checkPermissions,
-  upload.single('image'),
-  createCategory,
-);
+router.post('/', upload.single('category_image'), createCategory);
 router.delete('/:id', authenticate, checkPermissions, deleteCategory);
 
 export default router;

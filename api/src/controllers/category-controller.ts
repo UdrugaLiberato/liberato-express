@@ -10,6 +10,9 @@ import {
   validateRequiredFields,
   handleValidationError,
 } from '../utils/controller-utils';
+import axios from 'axios';
+import FormData from 'form-data';
+import fs from 'node:fs';
 
 export const getAllCategories = async (_req: Request, res: Response) => {
   try {
@@ -48,9 +51,9 @@ export const getCategoryByName = async (req: Request, res: Response) => {
 
 export const createCategory = async (req: Request, res: Response) => {
   try {
-    const { name, descriptionEN, descriptionHR, questions } = req.body;
     const { file } = req;
 
+    const { name, descriptionEN, descriptionHR, questions } = req.body;
     const missingFields = validateRequiredFields(req.body, ['name']);
     if (missingFields.length > 0) {
       handleValidationError(res, missingFields);
@@ -62,13 +65,50 @@ export const createCategory = async (req: Request, res: Response) => {
       return;
     }
 
+    // Send image to external upload service
+    let uploadResponse;
+    try {
+      const formData = new FormData();
+      formData.append('files', fs.createReadStream(file.path));
+      formData.append('requestType', 'categories');
+
+      uploadResponse = await axios.post(
+        'https://store.udruga-liberato.hr/upload',
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+          },
+        },
+      );
+
+      // console.log('Upload response:', uploadResponse.data);
+    } catch (uploadError) {
+      console.error('Upload service error:', uploadError);
+      // Clean up local file
+      if (file.path && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+      handleError(
+        res,
+        uploadError,
+        'Failed to upload image to external service',
+      );
+      return;
+    }
+
     const newCategory = await CategoryService.create(
       name,
-      file,
+      uploadResponse.data,
       descriptionEN,
       descriptionHR,
       questions,
     );
+
+    // Clean up local file after successful upload
+    if (file.path && fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
 
     sendCreated(res, newCategory);
   } catch (error) {
