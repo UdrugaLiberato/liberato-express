@@ -13,6 +13,7 @@ import userRoutes from './routes/user-routes';
 import questionRoutes from './routes/question-routes';
 import answerRoutes from './routes/answer-routes';
 import imageRoutes from './routes/image-routes';
+import healthRoutes from './routes/health-routes';
 
 const app = express();
 const port = env.PORT;
@@ -42,6 +43,7 @@ app.use('/users', userRoutes);
 app.use('/questions', questionRoutes);
 app.use('/answers', answerRoutes);
 app.use('/images', imageRoutes);
+app.use('/health', healthRoutes);
 
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
