@@ -43,8 +43,15 @@ app.use('/questions', questionRoutes);
 app.use('/answers', answerRoutes);
 app.use('/images', imageRoutes);
 
-const server = app.listen(port, () => {
+const server = app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
+
+  // Run network diagnostics in production to help debug upload issues
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Running network diagnostics...');
+    const { logNetworkDiagnostics } = await import('./utils/network-diagnostics');
+    await logNetworkDiagnostics();
+  }
 });
 
 // Graceful shutdown handling
