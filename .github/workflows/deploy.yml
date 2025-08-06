@@ -1,39 +1,201 @@
-name: Deploy API via rsync
+name: Deploy API to Production Servers
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+env:
+  NODE_ENV: production
+  REMOTE_USER: ${{ secrets.REMOTE_USER || 'stipo' }}
+  APP_PATH: /home/stipo/app
 
 jobs:
-  deploy:
+  pre-deploy:
     runs-on: self-hosted
+    outputs:
+      deployment-id: ${{ steps.generate-id.outputs.deployment-id }}
+    steps:
+      - name: Generate deployment ID
+        id: generate-id
+        run: echo "deployment-id=deploy-$(date +%Y%m%d-%H%M%S)-${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - name: Deployment started notification
+        run: |
+          echo "🚀 Starting deployment: ${{ steps.generate-id.outputs.deployment-id }}"
+          echo "📝 Commit: ${{ github.sha }}"
+          echo "👤 Actor: ${{ github.actor }}"
+          echo "🌍 Environment: ${{ github.event.inputs.environment || 'production' }}"
+
+  deploy:
+    needs: pre-deploy
+    runs-on: self-hosted
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        server:
+          - { name: "web1", host: "${{ secrets.WEB1 }}" }
+          - { name: "web2", host: "${{ secrets.WEB2 }}" }
+          - { name: "web3", host: "${{ secrets.WEB3 }}" }
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-      - name: Set up SSH key and known hosts
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ matrix.server.host }}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-          for host in ${{ secrets.WEB1 }} ${{ secrets.WEB2 }} ${{ secrets.WEB3 }}; do
-            ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
-          done
-
-      - name: Deploy to web1
+      - name: Test connectivity to ${{ matrix.server.name }}
         run: |
-          rsync -az ./api/ ${{ secrets.REMOTE_USER }}@${{ secrets.WEB1 }}:/home/stipo/app/
-          ssh ${{ secrets.REMOTE_USER }}@${{ secrets.WEB1 }} "cd /home/stipo/app && bun install && pm2 reload backend_map"
+          echo "Testing connection to ${{ matrix.server.name }}..."
+          ssh -o ConnectTimeout=10 ${{ env.REMOTE_USER }}@${{ matrix.server.host }} \
+            "echo 'Connection successful to ${{ matrix.server.name }}'"
 
-      - name: Deploy to web2
+      - name: Create backup on ${{ matrix.server.name }}
         run: |
-          rsync -az ./api/ ${{ secrets.REMOTE_USER }}@${{ secrets.WEB2 }}:/home/stipo/app/
-          ssh ${{ secrets.REMOTE_USER }}@${{ secrets.WEB2 }} "cd /home/stipo/app && bun install && pm2 reload backend_map"
+          ssh ${{ env.REMOTE_USER }}@${{ matrix.server.host }} "
+            cd ${{ env.APP_PATH }} || exit 1
+            
+            # Create backup if source exists
+            if [ -d src ]; then
+              backup_name=\"backup-\$(date +%Y%m%d-%H%M%S)\"
+              cp -r src \"\$backup_name\" && echo 'Backup created: '\$backup_name
+            fi
+            
+            # Cleanup old backups (keep last 3)
+            ls -dt backup-* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
+          "
 
-      - name: Deploy to web3
+      - name: Deploy files to ${{ matrix.server.name }}
         run: |
-          rsync -az ./api/ ${{ secrets.REMOTE_USER }}@${{ secrets.WEB3 }}:/home/stipo/app/
-          ssh ${{ secrets.REMOTE_USER }}@${{ secrets.WEB3 }} "cd /home/stipo/app && bun install && pm2 reload backend_map"
+          echo "📦 Deploying to ${{ matrix.server.name }}..."
+          
+          rsync -azP --delete \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='uploads' \
+            --exclude='logs' \
+            --exclude='backup-*' \
+            --exclude='.git' \
+            --exclude='.env*' \
+            --exclude='*.log' \
+            ./api/ ${{ env.REMOTE_USER }}@${{ matrix.server.host }}:${{ env.APP_PATH }}/
+          
+          echo "✅ Files deployed to ${{ matrix.server.name }}"
+
+      - name: Build application on ${{ matrix.server.name }}
+        run: |
+          ssh ${{ env.REMOTE_USER }}@${{ matrix.server.host }} "
+            cd ${{ env.APP_PATH }} || exit 1
+            
+            echo '📦 Installing dependencies...'
+            bun install --frozen-lockfile --production
+            
+            echo '🔨 Building application...'
+            bun run build
+            
+            echo '📁 Setting up directories...'
+            mkdir -p logs uploads
+            
+            echo '✅ Build completed on ${{ matrix.server.name }}'
+          "
+
+      - name: Deploy with PM2 on ${{ matrix.server.name }}
+        run: |
+          ssh ${{ env.REMOTE_USER }}@${{ matrix.server.host }} "
+            cd ${{ env.APP_PATH }} || exit 1
+            
+            echo '🔄 Deploying with PM2...'
+            
+            # Check if ecosystem config exists
+            if [ ! -f ecosystem.config.js ]; then
+              echo '❌ ecosystem.config.js not found!'
+              exit 1
+            fi
+            
+            # Start or reload PM2 application
+            if pm2 describe backend_map > /dev/null 2>&1; then
+              echo '🔄 Reloading existing PM2 process...'
+              pm2 reload ecosystem.config.js --env production
+            else
+              echo '🚀 Starting new PM2 process...'
+              pm2 start ecosystem.config.js --env production
+            fi
+            
+            # Save PM2 configuration
+            pm2 save
+            
+            echo '✅ PM2 deployment completed on ${{ matrix.server.name }}'
+          "
+
+      - name: Health check for ${{ matrix.server.name }}
+        run: |
+          echo "🔍 Health check for ${{ matrix.server.name }}..."
+          
+          # Wait for service to stabilize
+          sleep 3
+          
+          ssh ${{ env.REMOTE_USER }}@${{ matrix.server.host }} "
+            # Check PM2 status
+            pm2 status backend_map
+            
+            # Check if process is running
+            if pm2 describe backend_map | grep -q 'online'; then
+              echo '✅ Health check passed for ${{ matrix.server.name }}'
+            else
+              echo '❌ Health check failed for ${{ matrix.server.name }}'
+              pm2 logs backend_map --lines 10
+              exit 1
+            fi
+          "
+
+      - name: Deployment summary for ${{ matrix.server.name }}
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ ${{ matrix.server.name }}: Deployment successful"
+          else
+            echo "❌ ${{ matrix.server.name }}: Deployment failed"
+          fi
+
+  post-deploy:
+    needs: [pre-deploy, deploy]
+    runs-on: self-hosted
+    if: always()
+    
+    steps:
+      - name: Final deployment summary
+        run: |
+          echo "🎯 Deployment Summary"
+          echo "===================="
+          echo "🆔 Deployment ID: ${{ needs.pre-deploy.outputs.deployment-id }}"
+          echo "📝 Commit: ${{ github.sha }}"
+          echo "🌐 Repository: ${{ github.repository }}"
+          echo "👤 Actor: ${{ github.actor }}"
+          echo "🕐 Completed: $(date)"
+          echo ""
+          
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "🎉 All servers deployed successfully!"
+            echo "🔗 API should be available at: https://apits.udruga-liberato.hr"
+          else
+            echo "⚠️  Some deployments failed. Check logs above for details."
+            echo "🔧 You may need to manually check server status."
+          fi
