@@ -45,9 +45,9 @@ jobs:
       fail-fast: false
       matrix:
         server:
-          - { name: "web1", host: "${{ secrets.WEB1 }}" }
-          - { name: "web2", host: "${{ secrets.WEB2 }}" }
-          - { name: "web3", host: "${{ secrets.WEB3 }}" }
+          - { name: "web1", secret_key: "WEB1" }
+          - { name: "web2", secret_key: "WEB2" }
+          - { name: "web3", secret_key: "WEB3" }
 
     steps:
       - name: Checkout repository
@@ -60,17 +60,17 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ matrix.server.host }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -H "${{ secrets[matrix.server.secret_key] }}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Test connectivity to ${{ matrix.server.name }}
         run: |
           echo "Testing connection to ${{ matrix.server.name }}..."
-          ssh -o ConnectTimeout=10 ${{ env.REMOTE_USER }}@${{ matrix.server.host }} \
+          ssh -o ConnectTimeout=10 ${{ env.REMOTE_USER }}@${{ secrets[matrix.server.secret_key] }} \
             "echo 'Connection successful to ${{ matrix.server.name }}'"
 
       - name: Create backup on ${{ matrix.server.name }}
         run: |
-          ssh ${{ env.REMOTE_USER }}@${{ matrix.server.host }} "
+          ssh ${{ env.REMOTE_USER }}@${{ secrets[matrix.server.secret_key] }} "
             cd ${{ env.APP_PATH }} || exit 1
             
             # Create backup if source exists
@@ -96,13 +96,13 @@ jobs:
             --exclude='.git' \
             --exclude='.env*' \
             --exclude='*.log' \
-            ./api/ ${{ env.REMOTE_USER }}@${{ matrix.server.host }}:${{ env.APP_PATH }}/
+            ./api/ ${{ env.REMOTE_USER }}@${{ secrets[matrix.server.secret_key] }}:${{ env.APP_PATH }}/
           
           echo "✅ Files deployed to ${{ matrix.server.name }}"
 
       - name: Build application on ${{ matrix.server.name }}
         run: |
-          ssh ${{ env.REMOTE_USER }}@${{ matrix.server.host }} "
+          ssh ${{ env.REMOTE_USER }}@${{ secrets[matrix.server.secret_key] }} "
             cd ${{ env.APP_PATH }} || exit 1
             
             echo '📦 Installing dependencies...'
@@ -119,7 +119,7 @@ jobs:
 
       - name: Deploy with PM2 on ${{ matrix.server.name }}
         run: |
-          ssh ${{ env.REMOTE_USER }}@${{ matrix.server.host }} "
+          ssh ${{ env.REMOTE_USER }}@${{ secrets[matrix.server.secret_key] }} "
             cd ${{ env.APP_PATH }} || exit 1
             
             echo '🔄 Deploying with PM2...'
@@ -152,7 +152,7 @@ jobs:
           # Wait for service to stabilize
           sleep 3
           
-          ssh ${{ env.REMOTE_USER }}@${{ matrix.server.host }} "
+          ssh ${{ env.REMOTE_USER }}@${{ secrets[matrix.server.secret_key] }} "
             # Check PM2 status
             pm2 status backend_map
             
