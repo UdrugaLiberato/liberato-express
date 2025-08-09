@@ -92,7 +92,6 @@ export interface CityData {
   latitude: number;
   longitude: number;
   radiusInKm?: number | null;
-  image?: string;
 }
 
 export interface CityFilters {
@@ -106,7 +105,6 @@ export interface CityUpdateData {
   latitude?: number;
   longitude?: number;
   radiusInKm?: number;
-  image?: string;
 }
 
 // Question Types

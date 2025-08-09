@@ -18,13 +18,15 @@ router.get('/:id', getCity);
 router.get('/name/:name', getCityByName);
 router.post(
   '/',
-  cityImageUpload.single('city_image'),
   authenticate,
   checkPermissions,
+  cityImageUpload.single('city_image'),
   createCity,
 );
 router.put(
   '/:id',
+  authenticate,
+  checkPermissions,
   cityImageUpload.single('city_image'),
   updateCity,
 );

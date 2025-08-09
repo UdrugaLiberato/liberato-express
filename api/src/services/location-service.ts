@@ -30,7 +30,7 @@ export const getAllLocations = async (filters: LocationFilters) => {
 
   if (city)
     where.city = {
-      name: {
+      slug: {
         mode: 'insensitive',
         contains: city,
       },

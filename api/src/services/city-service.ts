@@ -64,14 +64,14 @@ export const getCityByName = async (filters: CityFilters) => {
 
 export const createCity = async (data: CityData) => {
   return prisma.city.create({
-    data: buildCityData(data),
+    data: await buildCityData(data),
   });
 };
 
 export const updateCity = async (id: string, data: CityUpdateData) => {
   return prisma.city.update({
     where: { id },
-    data: buildCityUpdateData(data),
+    data: await buildCityUpdateData(data, id),
   });
 };
 

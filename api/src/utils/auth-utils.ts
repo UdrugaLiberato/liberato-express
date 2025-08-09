@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { type SignOptions } from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import env from '../config/env';
 
@@ -14,7 +14,7 @@ export const normalizeHash = (hash: string): string => {
 export const generateToken = (userId: string, role: string): string => {
   return jwt.sign({ id: userId, role }, JWT_SECRET, {
     expiresIn: JWT_EXPIRATION,
-  } as jwt.SignOptions);
+  } as SignOptions);
 };
 
 export const setAuthCookie = (res: any, token: string) => {

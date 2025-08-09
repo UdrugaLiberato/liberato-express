@@ -21,7 +21,7 @@ const processImageUploadAsync = async (
     path: string;
     filename?: string;
     originalname?: string;
-    mime?: string;
+    mimetype?: string;
   },
 ) => {
   try {
@@ -30,7 +30,7 @@ const processImageUploadAsync = async (
     formData.append('requestType', 'cities');
 
     const uploadResponse = await axios.post(
-      `${env.STORE_URL}/upload`,
+      new URL('/upload', env.STORE_URL).toString(),
       formData,
       {
         headers: {
@@ -51,16 +51,27 @@ const processImageUploadAsync = async (
         status: uploadError.response.status,
         statusText: uploadError.response.statusText,
         data: uploadError.response.data,
-        url: `${env.STORE_URL}/upload`,
+        url: new URL('/upload', env.STORE_URL).toString(),
       });
     } else if (uploadError?.request) {
       console.error('Upload service request failed:', uploadError.message);
     } else {
       console.error('Upload error:', uploadError?.message || 'Unknown error');
     }
+
+    // Consider implementing retry mechanism or background job for failed uploads
+    // if the upload is business-critical
   } finally {
+    // Use non-blocking file deletion
     if (file.path && fs.existsSync(file.path)) {
-      fs.unlinkSync(file.path);
+      try {
+        await fs.promises.unlink(file.path);
+      } catch (deleteError) {
+        console.error(
+          `Failed to delete temporary file ${file.path}:`,
+          deleteError,
+        );
+      }
     }
   }
 };

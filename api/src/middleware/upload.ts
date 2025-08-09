@@ -22,11 +22,22 @@ const imageFileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback,
 ) => {
-  // Allow images only
-  if (file.mimetype.startsWith('image/')) {
+  // Only allow safe image MIME types to prevent XSS risks from SVG
+  const allowedMimeTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/avif',
+  ];
+
+  if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed'));
+    cb(
+      new Error(
+        `Only safe image files are allowed. Supported types: ${allowedMimeTypes.join(', ')}`,
+      ),
+    );
   }
 };
 
