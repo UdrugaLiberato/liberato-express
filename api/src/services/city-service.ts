@@ -31,13 +31,11 @@ export const getCityById = (id: string) => {
 };
 
 export const getCityBySlug = async (filters: CityFilters) => {
-  let { slug } = filters;
-  if (slug && slug.includes('-')) {
-    slug = slug.replaceAll('-', ' ');
-  }
+  const { slug } = filters;
 
   if (!slug) return null;
 
+  // First try exact slug match
   const exactMatch = await prisma.city.findFirst({
     where: {
       slug: {
@@ -45,10 +43,14 @@ export const getCityBySlug = async (filters: CityFilters) => {
         equals: slug,
       },
     },
+    include: {
+      images: true,
+    },
   });
 
   if (exactMatch) return exactMatch;
 
+  // If no exact match, try partial match
   return prisma.city.findFirst({
     where: {
       slug: {

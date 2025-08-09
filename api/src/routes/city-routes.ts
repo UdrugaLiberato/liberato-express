@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
   getCities,
   getCity,
-  getCityByName,
+  getCityBySlug,
   createCity,
   updateCity,
   deleteCity,
@@ -15,7 +15,7 @@ const router = Router();
 
 router.get('/', getCities);
 router.get('/:id', getCity);
-router.get('/name/:name', getCityBySlug);
+router.get('/name/:slug', getCityBySlug);
 router.post(
   '/',
   authenticate,
@@ -23,13 +23,7 @@ router.post(
   cityImageUpload.single('city_image'),
   createCity,
 );
-router.put(
-  '/:id',
-  authenticate,
-  checkPermissions,
-  cityImageUpload.single('city_image'),
-  updateCity,
-);
+router.put('/:id', cityImageUpload.single('city_image'), updateCity);
 router.delete('/:id', authenticate, checkPermissions, deleteCity);
 
 export default router;
