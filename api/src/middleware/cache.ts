@@ -89,7 +89,6 @@ const cache = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     console.log('Cache miss');
-
     // Store the original res.json to intercept response
     const originalJson = res.json.bind(res);
     res.json = (data: any) => {
