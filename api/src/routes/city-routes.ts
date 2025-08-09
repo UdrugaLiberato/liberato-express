@@ -15,7 +15,7 @@ const router = Router();
 
 router.get('/', getCities);
 router.get('/:id', getCity);
-router.get('/name/:name', getCityByName);
+router.get('/name/:name', getCityBySlug);
 router.post(
   '/',
   authenticate,

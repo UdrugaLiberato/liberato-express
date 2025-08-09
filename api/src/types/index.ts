@@ -95,7 +95,7 @@ export interface CityData {
 }
 
 export interface CityFilters {
-  name?: string;
+  slug?: string;
 }
 
 export interface CityUpdateData {
