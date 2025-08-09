@@ -1,3 +1,4 @@
+/* eslint-disable promise/prefer-await-to-callbacks */
 import multer from 'multer';
 import path from 'node:path';
 import { Request } from 'express';
@@ -21,11 +22,22 @@ const imageFileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback,
 ) => {
-  // Allow images only
-  if (file.mimetype.startsWith('image/')) {
+  // Only allow safe image MIME types to prevent XSS risks from SVG
+  const allowedMimeTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/avif',
+  ];
+
+  if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed'));
+    cb(
+      new Error(
+        `Only safe image files are allowed. Supported types: ${allowedMimeTypes.join(', ')}`,
+      ),
+    );
   }
 };
 
@@ -64,6 +76,16 @@ export const avatarUpload = multer({
   fileFilter: imageFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit for avatars
+    files: 1,
+  },
+});
+
+// Specialized upload for city images
+export const cityImageUpload = multer({
+  storage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for city images
     files: 1,
   },
 });

@@ -10,6 +10,71 @@ import {
   handleValidationError,
   handlePrismaError,
 } from '../utils/controller-utils';
+import axios from 'axios';
+import FormData from 'form-data';
+import fs from 'node:fs';
+import env from '../config/env';
+
+const processImageUploadAsync = async (
+  cityId: string,
+  file: {
+    path: string;
+    filename?: string;
+    originalname?: string;
+    mimetype?: string;
+  },
+) => {
+  try {
+    const formData = new FormData();
+    formData.append('files', fs.createReadStream(file.path));
+    formData.append('requestType', 'cities');
+
+    const uploadResponse = await axios.post(
+      new URL('/upload', env.STORE_URL).toString(),
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+        },
+        timeout: 30_000,
+      },
+    );
+
+    await CityService.updateWithImage(cityId, uploadResponse.data);
+
+    console.log(`Image uploaded successfully for city ${cityId}`);
+  } catch (uploadError: any) {
+    console.error(`Failed to upload image for city ${cityId}:`, uploadError);
+
+    if (uploadError?.response) {
+      console.error('Upload service responded with:', {
+        status: uploadError.response.status,
+        statusText: uploadError.response.statusText,
+        data: uploadError.response.data,
+        url: new URL('/upload', env.STORE_URL).toString(),
+      });
+    } else if (uploadError?.request) {
+      console.error('Upload service request failed:', uploadError.message);
+    } else {
+      console.error('Upload error:', uploadError?.message || 'Unknown error');
+    }
+
+    // Consider implementing retry mechanism or background job for failed uploads
+    // if the upload is business-critical
+  } finally {
+    // Use non-blocking file deletion
+    if (file.path && fs.existsSync(file.path)) {
+      try {
+        await fs.promises.unlink(file.path);
+      } catch (deleteError) {
+        console.error(
+          `Failed to delete temporary file ${file.path}:`,
+          deleteError,
+        );
+      }
+    }
+  }
+};
 
 export const getCities = async (_request: Request, res: Response) => {
   try {
@@ -48,6 +113,7 @@ export const getCityByName = async (request: Request, res: Response) => {
 
 export const createCity = async (request: Request, res: Response) => {
   try {
+    const { file } = request;
     const { name, latitude, longitude, radiusInKm } = request.body;
 
     const missingFields = validateRequiredFields(request.body, [
@@ -68,6 +134,10 @@ export const createCity = async (request: Request, res: Response) => {
     });
 
     sendCreated(res, newCity);
+
+    if (file) {
+      processImageUploadAsync(newCity.id, file);
+    }
   } catch (error) {
     handleError(res, error, 'Failed to create city');
   }
@@ -75,9 +145,14 @@ export const createCity = async (request: Request, res: Response) => {
 
 export const updateCity = async (request: Request, res: Response) => {
   try {
+    const { file } = request;
     const { id } = request.params;
     const updated = await CityService.updateCity(id, request.body);
     sendSuccess(res, updated);
+
+    if (file) {
+      processImageUploadAsync(updated.id, file);
+    }
   } catch (error) {
     handlePrismaError(res, error);
   }
