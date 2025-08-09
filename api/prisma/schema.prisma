@@ -43,6 +43,7 @@ model category {
 model city {
   id           String     @id(map: "idx_16869_primary") @default(uuid()) @db.VarChar(255)
   name         String     @unique(map: "idx_16869_uniq_2d5b02345e237e06") @db.VarChar(255)
+  slug         String?    @unique @db.VarChar(255)
   descriptionEN String?
   descriptionHR String?
   latitude     Float

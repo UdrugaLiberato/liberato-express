@@ -1,3 +1,4 @@
+/* eslint-disable promise/prefer-await-to-callbacks */
 import multer from 'multer';
 import path from 'node:path';
 import { Request } from 'express';
@@ -64,6 +65,16 @@ export const avatarUpload = multer({
   fileFilter: imageFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit for avatars
+    files: 1,
+  },
+});
+
+// Specialized upload for city images
+export const cityImageUpload = multer({
+  storage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for city images
     files: 1,
   },
 });

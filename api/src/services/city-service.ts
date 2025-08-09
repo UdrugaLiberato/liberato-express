@@ -3,8 +3,14 @@ import {
   buildCityData,
   buildCityUpdateData,
   validateCityDeletion,
+  createCityImage,
 } from '../utils/city-utils';
-import { CityData, CityUpdateData, CityFilters } from '../types';
+import {
+  CityData,
+  CityUpdateData,
+  CityFilters,
+  UploadResponseData,
+} from '../types';
 
 export const getAllCities = () => {
   return prisma.city.findMany({
@@ -18,6 +24,9 @@ export const getAllCities = () => {
 export const getCityById = (id: string) => {
   return prisma.city.findUnique({
     where: { id },
+    include: {
+      images: true,
+    },
   });
 };
 
@@ -75,4 +84,18 @@ export const deleteCity = async (id: string) => {
       deletedAt: new Date(),
     },
   });
+};
+
+export const updateWithImage = async (
+  cityId: string,
+  uploadResponseData: UploadResponseData,
+) => {
+  if (
+    uploadResponseData &&
+    Array.isArray(uploadResponseData.files) &&
+    uploadResponseData.files.length > 0 &&
+    uploadResponseData.files[0].path
+  ) {
+    await createCityImage(cityId, uploadResponseData.files[0]);
+  }
 };

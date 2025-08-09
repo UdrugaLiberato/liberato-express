@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import jwt, { Secret } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import env from '../config/env';
 
