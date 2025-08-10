@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
   getCities,
   getCity,
-  getCityByName,
+  getCityBySlug,
   createCity,
   updateCity,
   deleteCity,
@@ -15,7 +15,7 @@ const router = Router();
 
 router.get('/', getCities);
 router.get('/:id', getCity);
-router.get('/name/:name', getCityByName);
+router.get('/name/:slug', getCityBySlug);
 router.post(
   '/',
   authenticate,

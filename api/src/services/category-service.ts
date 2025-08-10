@@ -46,6 +46,37 @@ export const getByName = (filters: CategoryFilters) => {
   });
 };
 
+export const getBySlug = async (slug: string) => {
+  if (!slug) return null;
+
+  // First try to find by slug
+  let category = await prisma.category.findUnique({
+    where: { slug },
+    include: {
+      question: true,
+      image: true,
+    },
+  });
+
+  // If not found by slug, try by name (for backward compatibility)
+  if (!category) {
+    let searchName = slug;
+    if (searchName && searchName.includes('-')) {
+      searchName = searchName.replaceAll('-', ' ');
+    }
+
+    category = await prisma.category.findFirst({
+      where: { name: { mode: 'insensitive', contains: searchName } },
+      include: {
+        question: true,
+        image: true,
+      },
+    });
+  }
+
+  return category;
+};
+
 export const create = async (
   name: string,
   uploadResponseData: UploadResponseData | null,
