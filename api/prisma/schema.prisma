@@ -26,35 +26,35 @@ model answer {
 }
 
 model category {
-  id           String     @id(map: "idx_16864_primary") @default(uuid()) @db.VarChar(255)
-  name         String     @unique(map: "idx_16864_uniq_64c19c15e237e06") @db.VarChar(255)
-  slug         String?    @unique(map: "idx_category_slug_unique") @db.VarChar(255)
+  id            String     @id(map: "idx_16864_primary") @default(uuid()) @db.VarChar(255)
+  name          String     @unique(map: "idx_16864_uniq_64c19c15e237e06") @db.VarChar(255)
+  createdAt     DateTime   @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime?  @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime?  @map("deleted_at") @db.Timestamptz(6)
   descriptionEN String?
   descriptionHR String?
-  createdAt    DateTime   @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime?  @map("updated_at") @db.Timestamptz(6)
-  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz(6)
-  image        image[]
-  location     location[]
-  question     question[]
+  slug          String?    @unique(map: "idx_category_slug_unique") @db.VarChar(255)
+  image         image[]
+  location      location[]
+  question      question[]
 
   @@schema("public")
 }
 
 model city {
-  id           String     @id(map: "idx_16869_primary") @default(uuid()) @db.VarChar(255)
-  name         String     @unique(map: "idx_16869_uniq_2d5b02345e237e06") @db.VarChar(255)
-  slug         String?    @unique(map: "idx_city_slug_unique") @db.VarChar(255)
+  id            String     @id(map: "idx_16869_primary") @default(uuid()) @db.VarChar(255)
+  name          String     @unique(map: "idx_16869_uniq_2d5b02345e237e06") @db.VarChar(255)
   descriptionEN String?
   descriptionHR String?
-  latitude     Float
-  longitude    Float
-  images       image[]
-  createdAt    DateTime   @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime?  @map("updated_at") @db.Timestamptz(6)
-  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz(6)
-  radiusInKm   Int        @map("radius_in_km")
-  location     location[]
+  latitude      Float
+  longitude     Float
+  createdAt     DateTime   @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime?  @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  radiusInKm    Int        @map("radius_in_km")
+  slug          String?    @unique(map: "idx_city_slug_unique") @db.VarChar(255)
+  images        image[]
+  location      location[]
 
   @@schema("public")
 }
@@ -71,10 +71,11 @@ model image {
   category   category? @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "image_ibfk_1")
   location   location? @relation(fields: [locationId], references: [id], onUpdate: NoAction, map: "image_ibfk_2")
   city       city?     @relation(fields: [cityId], references: [id], onUpdate: NoAction, map: "image_ibfk_3")
+
   @@index([categoryId], map: "idx_16874_category_id")
   @@index([locationId], map: "idx_16874_location_id")
-  @@schema("public")
   @@index([cityId], map: "idx_16874_city_id")
+  @@schema("public")
 }
 
 model location {
@@ -83,6 +84,7 @@ model location {
   userId     String?   @map("user_id") @db.VarChar(255)
   cityId     String    @map("city_id") @db.VarChar(255)
   name       String    @db.VarChar(255)
+  slug       String?   @db.VarChar(255)
   street     String    @db.VarChar(255)
   phone      String?   @db.VarChar(255)
   email      String?   @db.VarChar(255)
@@ -100,6 +102,7 @@ model location {
   city       city      @relation(fields: [cityId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cb8bac62af")
   user       user?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cba76ed395")
 
+  @@unique([name, cityId, categoryId], map: "idx_location_name_city_category_unique")
   @@index([categoryId], map: "idx_16879_idx_5e9e89cb12469de2")
   @@index([cityId], map: "idx_16879_idx_5e9e89cb8bac62af")
   @@index([userId], map: "idx_16879_idx_5e9e89cba76ed395")

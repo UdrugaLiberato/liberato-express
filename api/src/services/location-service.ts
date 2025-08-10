@@ -10,6 +10,7 @@ import {
   buildLocationUpdateData,
   toInt,
   fromPascalWithDashes,
+  getUniqueSlug,
 } from '../utils/location-utils';
 import {
   LocationFilters,
@@ -132,6 +133,25 @@ export const getLocationById = async (id: string) => {
   return location ? addSimplifiedAnswers(location) : null;
 };
 
+export const getLocationBySlug = async (
+  citySlug: string,
+  categorySlug: string,
+  locationSlug: string,
+) => {
+  const location = await prisma.location.findFirst({
+    where: {
+      slug: locationSlug,
+      city: { slug: citySlug },
+      category: { slug: categorySlug },
+      deletedAt: null,
+      published: 1,
+    },
+    include: locationInclude,
+  });
+
+  return location ? addSimplifiedAnswers(location) : null;
+};
+
 export const getLocationByCityAndCategoryAndName = async (
   filters: LocationFilters,
 ) => {
@@ -201,12 +221,16 @@ export const createLocation = async (
     }
   }
 
+  // Generate unique slug for the location
+  const slug = await getUniqueSlug(body.name, body.city_id, body.category_id);
+
   const location = await prisma.location.create({
     data: {
       category: { connect: { id: body.category_id } },
       city: { connect: { id: body.city_id } },
       user: { connect: { id: userId } },
       name: body.name,
+      slug,
       street: coordinates.formattedAddress || `${body.street} ${city.name}`,
       phone: body.phone || '',
       email: body.email || '',
@@ -247,7 +271,15 @@ export const updateLocation = async (
 ) => {
   if (!body) throw new Error('Empty body');
 
-  const dataToUpdate = buildLocationUpdateData(body);
+  // Get current location data for slug generation
+  const currentLocation = await prisma.location.findUnique({
+    where: { id },
+    select: { cityId: true, categoryId: true, id: true, name: true },
+  });
+
+  if (!currentLocation) throw new Error('Location not found');
+
+  const dataToUpdate = await buildLocationUpdateData(body, currentLocation);
 
   if (body.street !== undefined || body.city_id !== undefined) {
     const city = body.city_id

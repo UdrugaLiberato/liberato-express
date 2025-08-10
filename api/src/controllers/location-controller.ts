@@ -205,3 +205,30 @@ export const getLocationByCityAndCategoryAndName = async (
     handleError(res, error);
   }
 };
+
+export const getLocationBySlug = async (req: Request, res: Response) => {
+  try {
+    const { citySlug, categorySlug, locationSlug } = req.params;
+
+    // Validate slug parameters
+    if (!citySlug || !categorySlug || !locationSlug) {
+      sendBadRequest(res, 'City slug, category slug, and location slug are required');
+      return;
+    }
+
+    const location = await LocationService.getLocationBySlug(
+      citySlug,
+      categorySlug,
+      locationSlug,
+    );
+
+    if (!location) {
+      sendNotFound(res, 'Location not found');
+      return;
+    }
+
+    sendSuccess(res, location);
+  } catch (error) {
+    handleError(res, error, 'Failed to get location by slug');
+  }
+};
