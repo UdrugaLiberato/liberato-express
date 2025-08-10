@@ -100,7 +100,17 @@ export const getCity = async (request: Request, res: Response) => {
 
 export const getCityBySlug = async (request: Request, res: Response) => {
   try {
-    const city = await CityService.getCityBySlug({ slug: request.params.slug });
+    // Validate slug parameter
+    const { slug } = request.params;
+    if (!slug || slug.trim() === '') {
+      sendBadRequest(res, 'City slug is required and cannot be empty');
+      return;
+    }
+
+    // Normalize slug
+    const normalizedSlug = slug.trim().toLowerCase();
+
+    const city = await CityService.getCityBySlug({ slug: normalizedSlug });
     if (!city) {
       sendNotFound(res, 'City not found');
       return;

@@ -6,6 +6,7 @@ import {
   sendCreated,
   sendNoContent,
   sendNotFound,
+  sendBadRequest,
   validateRequiredFields,
   handleValidationError,
 } from '../utils/controller-utils';
@@ -108,7 +109,17 @@ export const getCategoryByName = async (req: Request, res: Response) => {
 
 export const getCategoryBySlug = async (req: Request, res: Response) => {
   try {
-    const category = await CategoryService.getBySlug(req.params.slug);
+    // Validate slug parameter
+    const { slug } = req.params;
+    if (!slug || slug.trim() === '') {
+      sendBadRequest(res, 'Category slug is required and cannot be empty');
+      return;
+    }
+
+    // Normalize slug
+    const normalizedSlug = slug.trim().toLowerCase();
+
+    const category = await CategoryService.getBySlug(normalizedSlug);
     if (!category) {
       sendNotFound(res, 'Category not found');
       return;

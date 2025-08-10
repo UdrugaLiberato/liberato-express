@@ -23,7 +23,13 @@ router.post(
   cityImageUpload.single('city_image'),
   createCity,
 );
-router.put('/:id', cityImageUpload.single('city_image'), updateCity);
+router.put(
+  '/:id',
+  authenticate,
+  checkPermissions,
+  cityImageUpload.single('city_image'),
+  updateCity,
+);
 router.delete('/:id', authenticate, checkPermissions, deleteCity);
 
 export default router;
