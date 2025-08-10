@@ -211,8 +211,8 @@ export const getLocationBySlug = async (req: Request, res: Response) => {
     const { citySlug, categorySlug, locationSlug } = req.params;
 
     // Validate slug parameters
-    if (!citySlug || !categorySlug || !locationSlug) {
-      sendBadRequest(res, 'City slug, category slug, and location slug are required');
+    if (citySlug === '' || categorySlug === '' || locationSlug === '') {
+      sendBadRequest(res, 'City slug, category slug, and location slug cannot be empty');
       return;
     }
 

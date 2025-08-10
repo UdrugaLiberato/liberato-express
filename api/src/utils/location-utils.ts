@@ -121,7 +121,7 @@ export const toInt = (value: boolean | number | string): number => {
 
 export const buildLocationUpdateData = async (
   data: any,
-  currentLocation?: { cityId: string; categoryId: string; id: string },
+  currentLocation?: { cityId: string; categoryId: string; id: string; name: string },
 ) => {
   const updateData: any = {
     name: data.name,
@@ -142,7 +142,7 @@ export const buildLocationUpdateData = async (
   ) {
     const finalCityId = data.cityId || currentLocation.cityId;
     const finalCategoryId = data.categoryId || currentLocation.categoryId;
-    const finalName = data.name || 'Unknown'; // fallback if name is undefined
+    const finalName = data.name !== undefined ? data.name : currentLocation.name; // use current name as fallback
 
     updateData.slug = await getUniqueSlug(
       finalName,
@@ -210,12 +210,13 @@ export const getUniqueSlug = async (
       slug: baseSlug,
       cityId,
       categoryId,
-      deletedAt: null
+      deletedAt: null,
+      ...(excludeId && { id: { not: excludeId } }),
     },
     select: { id: true },
   });
 
-  if (!baseSlugExists || (excludeId && baseSlugExists.id === excludeId)) {
+  if (!baseSlugExists) {
     return baseSlug;
   }
 

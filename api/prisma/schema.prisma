@@ -106,6 +106,7 @@ model location {
   @@index([categoryId], map: "idx_16879_idx_5e9e89cb12469de2")
   @@index([cityId], map: "idx_16879_idx_5e9e89cb8bac62af")
   @@index([userId], map: "idx_16879_idx_5e9e89cba76ed395")
+  @@index([slug])
   @@schema("public")
 }
 
