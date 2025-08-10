@@ -38,7 +38,7 @@ export const getAllLocations = async (filters: LocationFilters) => {
     };
   if (category)
     where.category = {
-      name: {
+      slug: {
         mode: 'insensitive',
         contains: category,
       },
@@ -133,16 +133,10 @@ export const getLocationById = async (id: string) => {
   return location ? addSimplifiedAnswers(location) : null;
 };
 
-export const getLocationBySlug = async (
-  citySlug: string,
-  categorySlug: string,
-  locationSlug: string,
-) => {
+export const getLocationBySlug = async (slug: string) => {
   const location = await prisma.location.findFirst({
     where: {
-      slug: locationSlug,
-      city: { slug: citySlug },
-      category: { slug: categorySlug },
+      slug,
       deletedAt: null,
       published: 1,
     },
