@@ -106,6 +106,19 @@ export const getCategoryByName = async (req: Request, res: Response) => {
   }
 };
 
+export const getCategoryBySlug = async (req: Request, res: Response) => {
+  try {
+    const category = await CategoryService.getBySlug(req.params.slug);
+    if (!category) {
+      sendNotFound(res, 'Category not found');
+      return;
+    }
+    sendSuccess(res, category);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 export const createCategory = async (req: Request, res: Response) => {
   try {
     const { file } = req;
