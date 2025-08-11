@@ -16,7 +16,7 @@ import cache from '../middleware/cache';
 const router = Router();
 
 router.get('/', cache, getLocations);
-router.get('/slug/:citySlug/:categorySlug/:locationSlug', getLocationBySlug);
+router.get('/name/:slug', getLocationBySlug);
 router.get('/:id', getLocation);
 router.post(
   '/',
