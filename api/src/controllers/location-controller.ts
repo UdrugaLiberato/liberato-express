@@ -208,27 +208,10 @@ export const getLocationByCityAndCategoryAndName = async (
 
 export const getLocationBySlug = async (req: Request, res: Response) => {
   try {
-    const { citySlug, categorySlug, locationSlug } = req.params;
-
-    // Validate slug parameters
-    if (citySlug === '' || categorySlug === '' || locationSlug === '') {
-      sendBadRequest(res, 'City slug, category slug, and location slug cannot be empty');
-      return;
-    }
-
-    const location = await LocationService.getLocationBySlug(
-      citySlug,
-      categorySlug,
-      locationSlug,
-    );
-
-    if (!location) {
-      sendNotFound(res, 'Location not found');
-      return;
-    }
-
+    const { slug } = req.params;
+    const location = await LocationService.getLocationBySlug(slug);
     sendSuccess(res, location);
   } catch (error) {
-    handleError(res, error, 'Failed to get location by slug');
+    handleError(res, error);
   }
 };
