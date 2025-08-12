@@ -1,6 +1,5 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
@@ -126,14 +125,13 @@ model question {
 
 model user {
   id           String     @id(map: "idx_16889_primary") @default(uuid()) @db.VarChar(255)
+  clerkId      String?    @unique(map: "idx_16889_clerkid") @map("clerkid") @db.VarChar(255)
   emailAddress String?    @unique(map: "idx_16889_uniq_8d93d649e7927c74") @map("emailaddress") @db.VarChar(255)
-  externalId   String?    @unique(map: "idx_16889_externalid") @map("externalid") @db.VarChar(255)
   lastSignInAt BigInt?    @map("lastsigninat")
   lastActiveAt BigInt?    @map("lastactiveat")
   banned       Boolean?   @default(false)
   phone        String?    @db.VarChar(180)
-  roles        String
-  password     String     @db.VarChar(255)
+  roles        String     @default("user")
   username     String     @db.VarChar(255)
   avatarUrl    String?    @map("avatarurl")
   createdAt    DateTime   @map("created_at") @db.Timestamptz(6)
