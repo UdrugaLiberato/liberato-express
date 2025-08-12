@@ -2,10 +2,10 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { closeRedisConnection } from './middleware/cache';
+import { clerkMiddleware } from '@clerk/express';
 import env from './config/env';
 
 // Routes
-import authRoutes from './routes/auth-routes';
 import cityRoutes from './routes/city-routes';
 import locationRoutes from './routes/location-routes';
 import categoryRoutes from './routes/category-routes';
@@ -14,6 +14,7 @@ import questionRoutes from './routes/question-routes';
 import answerRoutes from './routes/answer-routes';
 import imageRoutes from './routes/image-routes';
 import healthRoutes from './routes/health-routes';
+import webhookRoutes from './routes/webhook-routes';
 
 const app = express();
 const port = env.PORT;
@@ -29,13 +30,12 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
+app.use(clerkMiddleware());
+
+// Webhook routes
+app.use('/webhook', webhookRoutes);
 
 // Routes
-app.get('/', (request, res) => {
-  res.send('Hello World!');
-});
-
-app.use('/auth', authRoutes);
 app.use('/cities', cityRoutes);
 app.use('/locations', locationRoutes);
 app.use('/categories', categoryRoutes);

@@ -210,6 +210,9 @@ export const getLocationBySlug = async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
     const location = await LocationService.getLocationBySlug(slug);
+    if (!location) {
+      return sendNotFound(res, 'Location not found');
+    }
     sendSuccess(res, location);
   } catch (error) {
     handleError(res, error);
