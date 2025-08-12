@@ -133,14 +133,24 @@ export const handleSessionCreated = async (evt: WebhookEvent) => {
     const userId = (evt.data as any).user_id;
 
     if (userId) {
-      await prisma.user
-        .update({
-          where: { clerkId: userId },
-          data: { lastActiveAt: BigInt(Date.now()) },
-        })
-        .catch((error) =>
-          console.warn('Could not update user last active:', error),
-        );
+      // Try to update user last active, but don't fail if user doesn't exist yet
+      // (session.created webhook might arrive before user.created completes)
+      const userExists = await prisma.user.findUnique({
+        where: { clerkId: userId },
+      });
+
+      if (userExists) {
+        await prisma.user
+          .update({
+            where: { clerkId: userId },
+            data: { lastActiveAt: BigInt(Date.now()) },
+          })
+          .catch((error) =>
+            console.warn('Could not update user last active:', error),
+          );
+      } else {
+        console.log(`⏭️ User ${userId} not found yet, skipping lastActiveAt update`);
+      }
     }
 
     return { sessionId, userId, action: 'created' };
