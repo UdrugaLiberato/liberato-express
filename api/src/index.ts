@@ -19,6 +19,9 @@ import webhookRoutes from './routes/webhook-routes';
 const app = express();
 const port = env.PORT;
 
+// Webhook routes (before JSON parsing to preserve raw body)
+app.use('/webhook', express.raw({ type: 'application/json' }), webhookRoutes);
+
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
@@ -31,9 +34,6 @@ app.use(
   }),
 );
 app.use(clerkMiddleware());
-
-// Webhook routes
-app.use('/webhook', webhookRoutes);
 
 // Routes
 app.use('/cities', cityRoutes);
