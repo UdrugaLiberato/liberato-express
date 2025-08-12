@@ -6,15 +6,14 @@ import {
   updateAnswer,
   deleteAnswer,
 } from '../controllers/answer-controller';
-import authenticate from '../middleware/authenticate';
-import checkPermissions from '../middleware/check-permissions';
+
 
 const router = Router();
 
 router.get('/', getAllAnswers);
 router.get('/:id', getAnswer);
-router.post('/', authenticate, checkPermissions, createAnswer);
-router.put('/:id', authenticate, checkPermissions, updateAnswer);
-router.delete('/:id', authenticate, checkPermissions, deleteAnswer);
+router.post('/', createAnswer);
+router.put('/:id', updateAnswer);
+router.delete('/:id', deleteAnswer);
 
 export default router;

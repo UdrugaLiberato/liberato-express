@@ -22,27 +22,21 @@ if (!process.env.CLERK_SECRET_KEY) {
   throw new Error('CLERK_SECRET_KEY is not set');
 }
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET is not set');
-}
 
-if (!process.env.GOOGLE_CLIENT_ID) {
-  throw new Error('GOOGLE_CLIENT_ID is not set');
+
+if (!process.env.STORE_URL) {
+  throw new Error('STORE_URL is not set');
 }
 
 interface EnvConfig {
   PORT: number;
   NODE_ENV: string;
   DATABASE_URL: string;
-  STORE_URL: string;
   GOOGLE_API_KEY: string;
   CLERK_WEBHOOK_SIGNING_SECRET: string;
   CLERK_PUBLISHABLE_KEY: string;
   CLERK_SECRET_KEY: string;
-  JWT_SECRET: string;
-  JWT_EXPIRATION: string;
-  COOKIE_EXPIRATION: number;
-  GOOGLE_CLIENT_ID: string;
+  STORE_URL: string;
 }
 
 const env: EnvConfig = {
@@ -54,13 +48,6 @@ const env: EnvConfig = {
   CLERK_WEBHOOK_SIGNING_SECRET: process.env.CLERK_WEBHOOK_SIGNING_SECRET,
   CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY,
   CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
-  JWT_SECRET: process.env.JWT_SECRET,
-  JWT_EXPIRATION: process.env.JWT_EXPIRATION || '24h',
-  COOKIE_EXPIRATION: Number.parseInt(
-    process.env.COOKIE_EXPIRATION || '3600000',
-    10,
-  ),
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 };
 
 export default env;

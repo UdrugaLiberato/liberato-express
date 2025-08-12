@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import authenticate from '../middleware/authenticate';
+
 import { locationImagesUpload } from '../middleware/upload';
 import {
   getLocations,
@@ -20,13 +20,11 @@ router.get('/name/:slug', getLocationBySlug);
 router.get('/:id', getLocation);
 router.post(
   '/',
-  authenticate,
   locationImagesUpload.array('images', 5),
   createLocation,
 );
 router.put(
   '/:id',
-  authenticate,
   locationImagesUpload.array('images', 5),
   updateLocation,
 );
