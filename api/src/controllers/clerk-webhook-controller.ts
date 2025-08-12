@@ -20,13 +20,7 @@ const serializeBigInt = (obj: any): any => {
 
 const handleClerkWebhook = async (req: Request, res: Response) => {
   try {
-    // Create a proper request object with string body for Clerk verification
-    const modifiedReq = {
-      ...req,
-      body: req.body.toString(),
-    };
-    
-    const evt = await verifyWebhook(modifiedReq);
+    const evt = await verifyWebhook(req);
 
     console.log(`✅ Clerk webhook verified: ${evt.type} - ${evt.data.id}`);
 
