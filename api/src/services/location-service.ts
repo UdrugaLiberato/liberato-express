@@ -44,7 +44,7 @@ export const getAllLocations = async (filters: LocationFilters) => {
       },
     };
   if (name)
-    where.name = {
+    where.slug = {
       mode: 'insensitive',
       contains: name,
     };
