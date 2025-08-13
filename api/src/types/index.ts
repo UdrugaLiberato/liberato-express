@@ -194,6 +194,9 @@ export interface LocationData {
   qa?: string;
 }
 
+// Legacy type for backward compatibility
+export interface LocationCreateData extends LocationData {}
+
 export interface LocationUpdateData {
   name?: string;
   category_id?: string;
@@ -215,6 +218,7 @@ export interface LocationFilters {
   featured?: boolean;
   cursor?: string;
   limit?: number;
+  includeVotes?: boolean;
 }
 
 export interface LocationResponse {
@@ -371,6 +375,13 @@ export interface VoteResponse {
   location?: LocationResponse;
 }
 
+export interface VoteStats {
+  upvotes: number;
+  downvotes: number;
+  totalVotes: number;
+  userVote?: 'up' | 'down' | null;
+}
+
 // Search Types
 export interface SearchFilters {
   query: string;
@@ -417,6 +428,16 @@ export interface AuthenticatedRequest extends Request {
     roles: string[];
   };
   apiKey?: string;
+}
+
+// Extend Express Request interface
+declare global {
+  namespace Express {
+    interface Request {
+      apiKey?: string;
+      userAgent?: string;
+    }
+  }
 }
 
 // Health Check Types

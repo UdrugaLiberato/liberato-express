@@ -1,4 +1,4 @@
-import { Request, Response, Express } from 'express';
+import { Request, Response } from 'express';
 import * as LocationService from '../services/location-service';
 import {
   handleError,
@@ -9,83 +9,34 @@ import {
   sendBadRequest,
 } from '../utils/controller-utils';
 import { LocationCreateData, LocationUpdateData } from '../types';
-import axios from 'axios';
-import FormData from 'form-data';
-import fs from 'node:fs';
-import env from '../config/env';
 
-// Async function to handle image upload in background
-const processImageUploadAsync = async (
-  locationId: string,
-  file: {
-    path: string;
-    filename?: string;
-    originalname?: string;
-    mime?: string;
-  },
-) => {
+// Helper function to process image upload asynchronously
+const processImageUploadAsync = async (locationId: string, file: Express.Multer.File) => {
   try {
-    const formData = new FormData();
-    formData.append('files', fs.createReadStream(file.path));
-    formData.append('requestType', 'locations');
-
-    const uploadResponse = await axios.post(
-      `${env.STORE_URL}/upload`,
-      formData,
-      {
-        headers: {
-          ...formData.getHeaders(),
-        },
-        timeout: 30_000, // 30 second timeout
-      },
-    );
-
-    // Update location with image info once upload is complete
-    await LocationService.updateWithImage(locationId, uploadResponse.data);
-
-    console.log(`Image uploaded successfully for location ${locationId}`);
-  } catch (uploadError: any) {
-    console.error(
-      `Failed to upload image for location ${locationId}:`,
-      uploadError,
-    );
-
-    // Log more detailed error information for debugging
-    if (uploadError?.response) {
-      console.error('Upload service responded with:', {
-        status: uploadError.response.status,
-        statusText: uploadError.response.statusText,
-        data: uploadError.response.data,
-        url: `${env.STORE_URL}/upload`,
-      });
-    } else if (uploadError?.request) {
-      console.error('Upload service request failed:', uploadError.message);
-    } else {
-      console.error('Upload error:', uploadError?.message || 'Unknown error');
-    }
-  } finally {
-    // Clean up local file
-    if (file.path && fs.existsSync(file.path)) {
-      fs.unlinkSync(file.path);
-    }
+    await LocationService.updateWithImage(locationId, file);
+    console.log(`Successfully uploaded image for location ${locationId}`);
+  } catch (error) {
+    console.error(`Failed to upload image for location ${locationId}:`, error);
   }
 };
 
-export const getLocations = async (req: Request, res: Response) => {
+export const getAllLocations = async (req: Request, res: Response) => {
   try {
-    const { city, category, name, cursor, includeVotes } = req.query;
-    const userId = req.user?.id;
+    const {
+      city,
+      category,
+      name,
+      cursor,
+      includeVotes,
+    } = req.query;
 
-    const locations = await LocationService.getAllLocations(
-      {
-        city: city as string | undefined,
-        category: category as string | undefined,
-        name: name as string | undefined,
-        cursor: cursor as string | undefined,
-        includeVotes: includeVotes === 'true',
-      },
-      userId,
-    );
+    const locations = await LocationService.getAllLocations({
+      city: city as string | undefined,
+      category: category as string | undefined,
+      name: name as string | undefined,
+      cursor: cursor as string | undefined,
+      includeVotes: includeVotes === 'true',
+    });
     sendSuccess(res, locations);
   } catch (error) {
     handleError(res, error);
@@ -94,14 +45,7 @@ export const getLocations = async (req: Request, res: Response) => {
 
 export const getLocation = async (req: Request, res: Response) => {
   try {
-    const { includeVotes } = req.query;
-    const userId = req.user?.id;
-
-    const location = await LocationService.getLocationById(
-      req.params.id,
-      includeVotes === 'true',
-      userId,
-    );
+    const location = await LocationService.getLocationById(req.params.id);
     if (!location) {
       sendNotFound(res, 'Location not found');
       return;
@@ -120,7 +64,6 @@ export const createLocation = async (req: Request, res: Response) => {
     const location = await LocationService.createLocation(
       req.body as LocationCreateData,
       [], // No files initially
-      '1ed198be-8109-68e4-8afe-cd8a4ea3d515',
     );
     if (!location) {
       sendBadRequest(res, 'Invalid city ID');
@@ -184,13 +127,14 @@ export const getLocationsByCityAndCategory = async (
   res: Response,
 ) => {
   try {
-    const cursor = req.query.cursor as string | undefined;
     const { city, category } = req.params;
-    const locations = await LocationService.getLocationsByCityAndCategory({
+    const limit = parseInt(req.query.limit as string) || 20;
+    
+    const locations = await LocationService.getLocationsByCityAndCategory(
       city,
       category,
-      cursor,
-    });
+      limit,
+    );
     sendSuccess(res, locations);
   } catch (error) {
     handleError(res, error);
@@ -202,13 +146,13 @@ export const getLocationByCityAndCategoryAndName = async (
   res: Response,
 ) => {
   try {
-    const { city, category, name, cursor } = req.params;
-    const location = await LocationService.getLocationByCityAndCategoryAndName({
+    const { city, category, name } = req.params;
+    
+    const location = await LocationService.getLocationByCityAndCategoryAndName(
       city,
       category,
-      cursor,
       name,
-    });
+    );
     if (!location) {
       sendNotFound(res, 'Location not found');
       return;

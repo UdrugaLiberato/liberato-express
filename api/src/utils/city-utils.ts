@@ -104,11 +104,39 @@ export const buildCityData = async (data: CityData) => ({
 export const buildCityUpdateData = async (
   data: CityUpdateData,
   excludeId?: string,
-) => ({
-  ...data,
-  ...(data.name && { slug: await getUniqueSlug(data.name, excludeId) }),
-  updatedAt: new Date(),
-});
+) => {
+  const updateData: any = {
+    updatedAt: new Date(),
+  };
+
+  // Only include fields that are actually provided
+  if (data.name !== undefined) {
+    updateData.name = data.name;
+    updateData.slug = await getUniqueSlug(data.name, excludeId);
+  }
+
+  if (data.descriptionEN !== undefined) {
+    updateData.descriptionEN = data.descriptionEN;
+  }
+
+  if (data.descriptionHR !== undefined) {
+    updateData.descriptionHR = data.descriptionHR;
+  }
+
+  if (data.latitude !== undefined) {
+    updateData.latitude = data.latitude;
+  }
+
+  if (data.longitude !== undefined) {
+    updateData.longitude = data.longitude;
+  }
+
+  if (data.radiusInKm !== undefined) {
+    updateData.radiusInKm = data.radiusInKm;
+  }
+
+  return updateData;
+};
 
 export const validateCityDeletion = async (id: string) => {
   const city = await prisma.city.findUnique({

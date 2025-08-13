@@ -1,111 +1,118 @@
-import { VoteStats } from '../types';
+import prisma from '../config/prisma';
 
-export const calculateVoteScore = (
-  upvotes: number,
-  downvotes: number,
-): number => {
-  return upvotes - downvotes;
+// Custom error class for vote utils
+class VoteUtilsError extends Error {
+  constructor(message: string, public code?: string) {
+    super(message);
+    this.name = 'VoteUtilsError';
+  }
+}
+
+export const validateVoteData = (data: any): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+
+  if (!data) {
+    errors.push('Vote data is required');
+    return { isValid: false, errors };
+  }
+
+  if (!data.location_id || typeof data.location_id !== 'string') {
+    errors.push('Valid location ID is required');
+  }
+
+  if (!data.vote_type || !['up', 'down'].includes(data.vote_type)) {
+    errors.push('Vote type must be "up" or "down"');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
 };
 
-export const calculateVotePercentage = (
-  upvotes: number,
-  downvotes: number,
-): {
-  upvotePercentage: number;
-  downvotePercentage: number;
-} => {
-  const total = upvotes + downvotes;
+export const checkVoteExists = async (locationId: string, userId: string) => {
+  try {
+    if (!locationId || !userId) {
+      throw new VoteUtilsError('Location ID and user ID are required', 'MISSING_PARAMS');
+    }
 
-  if (total === 0) {
+    return await prisma.vote.findFirst({
+      where: {
+        locationId,
+        userId,
+      },
+    });
+  } catch (error) {
+    console.error('Error in checkVoteExists:', error);
+    if (error instanceof VoteUtilsError) {
+      throw error;
+    }
+    throw new VoteUtilsError('Failed to check vote existence', 'CHECK_VOTE_ERROR');
+  }
+};
+
+export const formatVoteResponse = (vote: any) => {
+  try {
+    if (!vote) {
+      return null;
+    }
+
     return {
-      upvotePercentage: 0,
-      downvotePercentage: 0,
+      id: vote.id,
+      location_id: vote.locationId,
+      vote_type: vote.voteType === 1 ? 'up' : 'down',
+      user_id: vote.userId,
+      createdAt: vote.createdAt,
+      updatedAt: vote.updatedAt,
+      location: vote.location ? {
+        id: vote.location.id,
+        name: vote.location.name,
+        slug: vote.location.slug,
+      } : null,
+    };
+  } catch (error) {
+    console.error('Error in formatVoteResponse:', error);
+    return vote;
+  }
+};
+
+export const calculateVoteStats = (votes: any[], userId?: string) => {
+  try {
+    if (!Array.isArray(votes)) {
+      return {
+        upvotes: 0,
+        downvotes: 0,
+        totalVotes: 0,
+        userVote: null,
+      };
+    }
+
+    const upvotes = votes.filter(vote => vote.voteType === 1).length;
+    const downvotes = votes.filter(vote => vote.voteType === -1).length;
+    const totalVotes = upvotes + downvotes;
+
+    let userVote: 'up' | 'down' | null = null;
+    if (userId) {
+      const userVoteRecord = votes.find(vote => vote.userId === userId);
+      if (userVoteRecord) {
+        userVote = userVoteRecord.voteType === 1 ? 'up' : 'down';
+      }
+    }
+
+    return {
+      upvotes,
+      downvotes,
+      totalVotes,
+      userVote,
+    };
+  } catch (error) {
+    console.error('Error in calculateVoteStats:', error);
+    return {
+      upvotes: 0,
+      downvotes: 0,
+      totalVotes: 0,
+      userVote: null,
     };
   }
-
-  return {
-    upvotePercentage: Math.round((upvotes / total) * 100),
-    downvotePercentage: Math.round((downvotes / total) * 100),
-  };
-};
-
-export const getVoteRating = (
-  upvotes: number,
-  downvotes: number,
-): {
-  rating: number;
-  totalVotes: number;
-  score: number;
-} => {
-  const totalVotes = upvotes + downvotes;
-  const score = calculateVoteScore(upvotes, downvotes);
-
-  // Calculate rating as a percentage of positive votes
-  const rating = totalVotes > 0 ? (upvotes / totalVotes) * 100 : 0;
-
-  return {
-    rating: Math.round(rating * 100) / 100, // Round to 2 decimal places
-    totalVotes,
-    score,
-  };
-};
-
-export const enhanceVoteStats = (
-  stats: VoteStats,
-): VoteStats & {
-  score: number;
-  upvotePercentage: number;
-  downvotePercentage: number;
-  rating: number;
-} => {
-  const { upvotes, downvotes } = stats;
-  const score = calculateVoteScore(upvotes, downvotes);
-  const percentages = calculateVotePercentage(upvotes, downvotes);
-  const ratingData = getVoteRating(upvotes, downvotes);
-
-  return {
-    ...stats,
-    score,
-    ...percentages,
-    rating: ratingData.rating,
-  };
-};
-
-export const formatVoteDisplay = (
-  upvotes: number,
-  downvotes: number,
-): string => {
-  const score = calculateVoteScore(upvotes, downvotes);
-  const total = upvotes + downvotes;
-
-  if (total === 0) {
-    return 'No votes yet';
-  }
-
-  return `${score > 0 ? '+' : ''}${score} (${upvotes}↑ ${downvotes}↓)`;
-};
-
-export const isVoteDataValid = (voteType: any): voteType is 1 | -1 => {
-  return voteType === 1 || voteType === -1;
-};
-
-export const normalizeVoteType = (voteType: any): 1 | -1 | null => {
-  if (
-    voteType === 1 ||
-    voteType === '1' ||
-    voteType === 'upvote' ||
-    voteType === 'up'
-  ) {
-    return 1;
-  }
-  if (
-    voteType === -1 ||
-    voteType === '-1' ||
-    voteType === 'downvote' ||
-    voteType === 'down'
-  ) {
-    return -1;
-  }
-  return null;
 };
 

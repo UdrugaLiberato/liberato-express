@@ -1,24 +1,16 @@
 import prisma from '../config/prisma';
 import googleMaps from './google-maps';
-import {
-  SimplifiedAnswer,
-  LocationWithSimplifiedAnswers,
-  VoteStats,
-} from '../types';
+import { SimplifiedAnswer, LocationWithSimplifiedAnswers } from '../types';
 import env from '../config/env';
 
 // Constants for better maintainability
 const DEFAULT_IMAGE_NAME = 'location-image';
 const DEFAULT_MIME_TYPE = 'application/octet-stream';
-const DEFAULT_IMAGE_BASE_URL =
-  'https://dev.udruga-liberato.hr/images/location/';
+const DEFAULT_IMAGE_BASE_URL = 'https://dev.udruga-liberato.hr/images/location/';
 
 // Custom error class for location utils
 class LocationUtilsError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-  ) {
+  constructor(message: string, public code?: string) {
     super(message);
     this.name = 'LocationUtilsError';
   }
@@ -39,57 +31,6 @@ export const locationInclude = {
   category: true,
 };
 
-export const buildLocationInclude = (includeVotes: boolean = false) => {
-  const include: any = { ...locationInclude };
-
-  if (includeVotes) {
-    include.votes = true;
-  }
-
-  return include;
-};
-
-export const calculateVoteStatsFromLocation = (
-  votes: any[],
-  userId?: string,
-): VoteStats => {
-  if (!Array.isArray(votes)) {
-    return {
-      upvotes: 0,
-      downvotes: 0,
-      totalVotes: 0,
-      userVote: null,
-    };
-  }
-
-  const upvotes = votes.filter((vote) => vote.voteType === 1).length;
-  const downvotes = votes.filter((vote) => vote.voteType === -1).length;
-  const userVote = userId
-    ? votes.find((vote) => vote.userId === userId)?.voteType || null
-    : null;
-
-  return {
-    upvotes,
-    downvotes,
-    totalVotes: upvotes + downvotes,
-    userVote: userVote as 1 | -1 | null,
-  };
-};
-
-export const addVoteStatsToLocation = (location: any, userId?: string) => {
-  if (!location.votes) {
-    return location;
-  }
-
-  const voteStats = calculateVoteStatsFromLocation(location.votes, userId);
-  const { votes: _votes, ...locationWithoutVotes } = location;
-
-  return {
-    ...locationWithoutVotes,
-    voteStats,
-  };
-};
-
 export const simplifyAnswers = (answers: any[]): SimplifiedAnswer[] => {
   try {
     if (!Array.isArray(answers)) {
@@ -97,7 +38,7 @@ export const simplifyAnswers = (answers: any[]): SimplifiedAnswer[] => {
     }
 
     return answers
-      .filter((answer) => answer && answer.question) // Filter out invalid answers
+      .filter(answer => answer && answer.question) // Filter out invalid answers
       .map((answer) => ({
         answerId: answer.id,
         answer: answer.answer,
@@ -115,10 +56,7 @@ export const addSimplifiedAnswers = (
 ): LocationWithSimplifiedAnswers => {
   try {
     if (!location) {
-      throw new LocationUtilsError(
-        'Location data is required',
-        'INVALID_LOCATION',
-      );
+      throw new LocationUtilsError('Location data is required', 'INVALID_LOCATION');
     }
 
     const { answer, ...locationWithoutAnswer } = location;
@@ -131,20 +69,14 @@ export const addSimplifiedAnswers = (
     if (error instanceof LocationUtilsError) {
       throw error;
     }
-    throw new LocationUtilsError(
-      'Failed to add simplified answers',
-      'ADD_ANSWERS_ERROR',
-    );
+    throw new LocationUtilsError('Failed to add simplified answers', 'ADD_ANSWERS_ERROR');
   }
 };
 
 export const getCoordinates = async (address: string) => {
   try {
     if (!address || typeof address !== 'string') {
-      throw new LocationUtilsError(
-        'Valid address is required',
-        'INVALID_ADDRESS',
-      );
+      throw new LocationUtilsError('Valid address is required', 'INVALID_ADDRESS');
     }
 
     return googleMaps.getCoordinateForStreet('', address);
@@ -153,10 +85,7 @@ export const getCoordinates = async (address: string) => {
     if (error instanceof LocationUtilsError) {
       throw error;
     }
-    throw new LocationUtilsError(
-      'Failed to get coordinates',
-      'COORDINATES_ERROR',
-    );
+    throw new LocationUtilsError('Failed to get coordinates', 'COORDINATES_ERROR');
   }
 };
 
@@ -171,17 +100,11 @@ export const createLocationImage = async (
 ) => {
   try {
     if (!locationId) {
-      throw new LocationUtilsError(
-        'Location ID is required',
-        'INVALID_LOCATION_ID',
-      );
+      throw new LocationUtilsError('Location ID is required', 'INVALID_LOCATION_ID');
     }
 
     if (!image || !image.path) {
-      throw new LocationUtilsError(
-        'Valid image data is required',
-        'INVALID_IMAGE_DATA',
-      );
+      throw new LocationUtilsError('Valid image data is required', 'INVALID_IMAGE_DATA');
     }
 
     return prisma.image.create({
@@ -197,10 +120,7 @@ export const createLocationImage = async (
     if (error instanceof LocationUtilsError) {
       throw error;
     }
-    throw new LocationUtilsError(
-      'Failed to create location image',
-      'CREATE_IMAGE_ERROR',
-    );
+    throw new LocationUtilsError('Failed to create location image', 'CREATE_IMAGE_ERROR');
   }
 };
 
@@ -210,10 +130,7 @@ export const createImages = async (
 ) => {
   try {
     if (!locationId) {
-      throw new LocationUtilsError(
-        'Location ID is required',
-        'INVALID_LOCATION_ID',
-      );
+      throw new LocationUtilsError('Location ID is required', 'INVALID_LOCATION_ID');
     }
 
     if (!Array.isArray(files) || files.length === 0) {
@@ -237,26 +154,20 @@ export const createImages = async (
     });
 
     const results = await Promise.all(imagePromises);
-    return results.filter((result) => result !== null);
+    return results.filter(result => result !== null);
   } catch (error) {
     console.error('Error in createImages:', error);
     if (error instanceof LocationUtilsError) {
       throw error;
     }
-    throw new LocationUtilsError(
-      'Failed to create images',
-      'CREATE_IMAGES_ERROR',
-    );
+    throw new LocationUtilsError('Failed to create images', 'CREATE_IMAGES_ERROR');
   }
 };
 
 export const createAnswers = async (answers: string, locationId: string) => {
   try {
     if (!locationId) {
-      throw new LocationUtilsError(
-        'Location ID is required',
-        'INVALID_LOCATION_ID',
-      );
+      throw new LocationUtilsError('Location ID is required', 'INVALID_LOCATION_ID');
     }
 
     if (!answers || typeof answers !== 'string') {
@@ -274,7 +185,7 @@ export const createAnswers = async (answers: string, locationId: string) => {
 
     const answerPromises = items.map(async (item) => {
       const [questionId, answer] = item.split(':');
-
+      
       if (!questionId || answer === undefined) {
         console.warn('Invalid answer format:', item);
         return null;
@@ -291,16 +202,13 @@ export const createAnswers = async (answers: string, locationId: string) => {
     });
 
     const results = await Promise.all(answerPromises);
-    return results.filter((result) => result !== null);
+    return results.filter(result => result !== null);
   } catch (error) {
     console.error('Error in createAnswers:', error);
     if (error instanceof LocationUtilsError) {
       throw error;
     }
-    throw new LocationUtilsError(
-      'Failed to create answers',
-      'CREATE_ANSWERS_ERROR',
-    );
+    throw new LocationUtilsError('Failed to create answers', 'CREATE_ANSWERS_ERROR');
   }
 };
 
@@ -310,17 +218,11 @@ export const buildLocationUpdateData = async (
 ) => {
   try {
     if (!body) {
-      throw new LocationUtilsError(
-        'Update data is required',
-        'INVALID_UPDATE_DATA',
-      );
+      throw new LocationUtilsError('Update data is required', 'INVALID_UPDATE_DATA');
     }
 
     if (!currentLocation) {
-      throw new LocationUtilsError(
-        'Current location data is required',
-        'INVALID_CURRENT_LOCATION',
-      );
+      throw new LocationUtilsError('Current location data is required', 'INVALID_CURRENT_LOCATION');
     }
 
     const updateData: any = {};
@@ -360,15 +262,11 @@ export const buildLocationUpdateData = async (
     }
 
     // Generate new slug if name or relationships changed
-    if (
-      body.name !== undefined ||
-      body.category_id !== undefined ||
-      body.city_id !== undefined
-    ) {
+    if (body.name !== undefined || body.category_id !== undefined || body.city_id !== undefined) {
       const newName = body.name || currentLocation.name;
       const newCategoryId = body.category_id || currentLocation.categoryId;
       const newCityId = body.city_id || currentLocation.cityId;
-
+      
       updateData.slug = await getUniqueSlug(newName, newCityId, newCategoryId);
     }
 
@@ -380,10 +278,7 @@ export const buildLocationUpdateData = async (
     if (error instanceof LocationUtilsError) {
       throw error;
     }
-    throw new LocationUtilsError(
-      'Failed to build location update data',
-      'BUILD_UPDATE_DATA_ERROR',
-    );
+    throw new LocationUtilsError('Failed to build location update data', 'BUILD_UPDATE_DATA_ERROR');
   }
 };
 
@@ -402,8 +297,8 @@ export const toInt = (value: any): number => {
     }
 
     if (typeof value === 'string') {
-      const parsed = Number.parseInt(value, 10);
-      return Number.isNaN(parsed) ? 0 : parsed;
+      const parsed = parseInt(value, 10);
+      return isNaN(parsed) ? 0 : parsed;
     }
 
     return 0;
@@ -420,7 +315,7 @@ export const fromPascalWithDashes = (str: string): string => {
     }
 
     return str
-      .replaceAll(/([A-Z])/g, '-$1')
+      .replace(/([A-Z])/g, '-$1')
       .toLowerCase()
       .replace(/^-/, '');
   } catch (error) {
@@ -436,10 +331,7 @@ export const getUniqueSlug = async (
 ): Promise<string> => {
   try {
     if (!name || !cityId || !categoryId) {
-      throw new LocationUtilsError(
-        'Name, city ID, and category ID are required',
-        'MISSING_SLUG_PARAMS',
-      );
+      throw new LocationUtilsError('Name, city ID, and category ID are required', 'MISSING_SLUG_PARAMS');
     }
 
     const baseSlug = generateSlug(name);
@@ -467,10 +359,7 @@ export const getUniqueSlug = async (
 
       // Prevent infinite loop
       if (counter > 100) {
-        throw new LocationUtilsError(
-          'Unable to generate unique slug',
-          'SLUG_GENERATION_FAILED',
-        );
+        throw new LocationUtilsError('Unable to generate unique slug', 'SLUG_GENERATION_FAILED');
       }
     }
 
@@ -480,10 +369,7 @@ export const getUniqueSlug = async (
     if (error instanceof LocationUtilsError) {
       throw error;
     }
-    throw new LocationUtilsError(
-      'Failed to generate unique slug',
-      'SLUG_ERROR',
-    );
+    throw new LocationUtilsError('Failed to generate unique slug', 'SLUG_ERROR');
   }
 };
 
@@ -497,10 +383,10 @@ const generateSlug = (name: string): string => {
     return name
       .toLowerCase()
       .trim()
-      .replaceAll(/[^\s\w-]/g, '') // Remove special characters
-      .replaceAll(/\s+/g, '-') // Replace spaces with hyphens
-      .replaceAll(/-+/g, '-') // Replace multiple hyphens with single
-      .replaceAll(/^-|-$/g, ''); // Remove leading/trailing hyphens
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
   } catch (error) {
     console.error('Error in generateSlug:', error);
     return name || '';
@@ -508,9 +394,7 @@ const generateSlug = (name: string): string => {
 };
 
 // New utility function: Validate location data
-export const validateLocationData = (
-  data: any,
-): { isValid: boolean; errors: string[] } => {
+export const validateLocationData = (data: any): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
   if (!data) {
@@ -518,11 +402,7 @@ export const validateLocationData = (
     return { isValid: false, errors };
   }
 
-  if (
-    !data.name ||
-    typeof data.name !== 'string' ||
-    data.name.trim().length === 0
-  ) {
+  if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
     errors.push('Valid name is required');
   }
 
@@ -542,17 +422,11 @@ export const validateLocationData = (
     errors.push('Email must be a string');
   }
 
-  if (
-    data.latitude !== undefined &&
-    (typeof data.latitude !== 'number' || Number.isNaN(data.latitude))
-  ) {
+  if (data.latitude !== undefined && (typeof data.latitude !== 'number' || isNaN(data.latitude))) {
     errors.push('Latitude must be a valid number');
   }
 
-  if (
-    data.longitude !== undefined &&
-    (typeof data.longitude !== 'number' || Number.isNaN(data.longitude))
-  ) {
+  if (data.longitude !== undefined && (typeof data.longitude !== 'number' || isNaN(data.longitude))) {
     errors.push('Longitude must be a valid number');
   }
 
@@ -571,14 +445,12 @@ export const calculateDistance = (
 ): number => {
   try {
     const R = 6371; // Earth's radius in kilometers
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLng = ((lng2 - lng1) * Math.PI) / 180;
-    const a =
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = 
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   } catch (error) {
@@ -608,27 +480,21 @@ export const formatLocationForDisplay = (location: any) => {
       published: Boolean(location.published),
       createdAt: location.createdAt,
       updatedAt: location.updatedAt,
-      city: location.city
-        ? {
-            id: location.city.id,
-            name: location.city.name,
-            slug: location.city.slug,
-          }
-        : null,
-      category: location.category
-        ? {
-            id: location.category.id,
-            name: location.category.name,
-          }
-        : null,
-      images: Array.isArray(location.image)
-        ? location.image.map((img: any) => ({
-            id: img.id,
-            src: img.src,
-            name: img.name,
-            mime: img.mime,
-          }))
-        : [],
+      city: location.city ? {
+        id: location.city.id,
+        name: location.city.name,
+        slug: location.city.slug,
+      } : null,
+      category: location.category ? {
+        id: location.category.id,
+        name: location.category.name,
+      } : null,
+      images: Array.isArray(location.image) ? location.image.map((img: any) => ({
+        id: img.id,
+        src: img.src,
+        name: img.name,
+        mime: img.mime,
+      })) : [],
       answers: Array.isArray(location.answers) ? location.answers : [],
     };
   } catch (error) {

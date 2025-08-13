@@ -1,213 +1,168 @@
 import prisma from '../config/prisma';
 import { VoteData, VoteStats, VoteResponse } from '../types';
 
-class VoteServiceError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-  ) {
-    super(message);
-    this.name = 'VoteServiceError';
-  }
-}
-
-export const createOrUpdateVote = async (
-  userId: string,
-  voteData: VoteData,
-): Promise<VoteResponse> => {
+export const createVote = async (voteData: VoteData, userId: string) => {
   try {
-    const { locationId, voteType } = voteData;
+    const { location_id, vote_type } = voteData;
 
-    // Validate vote type
-    if (voteType !== 1 && voteType !== -1) {
-      throw new VoteServiceError(
-        'Invalid vote type. Must be 1 (upvote) or -1 (downvote)',
-      );
-    }
-
-    // Check if location exists
-    const locationExists = await prisma.location.findFirst({
+    // Check if user already voted on this location
+    const existingVote = await prisma.vote.findFirst({
       where: {
-        id: locationId,
-        published: 1,
-        deletedAt: null,
+        locationId: location_id,
+        userId: userId,
       },
     });
 
-    if (!locationExists) {
-      throw new VoteServiceError('Location not found or not published');
+    if (existingVote) {
+      // Update existing vote
+      return prisma.vote.update({
+        where: { id: existingVote.id },
+        data: {
+          voteType: vote_type === 'up' ? 1 : -1,
+          updatedAt: new Date(),
+        },
+      });
     }
 
-    // Use upsert to handle both create and update cases
-    const vote = await prisma.vote.upsert({
-      where: {
-        userId_locationId: {
-          userId,
-          locationId,
-        },
-      },
-      update: {
-        voteType,
-        updatedAt: new Date(),
-      },
-      create: {
-        userId,
-        locationId,
-        voteType,
+    // Create new vote
+    return prisma.vote.create({
+      data: {
+        locationId: location_id,
+        userId: userId,
+        voteType: vote_type === 'up' ? 1 : -1,
         createdAt: new Date(),
       },
     });
-
-    return {
-      id: vote.id,
-      userId: vote.userId,
-      locationId: vote.locationId,
-      voteType: vote.voteType as 1 | -1,
-      createdAt: vote.createdAt,
-      updatedAt: vote.updatedAt || undefined,
-    };
   } catch (error) {
-    if (error instanceof VoteServiceError) {
-      throw error;
-    }
-    throw new VoteServiceError(
-      'Failed to create or update vote',
-      'DATABASE_ERROR',
-    );
+    console.error('Error in createVote:', error);
+    throw new Error('Failed to create vote');
   }
 };
 
-export const removeVote = async (
-  userId: string,
-  locationId: string,
-): Promise<void> => {
-  try {
-    const deletedVote = await prisma.vote.deleteMany({
-      where: {
-        userId,
-        locationId,
-      },
-    });
-
-    if (deletedVote.count === 0) {
-      throw new VoteServiceError('Vote not found');
-    }
-  } catch (error) {
-    if (error instanceof VoteServiceError) {
-      throw error;
-    }
-    throw new VoteServiceError('Failed to remove vote', 'DATABASE_ERROR');
-  }
-};
-
-export const getVoteStats = async (
-  locationId: string,
-  userId?: string,
-): Promise<VoteStats> => {
-  try {
-    // Get vote counts using aggregation
-    const [upvoteCount, downvoteCount, userVote] = await Promise.all([
-      prisma.vote.count({
-        where: {
-          locationId,
-          voteType: 1,
-        },
-      }),
-      prisma.vote.count({
-        where: {
-          locationId,
-          voteType: -1,
-        },
-      }),
-      userId
-        ? prisma.vote.findUnique({
-            where: {
-              userId_locationId: {
-                userId,
-                locationId,
-              },
-            },
-            select: {
-              voteType: true,
-            },
-          })
-        : null,
-    ]);
-
-    return {
-      upvotes: upvoteCount,
-      downvotes: downvoteCount,
-      totalVotes: upvoteCount + downvoteCount,
-      userVote: userVote ? (userVote.voteType as 1 | -1) : null,
-    };
-  } catch {
-    throw new VoteServiceError(
-      'Failed to get vote statistics',
-      'DATABASE_ERROR',
-    );
-  }
-};
-
-export const getUserVote = async (
-  userId: string,
-  locationId: string,
-): Promise<1 | -1 | null> => {
-  try {
-    const vote = await prisma.vote.findUnique({
-      where: {
-        userId_locationId: {
-          userId,
-          locationId,
-        },
-      },
-      select: {
-        voteType: true,
-      },
-    });
-
-    return vote ? (vote.voteType as 1 | -1) : null;
-  } catch {
-    throw new VoteServiceError('Failed to get user vote', 'DATABASE_ERROR');
-  }
-};
-
-export const getLocationVotes = async (
-  locationId: string,
-  limit: number = 50,
-  offset: number = 0,
-): Promise<VoteResponse[]> => {
+export const getVoteStats = async (locationId: string, userId?: string): Promise<VoteStats> => {
   try {
     const votes = await prisma.vote.findMany({
+      where: { locationId },
+    });
+
+    const upvotes = votes.filter(vote => vote.voteType === 1).length;
+    const downvotes = votes.filter(vote => vote.voteType === -1).length;
+    const totalVotes = upvotes + downvotes;
+
+    let userVote: 'up' | 'down' | null = null;
+    if (userId) {
+      const userVoteRecord = votes.find(vote => vote.userId === userId);
+      if (userVoteRecord) {
+        userVote = userVoteRecord.voteType === 1 ? 'up' : 'down';
+      }
+    }
+
+    return {
+      upvotes,
+      downvotes,
+      totalVotes,
+      userVote,
+    };
+  } catch (error) {
+    console.error('Error in getVoteStats:', error);
+    throw new Error('Failed to get vote stats');
+  }
+};
+
+export const deleteVote = async (locationId: string, userId: string) => {
+  try {
+    const vote = await prisma.vote.findFirst({
       where: {
         locationId,
+        userId,
       },
+    });
+
+    if (!vote) {
+      throw new Error('Vote not found');
+    }
+
+    return prisma.vote.delete({
+      where: { id: vote.id },
+    });
+  } catch (error) {
+    console.error('Error in deleteVote:', error);
+    throw new Error('Failed to delete vote');
+  }
+};
+
+export const getVotesByLocation = async (locationId: string): Promise<VoteResponse[]> => {
+  try {
+    const votes = await prisma.vote.findMany({
+      where: { locationId },
       include: {
-        user: {
+        location: {
           select: {
-            username: true,
+            id: true,
+            name: true,
+            slug: true,
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: limit,
-      skip: offset,
     });
 
     return votes.map((vote) => ({
       id: vote.id,
-      userId: vote.userId,
-      locationId: vote.locationId,
-      voteType: vote.voteType as 1 | -1,
+      location_id: vote.locationId,
+      vote_type: vote.voteType === 1 ? 'up' : 'down',
+      user_id: vote.userId,
       createdAt: vote.createdAt,
-      updatedAt: vote.updatedAt || undefined,
+      location: vote.location ? {
+        id: vote.location.id,
+        name: vote.location.name,
+        slug: vote.location.slug,
+      } as any : undefined,
     }));
-  } catch {
-    throw new VoteServiceError(
-      'Failed to get location votes',
-      'DATABASE_ERROR',
-    );
+  } catch (error) {
+    console.error('Error in getVotesByLocation:', error);
+    throw new Error('Failed to get votes by location');
   }
+};
+
+export const getVotesByUser = async (userId: string): Promise<VoteResponse[]> => {
+  try {
+    const votes = await prisma.vote.findMany({
+      where: { userId },
+      include: {
+        location: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    return votes.map((vote) => ({
+      id: vote.id,
+      location_id: vote.locationId,
+      vote_type: vote.voteType === 1 ? 'up' : 'down',
+      user_id: vote.userId,
+      createdAt: vote.createdAt,
+      location: vote.location ? {
+        id: vote.location.id,
+        name: vote.location.name,
+        slug: vote.location.slug,
+      } as any : undefined,
+    }));
+  } catch (error) {
+    console.error('Error in getVotesByUser:', error);
+    throw new Error('Failed to get votes by user');
+  }
+};
+
+// Export as VoteService object for backward compatibility
+export const VoteService = {
+  createVote,
+  getVoteStats,
+  deleteVote,
+  getVotesByLocation,
+  getVotesByUser,
 };
 

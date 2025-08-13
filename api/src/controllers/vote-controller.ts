@@ -1,152 +1,110 @@
 import { Request, Response } from 'express';
-import * as VoteService from '../services/vote-service';
-import {
-  handleError,
-  sendSuccess,
-  sendCreated,
-  sendNoContent,
-  sendNotFound,
-  sendBadRequest,
-  sendUnauthorized,
-  validateRequiredFields,
-  handleValidationError,
-} from '../utils/controller-utils';
-import { VoteData } from '../types';
+import { VoteService } from '../services/vote-service';
+import { sendSuccess, sendCreated, sendNoContent } from '../utils/controller-utils';
 
-export const createOrUpdateVote = async (req: Request, res: Response) => {
+export const createVote = async (req: Request, res: Response) => {
   try {
-    // Check if user is authenticated
-    if (!req.user?.id) {
-      sendUnauthorized(res, 'Authentication required to vote');
-      return;
+    const { location_id, vote_type } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    const { locationId, voteType } = req.body;
+    const vote = await VoteService.createVote(
+      { location_id, vote_type },
+      userId,
+    );
 
-    // Validate required fields
-    const missingFields = validateRequiredFields(req.body, [
-      'locationId',
-      'voteType',
-    ]);
-    if (missingFields.length > 0) {
-      handleValidationError(res, missingFields);
-      return;
-    }
-
-    // Validate vote type
-    if (voteType !== 1 && voteType !== -1) {
-      sendBadRequest(res, 'Vote type must be 1 (upvote) or -1 (downvote)');
-      return;
-    }
-
-    const voteData: VoteData = {
-      locationId,
-      voteType,
-    };
-
-    const vote = await VoteService.createOrUpdateVote(req.user.id, voteData);
     sendCreated(res, vote);
-  } catch (error: any) {
-    if (error.message === 'Location not found or not published') {
-      sendNotFound(res, error.message);
-      return;
-    }
-    handleError(res, error, 'Failed to create or update vote');
+  } catch (error) {
+    console.error('Error in createVote:', error);
+    res.status(500).json({ error: 'Failed to create vote' });
   }
 };
 
-export const removeVote = async (req: Request, res: Response) => {
+// Legacy export for backward compatibility
+export const createOrUpdateVote = createVote;
+
+export const deleteVote = async (req: Request, res: Response) => {
   try {
-    // Check if user is authenticated
-    if (!req.user?.id) {
-      sendUnauthorized(res, 'Authentication required to remove vote');
-      return;
+    const { location_id } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    const { locationId } = req.params;
-
-    if (!locationId) {
-      sendBadRequest(res, 'Location ID is required');
-      return;
-    }
-
-    await VoteService.removeVote(req.user.id, locationId);
+    await VoteService.deleteVote(location_id, userId);
     sendNoContent(res);
-  } catch (error: any) {
-    if (error.message === 'Vote not found') {
-      sendNotFound(res, error.message);
-      return;
-    }
-    handleError(res, error, 'Failed to remove vote');
+  } catch (error) {
+    console.error('Error in deleteVote:', error);
+    res.status(500).json({ error: 'Failed to delete vote' });
   }
 };
+
+// Legacy export for backward compatibility
+export const removeVote = deleteVote;
 
 export const getVoteStats = async (req: Request, res: Response) => {
   try {
-    const { locationId } = req.params;
-
-    if (!locationId) {
-      sendBadRequest(res, 'Location ID is required');
-      return;
-    }
-
-    // Include user's vote if authenticated
+    const { location_id } = req.params;
     const userId = req.user?.id;
-    const stats = await VoteService.getVoteStats(locationId, userId);
+
+    const stats = await VoteService.getVoteStats(location_id, userId);
     sendSuccess(res, stats);
   } catch (error) {
-    handleError(res, error, 'Failed to get vote statistics');
+    console.error('Error in getVoteStats:', error);
+    res.status(500).json({ error: 'Failed to get vote stats' });
   }
 };
 
-export const getUserVote = async (req: Request, res: Response) => {
+export const getVotesByLocation = async (req: Request, res: Response) => {
   try {
-    // Check if user is authenticated
-    if (!req.user?.id) {
-      sendUnauthorized(res, 'Authentication required to get user vote');
-      return;
-    }
+    const { location_id } = req.params;
 
-    const { locationId } = req.params;
-
-    if (!locationId) {
-      sendBadRequest(res, 'Location ID is required');
-      return;
-    }
-
-    const userVote = await VoteService.getUserVote(req.user.id, locationId);
-    sendSuccess(res, { userVote });
-  } catch (error) {
-    handleError(res, error, 'Failed to get user vote');
-  }
-};
-
-export const getLocationVotes = async (req: Request, res: Response) => {
-  try {
-    const { locationId } = req.params;
-    const { limit = '50', offset = '0' } = req.query;
-
-    if (!locationId) {
-      sendBadRequest(res, 'Location ID is required');
-      return;
-    }
-
-    const limitNum = Number.parseInt(limit as string, 10);
-    const offsetNum = Number.parseInt(offset as string, 10);
-
-    if (Number.isNaN(limitNum) || Number.isNaN(offsetNum) || limitNum <= 0 || offsetNum < 0) {
-      sendBadRequest(res, 'Invalid limit or offset parameters');
-      return;
-    }
-
-    const votes = await VoteService.getLocationVotes(
-      locationId,
-      limitNum,
-      offsetNum,
-    );
+    const votes = await VoteService.getVotesByLocation(location_id);
     sendSuccess(res, votes);
   } catch (error) {
-    handleError(res, error, 'Failed to get location votes');
+    console.error('Error in getVotesByLocation:', error);
+    res.status(500).json({ error: 'Failed to get votes by location' });
+  }
+};
+
+// Legacy export for backward compatibility
+export const getLocationVotes = getVotesByLocation;
+
+export const getVotesByUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const votes = await VoteService.getVotesByUser(userId);
+    sendSuccess(res, votes);
+  } catch (error) {
+    console.error('Error in getVotesByUser:', error);
+    res.status(500).json({ error: 'Failed to get votes by user' });
+  }
+};
+
+// Legacy export for backward compatibility
+export const getUserVote = async (req: Request, res: Response) => {
+  try {
+    const { location_id } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const stats = await VoteService.getVoteStats(location_id, userId);
+    sendSuccess(res, { userVote: stats.userVote });
+  } catch (error) {
+    console.error('Error in getUserVote:', error);
+    res.status(500).json({ error: 'Failed to get user vote' });
   }
 };
 

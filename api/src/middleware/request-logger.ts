@@ -3,7 +3,8 @@ import { Request, Response, NextFunction } from 'express';
 // Request logger middleware
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
-  const { method, originalUrl, ip, userAgent } = req;
+  const { method, originalUrl, ip } = req;
+  const userAgent = req.get('User-Agent') || 'Unknown';
 
   // Log request start
   console.log(`📥 ${method} ${originalUrl} - ${ip} - ${userAgent}`);
@@ -40,7 +41,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     }
 
     // Call original end method
-    originalEnd.call(this, chunk, encoding);
+    return originalEnd.call(this, chunk, encoding);
   };
 
   next();
