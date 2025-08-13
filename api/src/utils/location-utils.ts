@@ -3,6 +3,19 @@ import googleMaps from './google-maps';
 import { SimplifiedAnswer, LocationWithSimplifiedAnswers } from '../types';
 import env from '../config/env';
 
+// Constants for better maintainability
+const DEFAULT_IMAGE_NAME = 'location-image';
+const DEFAULT_MIME_TYPE = 'application/octet-stream';
+const DEFAULT_IMAGE_BASE_URL = 'https://dev.udruga-liberato.hr/images/location/';
+
+// Custom error class for location utils
+class LocationUtilsError extends Error {
+  constructor(message: string, public code?: string) {
+    super(message);
+    this.name = 'LocationUtilsError';
+  }
+}
+
 export const locationInclude = {
   answer: {
     include: {
@@ -19,26 +32,61 @@ export const locationInclude = {
 };
 
 export const simplifyAnswers = (answers: any[]): SimplifiedAnswer[] => {
-  return answers.map((answer) => ({
-    answerId: answer.id,
-    answer: answer.answer,
-    questionId: answer.question.id,
-    question: answer.question.question,
-  }));
+  try {
+    if (!Array.isArray(answers)) {
+      return [];
+    }
+
+    return answers
+      .filter(answer => answer && answer.question) // Filter out invalid answers
+      .map((answer) => ({
+        answerId: answer.id,
+        answer: answer.answer,
+        questionId: answer.question.id,
+        question: answer.question.question,
+      }));
+  } catch (error) {
+    console.error('Error in simplifyAnswers:', error);
+    return [];
+  }
 };
 
 export const addSimplifiedAnswers = (
   location: any,
 ): LocationWithSimplifiedAnswers => {
-  const { answer, ...locationWithoutAnswer } = location;
-  return {
-    ...locationWithoutAnswer,
-    answers: simplifyAnswers(answer || []),
-  };
+  try {
+    if (!location) {
+      throw new LocationUtilsError('Location data is required', 'INVALID_LOCATION');
+    }
+
+    const { answer, ...locationWithoutAnswer } = location;
+    return {
+      ...locationWithoutAnswer,
+      answers: simplifyAnswers(answer || []),
+    };
+  } catch (error) {
+    console.error('Error in addSimplifiedAnswers:', error);
+    if (error instanceof LocationUtilsError) {
+      throw error;
+    }
+    throw new LocationUtilsError('Failed to add simplified answers', 'ADD_ANSWERS_ERROR');
+  }
 };
 
 export const getCoordinates = async (address: string) => {
-  return googleMaps.getCoordinateForStreet('', address);
+  try {
+    if (!address || typeof address !== 'string') {
+      throw new LocationUtilsError('Valid address is required', 'INVALID_ADDRESS');
+    }
+
+    return googleMaps.getCoordinateForStreet('', address);
+  } catch (error) {
+    console.error('Error in getCoordinates:', error);
+    if (error instanceof LocationUtilsError) {
+      throw error;
+    }
+    throw new LocationUtilsError('Failed to get coordinates', 'COORDINATES_ERROR');
+  }
 };
 
 export const createLocationImage = async (
@@ -50,45 +98,99 @@ export const createLocationImage = async (
     fileType?: string;
   },
 ) => {
-  return prisma.image.create({
-    data: {
-      src: `${env.STORE_URL}${image.path}`,
-      name: image.name || 'location-image',
-      mime: image.fileType || 'application/octet-stream',
-      locationId,
-    },
-  });
+  try {
+    if (!locationId) {
+      throw new LocationUtilsError('Location ID is required', 'INVALID_LOCATION_ID');
+    }
+
+    if (!image || !image.path) {
+      throw new LocationUtilsError('Valid image data is required', 'INVALID_IMAGE_DATA');
+    }
+
+    return prisma.image.create({
+      data: {
+        src: `${env.STORE_URL}${image.path}`,
+        name: image.name || DEFAULT_IMAGE_NAME,
+        mime: image.fileType || DEFAULT_MIME_TYPE,
+        locationId,
+      },
+    });
+  } catch (error) {
+    console.error('Error in createLocationImage:', error);
+    if (error instanceof LocationUtilsError) {
+      throw error;
+    }
+    throw new LocationUtilsError('Failed to create location image', 'CREATE_IMAGE_ERROR');
+  }
 };
 
 export const createImages = async (
   files: Express.Multer.File[],
   locationId: string,
 ) => {
-  return Promise.all(
-    files.map((file) =>
-      prisma.image.create({
+  try {
+    if (!locationId) {
+      throw new LocationUtilsError('Location ID is required', 'INVALID_LOCATION_ID');
+    }
+
+    if (!Array.isArray(files) || files.length === 0) {
+      return [];
+    }
+
+    const imagePromises = files.map((file) => {
+      if (!file.filename) {
+        console.warn('Skipping file without filename:', file);
+        return null;
+      }
+
+      return prisma.image.create({
         data: {
-          src: `https://dev.udruga-liberato.hr/images/location/${file.filename}`,
-          name: file.originalname.split('.')[0],
-          mime: file.mimetype,
+          src: `${DEFAULT_IMAGE_BASE_URL}${file.filename}`,
+          name: file.originalname?.split('.')[0] || DEFAULT_IMAGE_NAME,
+          mime: file.mimetype || DEFAULT_MIME_TYPE,
           locationId,
         },
-      }),
-    ),
-  );
+      });
+    });
+
+    const results = await Promise.all(imagePromises);
+    return results.filter(result => result !== null);
+  } catch (error) {
+    console.error('Error in createImages:', error);
+    if (error instanceof LocationUtilsError) {
+      throw error;
+    }
+    throw new LocationUtilsError('Failed to create images', 'CREATE_IMAGES_ERROR');
+  }
 };
 
 export const createAnswers = async (answers: string, locationId: string) => {
-  if (!answers) return;
+  try {
+    if (!locationId) {
+      throw new LocationUtilsError('Location ID is required', 'INVALID_LOCATION_ID');
+    }
 
-  const items = answers
-    .split(',')
-    .map((a) => a.trim())
-    .filter(Boolean);
+    if (!answers || typeof answers !== 'string') {
+      return [];
+    }
 
-  return Promise.all(
-    items.map(async (item) => {
+    const items = answers
+      .split(',')
+      .map((a) => a.trim())
+      .filter(Boolean);
+
+    if (items.length === 0) {
+      return [];
+    }
+
+    const answerPromises = items.map(async (item) => {
       const [questionId, answer] = item.split(':');
+      
+      if (!questionId || answer === undefined) {
+        console.warn('Invalid answer format:', item);
+        return null;
+      }
+
       return prisma.answer.create({
         data: {
           question: { connect: { id: questionId } },
@@ -97,172 +199,306 @@ export const createAnswers = async (answers: string, locationId: string) => {
           createdAt: new Date(),
         },
       });
-    }),
-  );
-};
+    });
 
-export const toInt = (value: boolean | number | string): number => {
-  if (typeof value === 'boolean') {
-    return value ? 1 : 0;
-  }
-  if (typeof value === 'string') {
-    if (value.toLowerCase() === 'true' || value === '1') {
-      return 1;
+    const results = await Promise.all(answerPromises);
+    return results.filter(result => result !== null);
+  } catch (error) {
+    console.error('Error in createAnswers:', error);
+    if (error instanceof LocationUtilsError) {
+      throw error;
     }
-    if (value.toLowerCase() === 'false' || value === '0') {
-      return 0;
-    }
-    // Try to parse as number
-    const parsed = Number.parseInt(value, 10);
-    return Number.isNaN(parsed) ? 0 : parsed;
+    throw new LocationUtilsError('Failed to create answers', 'CREATE_ANSWERS_ERROR');
   }
-  return value;
 };
 
 export const buildLocationUpdateData = async (
-  data: any,
-  currentLocation?: { cityId: string; categoryId: string; id: string; name: string },
+  body: any,
+  currentLocation: any,
 ) => {
-  const updateData: any = {
-    name: data.name,
-    address: data.address,
-    latitude: data.latitude,
-    longitude: data.longitude,
-    cityId: data.cityId,
-    categoryId: data.categoryId,
-    featured: data.featured === undefined ? undefined : toInt(data.featured),
-    published: data.published === undefined ? undefined : toInt(data.published),
-    updatedAt: new Date(),
-  };
+  try {
+    if (!body) {
+      throw new LocationUtilsError('Update data is required', 'INVALID_UPDATE_DATA');
+    }
 
-  // Generate slug if name, cityId, or categoryId is being updated
-  if (
-    (data.name !== undefined || data.cityId !== undefined || data.categoryId !== undefined) &&
-    currentLocation
-  ) {
-    const finalCityId = data.cityId || currentLocation.cityId;
-    const finalCategoryId = data.categoryId || currentLocation.categoryId;
-    const finalName = data.name !== undefined ? data.name : currentLocation.name; // use current name as fallback
+    if (!currentLocation) {
+      throw new LocationUtilsError('Current location data is required', 'INVALID_CURRENT_LOCATION');
+    }
 
-    updateData.slug = await getUniqueSlug(
-      finalName,
-      finalCityId,
-      finalCategoryId,
-      currentLocation.id,
-    );
+    const updateData: any = {};
+
+    // Update basic fields if provided
+    if (body.name !== undefined) {
+      updateData.name = body.name;
+    }
+
+    if (body.street !== undefined) {
+      updateData.street = body.street;
+    }
+
+    if (body.phone !== undefined) {
+      updateData.phone = body.phone;
+    }
+
+    if (body.email !== undefined) {
+      updateData.email = body.email;
+    }
+
+    if (body.about !== undefined) {
+      updateData.about = body.about;
+    }
+
+    if (body.featured !== undefined) {
+      updateData.featured = toInt(body.featured);
+    }
+
+    // Update relationships if provided
+    if (body.category_id !== undefined) {
+      updateData.category = { connect: { id: body.category_id } };
+    }
+
+    if (body.city_id !== undefined) {
+      updateData.city = { connect: { id: body.city_id } };
+    }
+
+    // Generate new slug if name or relationships changed
+    if (body.name !== undefined || body.category_id !== undefined || body.city_id !== undefined) {
+      const newName = body.name || currentLocation.name;
+      const newCategoryId = body.category_id || currentLocation.categoryId;
+      const newCityId = body.city_id || currentLocation.cityId;
+      
+      updateData.slug = await getUniqueSlug(newName, newCityId, newCategoryId);
+    }
+
+    updateData.updatedAt = new Date();
+
+    return updateData;
+  } catch (error) {
+    console.error('Error in buildLocationUpdateData:', error);
+    if (error instanceof LocationUtilsError) {
+      throw error;
+    }
+    throw new LocationUtilsError('Failed to build location update data', 'BUILD_UPDATE_DATA_ERROR');
   }
-
-  return updateData;
 };
 
-export const fromPascalWithDashes = (input: string): string => {
-  return input
-    .split('-') // split on dashes first
-    .map((part) =>
-      part
-        .replaceAll(/([a-z])([A-Z])/g, '$1 $2')
-        .replaceAll(/([A-Z])([A-Z][a-z])/g, '$1 $2')
-        .toLowerCase(),
-    )
-    .join(' - ')
-    .replace(/^./, (c) => c.toUpperCase());
+export const toInt = (value: any): number => {
+  try {
+    if (value === null || value === undefined) {
+      return 0;
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 1 : 0;
+    }
+
+    if (typeof value === 'number') {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const parsed = parseInt(value, 10);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+
+    return 0;
+  } catch (error) {
+    console.error('Error in toInt:', error);
+    return 0;
+  }
 };
 
-export const generateSlug = (name: string): string => {
-  const croatianCharMap: { [key: string]: string } = {
-    š: 's',
-    đ: 'd',
-    č: 'c',
-    ć: 'c',
-    ž: 'z',
-    Š: 's',
-    Đ: 'd',
-    Č: 'c',
-    Ć: 'c',
-    Ž: 'z',
-  };
+export const fromPascalWithDashes = (str: string): string => {
+  try {
+    if (!str || typeof str !== 'string') {
+      return '';
+    }
 
-  const slug = [...name]
-    .map((char) => croatianCharMap[char] || char)
-    .join('')
-    .toLowerCase()
-    .trim()
-    .replaceAll(/\s+/g, '-')
-    .replaceAll(/[^\da-z-]/g, '')
-    .replaceAll(/-+/g, '-')
-    .replaceAll(/(^-)|(-$)/g, '');
-
-  // Ensure slug is trimmed to 255 characters
-  return slug.slice(0, 255);
+    return str
+      .replace(/([A-Z])/g, '-$1')
+      .toLowerCase()
+      .replace(/^-/, '');
+  } catch (error) {
+    console.error('Error in fromPascalWithDashes:', error);
+    return str || '';
+  }
 };
 
 export const getUniqueSlug = async (
   name: string,
   cityId: string,
   categoryId: string,
-  excludeId?: string,
 ): Promise<string> => {
-  const baseSlug = generateSlug(name);
-
-  // First, check if the base slug is available within the same city and category
-  const baseSlugExists = await prisma.location.findFirst({
-    where: {
-      slug: baseSlug,
-      cityId,
-      categoryId,
-      deletedAt: null,
-      ...(excludeId && { id: { not: excludeId } }),
-    },
-    select: { id: true },
-  });
-
-  if (!baseSlugExists) {
-    return baseSlug;
-  }
-
-  // Generate numbered variants and check them in batch
-  const maxAttempts = 100; // Reasonable limit to prevent infinite loops
-  const slugVariants = [];
-
-  for (let counter = 1; counter <= maxAttempts; counter++) {
-    let slug = `${baseSlug}-${counter}`;
-    // Ensure the final slug with counter doesn't exceed 255 characters
-    if (slug.length > 255) {
-      const maxBaseLength = 255 - `-${counter}`.length;
-      slug = `${baseSlug.slice(0, maxBaseLength)}-${counter}`;
+  try {
+    if (!name || !cityId || !categoryId) {
+      throw new LocationUtilsError('Name, city ID, and category ID are required', 'MISSING_SLUG_PARAMS');
     }
-    slugVariants.push(slug);
+
+    const baseSlug = generateSlug(name);
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Check for existing slug and generate unique one
+    while (true) {
+      const existingLocation = await prisma.location.findFirst({
+        where: {
+          slug,
+          cityId,
+          categoryId,
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+
+      if (!existingLocation) {
+        break;
+      }
+
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+
+      // Prevent infinite loop
+      if (counter > 100) {
+        throw new LocationUtilsError('Unable to generate unique slug', 'SLUG_GENERATION_FAILED');
+      }
+    }
+
+    return slug;
+  } catch (error) {
+    console.error('Error in getUniqueSlug:', error);
+    if (error instanceof LocationUtilsError) {
+      throw error;
+    }
+    throw new LocationUtilsError('Failed to generate unique slug', 'SLUG_ERROR');
+  }
+};
+
+// Helper function to generate slug from name
+const generateSlug = (name: string): string => {
+  try {
+    if (!name || typeof name !== 'string') {
+      return '';
+    }
+
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  } catch (error) {
+    console.error('Error in generateSlug:', error);
+    return name || '';
+  }
+};
+
+// New utility function: Validate location data
+export const validateLocationData = (data: any): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+
+  if (!data) {
+    errors.push('Location data is required');
+    return { isValid: false, errors };
   }
 
-  // Check all variants at once
-  const existingSlugs = await prisma.location.findMany({
-    where: {
-      slug: { in: slugVariants },
-      cityId,
-      categoryId,
-      deletedAt: null,
-      ...(excludeId && { id: { not: excludeId } }),
-    },
-    select: { slug: true },
-  });
-
-  const existingSlugSet = new Set(existingSlugs.map((location) => location.slug));
-
-  // Return the first available variant
-  const availableVariant = slugVariants.find(
-    (variant) => !existingSlugSet.has(variant),
-  );
-  if (availableVariant) {
-    return availableVariant;
+  if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
+    errors.push('Valid name is required');
   }
 
-  // If no variant is available after maxAttempts, add a timestamp
-  const timestamp = Date.now();
-  let finalSlug = `${baseSlug}-${timestamp}`;
-  if (finalSlug.length > 255) {
-    const maxBaseLength = 255 - `-${timestamp}`.length;
-    finalSlug = `${baseSlug.slice(0, maxBaseLength)}-${timestamp}`;
+  if (!data.city_id || typeof data.city_id !== 'string') {
+    errors.push('Valid city ID is required');
   }
 
-  return finalSlug;
+  if (!data.category_id || typeof data.category_id !== 'string') {
+    errors.push('Valid category ID is required');
+  }
+
+  if (data.phone && typeof data.phone !== 'string') {
+    errors.push('Phone must be a string');
+  }
+
+  if (data.email && typeof data.email !== 'string') {
+    errors.push('Email must be a string');
+  }
+
+  if (data.latitude !== undefined && (typeof data.latitude !== 'number' || isNaN(data.latitude))) {
+    errors.push('Latitude must be a valid number');
+  }
+
+  if (data.longitude !== undefined && (typeof data.longitude !== 'number' || isNaN(data.longitude))) {
+    errors.push('Longitude must be a valid number');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+// New utility function: Calculate distance between two coordinates
+export const calculateDistance = (
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number => {
+  try {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  } catch (error) {
+    console.error('Error in calculateDistance:', error);
+    return 0;
+  }
+};
+
+// New utility function: Format location for display
+export const formatLocationForDisplay = (location: any) => {
+  try {
+    if (!location) {
+      return null;
+    }
+
+    return {
+      id: location.id,
+      name: location.name,
+      slug: location.slug,
+      street: location.street,
+      phone: location.phone || null,
+      email: location.email || null,
+      about: location.about || null,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      featured: Boolean(location.featured),
+      published: Boolean(location.published),
+      createdAt: location.createdAt,
+      updatedAt: location.updatedAt,
+      city: location.city ? {
+        id: location.city.id,
+        name: location.city.name,
+        slug: location.city.slug,
+      } : null,
+      category: location.category ? {
+        id: location.category.id,
+        name: location.category.name,
+      } : null,
+      images: Array.isArray(location.image) ? location.image.map((img: any) => ({
+        id: img.id,
+        src: img.src,
+        name: img.name,
+        mime: img.mime,
+      })) : [],
+      answers: Array.isArray(location.answers) ? location.answers : [],
+    };
+  } catch (error) {
+    console.error('Error in formatLocationForDisplay:', error);
+    return location;
+  }
 };

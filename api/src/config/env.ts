@@ -22,8 +22,6 @@ if (!process.env.CLERK_SECRET_KEY) {
   throw new Error('CLERK_SECRET_KEY is not set');
 }
 
-
-
 if (!process.env.STORE_URL) {
   throw new Error('STORE_URL is not set');
 }

@@ -7,7 +7,6 @@ import {
   deleteUser,
 } from '../controllers/user-controller';
 
-
 const router = Router();
 
 router.get('/', getAllUsers);

@@ -149,7 +149,9 @@ export const handleSessionCreated = async (evt: WebhookEvent) => {
             console.warn('Could not update user last active:', error),
           );
       } else {
-        console.log(`⏭️ User ${userId} not found yet, skipping lastActiveAt update`);
+        console.log(
+          `⏭️ User ${userId} not found yet, skipping lastActiveAt update`,
+        );
       }
     }
 

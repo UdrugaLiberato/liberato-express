@@ -7,7 +7,6 @@ import {
   deleteQuestion,
 } from '../controllers/question-controller';
 
-
 const router = Router();
 
 router.get('/', getAllQuestions);

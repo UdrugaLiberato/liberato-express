@@ -7,7 +7,6 @@ import {
   deleteAnswer,
 } from '../controllers/answer-controller';
 
-
 const router = Router();
 
 router.get('/', getAllAnswers);
