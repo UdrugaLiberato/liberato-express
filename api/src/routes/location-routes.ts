@@ -18,16 +18,8 @@ const router = Router();
 router.get('/', cache, getLocations);
 router.get('/name/:slug', getLocationBySlug);
 router.get('/:id', getLocation);
-router.post(
-  '/',
-  locationImagesUpload.array('images', 5),
-  createLocation,
-);
-router.put(
-  '/:id',
-  locationImagesUpload.array('images', 5),
-  updateLocation,
-);
+router.post('/', locationImagesUpload.array('images', 5), createLocation);
+router.put('/:id', locationImagesUpload.array('images', 5), updateLocation);
 router.delete('/:id', deleteLocation);
 router.get('/:city/:category/:name', getLocationByCityAndCategoryAndName);
 router.get('/:city/:category', getLocationsByCityAndCategory);

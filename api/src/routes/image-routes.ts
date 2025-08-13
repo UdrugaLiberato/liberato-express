@@ -7,7 +7,6 @@ import {
   deleteImage,
 } from '../controllers/image-controller';
 
-
 const router = Router();
 
 router.get('/', getAllImages);

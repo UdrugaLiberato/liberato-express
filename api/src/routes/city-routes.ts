@@ -15,16 +15,8 @@ const router = Router();
 router.get('/', getCities);
 router.get('/:id', getCity);
 router.get('/name/:slug', getCityBySlug);
-router.post(
-  '/',
-  cityImageUpload.single('city_image'),
-  createCity,
-);
-router.put(
-  '/:id',
-  cityImageUpload.single('city_image'),
-  updateCity,
-);
+router.post('/', cityImageUpload.single('city_image'), createCity);
+router.put('/:id', cityImageUpload.single('city_image'), updateCity);
 router.delete('/:id', deleteCity);
 
 export default router;
