@@ -26,7 +26,10 @@ const DEFAULT_PUBLISHED_STATUS = 1;
 
 // Custom error class for location service
 class LocationServiceError extends Error {
-  constructor(message: string, public code?: string) {
+  constructor(
+    message: string,
+    public code?: string,
+  ) {
     super(message);
     this.name = 'LocationServiceError';
   }
@@ -86,9 +89,10 @@ export const getAllLocations = async (filters: LocationFilters) => {
     const where = buildLocationWhereClause(filters);
 
     // Check if any filters are applied
-    const hasFilters = filters.city !== undefined || 
-                      filters.category !== undefined || 
-                      filters.name !== undefined;
+    const hasFilters =
+      filters.city !== undefined ||
+      filters.category !== undefined ||
+      filters.name !== undefined;
 
     if (hasFilters) {
       const locations = await prisma.location.findMany({
@@ -101,7 +105,7 @@ export const getAllLocations = async (filters: LocationFilters) => {
 
       const { items: locationsToReturn, nextCursor } = handlePagination(
         locations,
-        MAX_PAGE_SIZE
+        MAX_PAGE_SIZE,
       );
 
       return {
@@ -165,7 +169,10 @@ export const getAllLocations = async (filters: LocationFilters) => {
     return locations.map((location) => addSimplifiedAnswers(location));
   } catch (error) {
     console.error('Error in getAllLocations:', error);
-    throw new LocationServiceError('Failed to retrieve locations', 'GET_ALL_ERROR');
+    throw new LocationServiceError(
+      'Failed to retrieve locations',
+      'GET_ALL_ERROR',
+    );
   }
 };
 
@@ -186,14 +193,20 @@ export const getLocationById = async (id: string) => {
     if (error instanceof LocationServiceError) {
       throw error;
     }
-    throw new LocationServiceError('Failed to retrieve location by ID', 'GET_BY_ID_ERROR');
+    throw new LocationServiceError(
+      'Failed to retrieve location by ID',
+      'GET_BY_ID_ERROR',
+    );
   }
 };
 
 export const getLocationBySlug = async (slug: string) => {
   try {
     if (!slug) {
-      throw new LocationServiceError('Location slug is required', 'INVALID_SLUG');
+      throw new LocationServiceError(
+        'Location slug is required',
+        'INVALID_SLUG',
+      );
     }
 
     const location = await prisma.location.findFirst({
@@ -211,7 +224,10 @@ export const getLocationBySlug = async (slug: string) => {
     if (error instanceof LocationServiceError) {
       throw error;
     }
-    throw new LocationServiceError('Failed to retrieve location by slug', 'GET_BY_SLUG_ERROR');
+    throw new LocationServiceError(
+      'Failed to retrieve location by slug',
+      'GET_BY_SLUG_ERROR',
+    );
   }
 };
 
@@ -222,7 +238,10 @@ export const getLocationByCityAndCategoryAndName = async (
     let { city, category, name } = filters;
 
     if (!city || !category || !name) {
-      throw new LocationServiceError('City, category, and name are required', 'MISSING_PARAMS');
+      throw new LocationServiceError(
+        'City, category, and name are required',
+        'MISSING_PARAMS',
+      );
     }
 
     name = fromPascalWithDashes(name as string);
@@ -242,11 +261,11 @@ export const getLocationByCityAndCategoryAndName = async (
           contains: city,
         },
       },
-      category: { 
-        name: { 
-          mode: 'insensitive', 
-          contains: category 
-        } 
+      category: {
+        name: {
+          mode: 'insensitive',
+          contains: category,
+        },
       },
       name: {
         mode: 'insensitive',
@@ -267,7 +286,10 @@ export const getLocationByCityAndCategoryAndName = async (
     if (error instanceof LocationServiceError) {
       throw error;
     }
-    throw new LocationServiceError('Failed to retrieve location by filters', 'GET_BY_FILTERS_ERROR');
+    throw new LocationServiceError(
+      'Failed to retrieve location by filters',
+      'GET_BY_FILTERS_ERROR',
+    );
   }
 };
 
@@ -278,12 +300,18 @@ export const createLocation = async (
 ) => {
   try {
     if (!body || !userId) {
-      throw new LocationServiceError('Location data and user ID are required', 'INVALID_INPUT');
+      throw new LocationServiceError(
+        'Location data and user ID are required',
+        'INVALID_INPUT',
+      );
     }
 
     // Validate required fields
     if (!body.name || !body.city_id || !body.category_id) {
-      throw new LocationServiceError('Name, city ID, and category ID are required', 'MISSING_REQUIRED_FIELDS');
+      throw new LocationServiceError(
+        'Name, city ID, and category ID are required',
+        'MISSING_REQUIRED_FIELDS',
+      );
     }
 
     const city = await prisma.city.findUnique({
@@ -306,7 +334,10 @@ export const createLocation = async (
       try {
         coordinates = await getCoordinates(`${body.street} ${city.name}`);
       } catch (error) {
-        console.warn('Geocoding failed, using city coordinates as fallback:', error);
+        console.warn(
+          'Geocoding failed, using city coordinates as fallback:',
+          error,
+        );
         // Fallback to default coordinates if geocoding fails
         coordinates = {
           lat: city.latitude,
@@ -345,7 +376,7 @@ export const createLocation = async (
 
     // Process images and answers asynchronously
     const promises = [];
-    
+
     if (files?.length) {
       promises.push(createImages(files, location.id));
     }
@@ -381,7 +412,10 @@ export const updateLocation = async (
 ) => {
   try {
     if (!id || !body) {
-      throw new LocationServiceError('Location ID and update data are required', 'INVALID_INPUT');
+      throw new LocationServiceError(
+        'Location ID and update data are required',
+        'INVALID_INPUT',
+      );
     }
 
     // Get current location data for slug generation
@@ -391,7 +425,10 @@ export const updateLocation = async (
     });
 
     if (!currentLocation) {
-      throw new LocationServiceError('Location not found', 'LOCATION_NOT_FOUND');
+      throw new LocationServiceError(
+        'Location not found',
+        'LOCATION_NOT_FOUND',
+      );
     }
 
     const dataToUpdate = await buildLocationUpdateData(body, currentLocation);
@@ -433,7 +470,7 @@ export const updateLocation = async (
       // Delete existing images and create new ones
       promises.push(
         prisma.image.deleteMany({ where: { locationId: id } }),
-        createImages(files, id)
+        createImages(files, id),
       );
     }
 
@@ -441,7 +478,7 @@ export const updateLocation = async (
       // Delete existing answers and create new ones
       promises.push(
         prisma.answer.deleteMany({ where: { locationId: id } }),
-        createAnswers(body.qa, id)
+        createAnswers(body.qa, id),
       );
     }
 
@@ -472,18 +509,27 @@ export const updateWithImage = async (
   try {
     // Validate input parameters
     if (!locationId) {
-      throw new LocationServiceError('Location ID is required', 'INVALID_LOCATION_ID');
+      throw new LocationServiceError(
+        'Location ID is required',
+        'INVALID_LOCATION_ID',
+      );
     }
 
     if (!uploadResponseData) {
-      throw new LocationServiceError('Upload response data is required', 'INVALID_UPLOAD_DATA');
+      throw new LocationServiceError(
+        'Upload response data is required',
+        'INVALID_UPLOAD_DATA',
+      );
     }
 
     if (
       !Array.isArray(uploadResponseData.files) ||
       uploadResponseData.files.length === 0
     ) {
-      throw new LocationServiceError('No files found in upload response data', 'NO_FILES');
+      throw new LocationServiceError(
+        'No files found in upload response data',
+        'NO_FILES',
+      );
     }
 
     // Verify location exists
@@ -493,7 +539,10 @@ export const updateWithImage = async (
     });
 
     if (!location) {
-      throw new LocationServiceError('Location not found', 'LOCATION_NOT_FOUND');
+      throw new LocationServiceError(
+        'Location not found',
+        'LOCATION_NOT_FOUND',
+      );
     }
 
     // Process all files in the upload response
@@ -502,7 +551,10 @@ export const updateWithImage = async (
       .map((file) => createLocationImage(locationId, file));
 
     if (imageCreationPromises.length === 0) {
-      throw new LocationServiceError('No valid file paths found in upload response', 'NO_VALID_FILES');
+      throw new LocationServiceError(
+        'No valid file paths found in upload response',
+        'NO_VALID_FILES',
+      );
     }
 
     await Promise.all(imageCreationPromises);
@@ -517,7 +569,10 @@ export const updateWithImage = async (
     if (error instanceof LocationServiceError) {
       throw error;
     }
-    throw new LocationServiceError('Failed to update location with images', 'UPDATE_WITH_IMAGE_ERROR');
+    throw new LocationServiceError(
+      'Failed to update location with images',
+      'UPDATE_WITH_IMAGE_ERROR',
+    );
   }
 };
 
@@ -534,14 +589,17 @@ export const deleteLocation = async (id: string) => {
     });
 
     if (!location) {
-      throw new LocationServiceError('Location not found', 'LOCATION_NOT_FOUND');
+      throw new LocationServiceError(
+        'Location not found',
+        'LOCATION_NOT_FOUND',
+      );
     }
 
     return prisma.location.update({
       where: { id },
-      data: { 
-        published: 0, 
-        deletedAt: new Date() 
+      data: {
+        published: 0,
+        deletedAt: new Date(),
       },
     });
   } catch (error) {
@@ -561,7 +619,10 @@ export const getLocationsByCityAndCategory = async (
     const { cursor } = filters;
 
     if (!city || !category) {
-      throw new LocationServiceError('City and category are required', 'MISSING_PARAMS');
+      throw new LocationServiceError(
+        'City and category are required',
+        'MISSING_PARAMS',
+      );
     }
 
     // Normalize city and category names
@@ -587,7 +648,7 @@ export const getLocationsByCityAndCategory = async (
 
     const { items: locationsToReturn, nextCursor } = handlePagination(
       locations,
-      DEFAULT_PAGE_SIZE
+      DEFAULT_PAGE_SIZE,
     );
 
     return {
@@ -601,7 +662,10 @@ export const getLocationsByCityAndCategory = async (
     if (error instanceof LocationServiceError) {
       throw error;
     }
-    throw new LocationServiceError('Failed to retrieve locations by city and category', 'GET_BY_CITY_CATEGORY_ERROR');
+    throw new LocationServiceError(
+      'Failed to retrieve locations by city and category',
+      'GET_BY_CITY_CATEGORY_ERROR',
+    );
   }
 };
 
@@ -622,7 +686,10 @@ export const getFeaturedLocations = async (limit: number = 10) => {
     return locations.map((location) => addSimplifiedAnswers(location));
   } catch (error) {
     console.error('Error in getFeaturedLocations:', error);
-    throw new LocationServiceError('Failed to retrieve featured locations', 'GET_FEATURED_ERROR');
+    throw new LocationServiceError(
+      'Failed to retrieve featured locations',
+      'GET_FEATURED_ERROR',
+    );
   }
 };
 
@@ -630,7 +697,10 @@ export const getFeaturedLocations = async (limit: number = 10) => {
 export const searchLocations = async (query: string, limit: number = 20) => {
   try {
     if (!query || query.trim().length < 2) {
-      throw new LocationServiceError('Search query must be at least 2 characters', 'INVALID_QUERY');
+      throw new LocationServiceError(
+        'Search query must be at least 2 characters',
+        'INVALID_QUERY',
+      );
     }
 
     const locations = await prisma.location.findMany({
@@ -656,7 +726,10 @@ export const searchLocations = async (query: string, limit: number = 20) => {
     if (error instanceof LocationServiceError) {
       throw error;
     }
-    throw new LocationServiceError('Failed to search locations', 'SEARCH_ERROR');
+    throw new LocationServiceError(
+      'Failed to search locations',
+      'SEARCH_ERROR',
+    );
   }
 };
 
@@ -665,17 +738,20 @@ export const getLocationsNearCoordinates = async (
   lat: number,
   lng: number,
   radiusKm: number = 10,
-  limit: number = 20
+  limit: number = 20,
 ) => {
   try {
     if (!lat || !lng) {
-      throw new LocationServiceError('Latitude and longitude are required', 'INVALID_COORDINATES');
+      throw new LocationServiceError(
+        'Latitude and longitude are required',
+        'INVALID_COORDINATES',
+      );
     }
 
     // Simple distance calculation using bounding box
     // For more accurate results, consider using PostGIS or similar
     const latDelta = radiusKm / 111; // Approximate km per degree latitude
-    const lngDelta = radiusKm / (111 * Math.cos(lat * Math.PI / 180));
+    const lngDelta = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
 
     const locations = await prisma.location.findMany({
       where: {
@@ -701,6 +777,9 @@ export const getLocationsNearCoordinates = async (
     if (error instanceof LocationServiceError) {
       throw error;
     }
-    throw new LocationServiceError('Failed to retrieve nearby locations', 'NEARBY_ERROR');
+    throw new LocationServiceError(
+      'Failed to retrieve nearby locations',
+      'NEARBY_ERROR',
+    );
   }
 };
