@@ -73,13 +73,19 @@ const processImageUploadAsync = async (
 
 export const getLocations = async (req: Request, res: Response) => {
   try {
-    const { city, category, name, cursor } = req.query;
-    const locations = await LocationService.getAllLocations({
-      city: city as string | undefined,
-      category: category as string | undefined,
-      name: name as string | undefined,
-      cursor: cursor as string | undefined,
-    });
+    const { city, category, name, cursor, includeVotes } = req.query;
+    const userId = req.user?.id;
+
+    const locations = await LocationService.getAllLocations(
+      {
+        city: city as string | undefined,
+        category: category as string | undefined,
+        name: name as string | undefined,
+        cursor: cursor as string | undefined,
+        includeVotes: includeVotes === 'true',
+      },
+      userId,
+    );
     sendSuccess(res, locations);
   } catch (error) {
     handleError(res, error);
@@ -88,7 +94,14 @@ export const getLocations = async (req: Request, res: Response) => {
 
 export const getLocation = async (req: Request, res: Response) => {
   try {
-    const location = await LocationService.getLocationById(req.params.id);
+    const { includeVotes } = req.query;
+    const userId = req.user?.id;
+
+    const location = await LocationService.getLocationById(
+      req.params.id,
+      includeVotes === 'true',
+      userId,
+    );
     if (!location) {
       sendNotFound(res, 'Location not found');
       return;

@@ -2,7 +2,9 @@ import prisma from '../config/prisma';
 import { Express } from 'express';
 import {
   locationInclude,
+  buildLocationInclude,
   addSimplifiedAnswers,
+  addVoteStatsToLocation,
   getCoordinates,
   createImages,
   createLocationImage,
@@ -83,10 +85,14 @@ const handlePagination = <T>(items: T[], pageSize: number) => {
   };
 };
 
-export const getAllLocations = async (filters: LocationFilters) => {
+export const getAllLocations = async (
+  filters: LocationFilters,
+  userId?: string,
+) => {
   try {
-    const { cursor } = filters;
+    const { cursor, includeVotes = false } = filters;
     const where = buildLocationWhereClause(filters);
+    const include = buildLocationInclude(includeVotes);
 
     // Check if any filters are applied
     const hasFilters =
@@ -99,7 +105,7 @@ export const getAllLocations = async (filters: LocationFilters) => {
         where,
         ...(cursor ? { cursor: { id: cursor } } : undefined),
         take: MAX_PAGE_SIZE + 1,
-        include: locationInclude,
+        include,
         orderBy: { featured: 'desc' },
       });
 
@@ -109,9 +115,16 @@ export const getAllLocations = async (filters: LocationFilters) => {
       );
 
       return {
-        locations: locationsToReturn.map((location) =>
-          addSimplifiedAnswers(location),
-        ),
+        locations: locationsToReturn.map((location) => {
+          let processedLocation = addSimplifiedAnswers(location);
+          if (includeVotes) {
+            processedLocation = addVoteStatsToLocation(
+              processedLocation,
+              userId,
+            );
+          }
+          return processedLocation;
+        }),
         nextCursor: nextCursor?.id || null,
       };
     }
@@ -176,18 +189,32 @@ export const getAllLocations = async (filters: LocationFilters) => {
   }
 };
 
-export const getLocationById = async (id: string) => {
+export const getLocationById = async (
+  id: string,
+  includeVotes: boolean = false,
+  userId?: string,
+) => {
   try {
     if (!id) {
       throw new LocationServiceError('Location ID is required', 'INVALID_ID');
     }
 
+    const include = buildLocationInclude(includeVotes);
     const location = await prisma.location.findUnique({
       where: { id },
-      include: locationInclude,
+      include,
     });
 
-    return location ? addSimplifiedAnswers(location) : null;
+    if (!location) {
+      return null;
+    }
+
+    let processedLocation = addSimplifiedAnswers(location);
+    if (includeVotes) {
+      processedLocation = addVoteStatsToLocation(processedLocation, userId);
+    }
+
+    return processedLocation;
   } catch (error) {
     console.error('Error in getLocationById:', error);
     if (error instanceof LocationServiceError) {

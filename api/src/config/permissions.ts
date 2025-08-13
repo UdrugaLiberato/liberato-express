@@ -76,6 +76,15 @@ const permissions: Record<string, Record<string, string[]>> = {
   '/api/auth*': {
     POST: ['PUBLIC_ACCESS'],
   },
+  '/api/votes/*': {
+    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
+    POST: ['ROLE_ADMIN', 'ROLE_USER'],
+    DELETE: ['ROLE_ADMIN', 'ROLE_USER'],
+  },
+  '/api/votes': {
+    GET: ['ROLE_ADMIN', 'ROLE_USER', 'PUBLIC_ACCESS'],
+    POST: ['ROLE_ADMIN', 'ROLE_USER'],
+  },
 };
 
 export default permissions;
