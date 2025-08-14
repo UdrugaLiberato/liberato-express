@@ -2,7 +2,9 @@ import prisma from '../config/prisma';
 import { Express } from 'express';
 import {
   locationInclude,
+  locationIncludeWithVotes,
   addSimplifiedAnswers,
+  addSimplifiedAnswersWithVotes,
   getCoordinates,
   createImages,
   createLocationImage,
@@ -83,10 +85,14 @@ const handlePagination = <T>(items: T[], pageSize: number) => {
   };
 };
 
-export const getAllLocations = async (filters: LocationFilters) => {
+export const getAllLocations = async (
+  filters: LocationFilters,
+  userId?: string,
+) => {
   try {
-    const { cursor } = filters;
+    const { cursor, votes } = filters;
     const where = buildLocationWhereClause(filters);
+    const includeVotes = votes === true;
 
     // Check if any filters are applied
     const hasFilters =
@@ -99,7 +105,7 @@ export const getAllLocations = async (filters: LocationFilters) => {
         where,
         ...(cursor ? { cursor: { id: cursor } } : undefined),
         take: MAX_PAGE_SIZE + 1,
-        include: locationInclude,
+        include: includeVotes ? locationIncludeWithVotes : locationInclude,
         orderBy: { featured: 'desc' },
       });
 
@@ -110,63 +116,82 @@ export const getAllLocations = async (filters: LocationFilters) => {
 
       return {
         locations: locationsToReturn.map((location) =>
-          addSimplifiedAnswers(location),
+          includeVotes
+            ? addSimplifiedAnswersWithVotes(location, userId)
+            : addSimplifiedAnswers(location),
         ),
         nextCursor: nextCursor?.id || null,
       };
     }
 
     // No filters applied - return all locations with simplified select
-    const locations = await prisma.location.findMany({
-      select: {
-        id: true,
-        cityId: true,
-        name: true,
-        street: true,
-        featured: true,
-        answer: {
-          select: {
-            id: true,
-            answer: true,
-            question: {
-              select: {
-                id: true,
-                question: true,
-              },
+    const selectFields = {
+      id: true,
+      cityId: true,
+      name: true,
+      street: true,
+      featured: true,
+      answer: {
+        select: {
+          id: true,
+          answer: true,
+          question: {
+            select: {
+              id: true,
+              question: true,
             },
           },
         },
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
+      },
+      category: {
+        select: {
+          id: true,
+          name: true,
         },
-        city: {
-          select: {
-            id: true,
-            name: true,
-          },
+      },
+      city: {
+        select: {
+          id: true,
+          name: true,
         },
-        image: {
+      },
+      image: {
+        select: {
+          id: true,
+          src: true,
+          mime: true,
+          name: true,
+        },
+        where: {
+          deletedAt: null,
+        },
+      },
+      ...(includeVotes && {
+        vote: {
           select: {
-            id: true,
-            src: true,
-            mime: true,
-            name: true,
+            voteType: true,
+            userId: true,
           },
           where: {
             deletedAt: null,
           },
         },
-      },
+      }),
+    };
+
+    const locations = await prisma.location.findMany({
+      select: selectFields,
       where: {
         deletedAt: null,
       },
       orderBy: { featured: 'desc' },
     });
 
-    return locations.map((location) => addSimplifiedAnswers(location));
+    return locations.map((location) =>
+      includeVotes
+        ? addSimplifiedAnswersWithVotes(location, userId)
+        : addSimplifiedAnswers(location),
+    );
   } catch (error) {
     console.error('Error in getAllLocations:', error);
     throw new LocationServiceError(
@@ -176,7 +201,7 @@ export const getAllLocations = async (filters: LocationFilters) => {
   }
 };
 
-export const getLocationById = async (id: string) => {
+export const getLocationById = async (id: string, userId?: string) => {
   try {
     if (!id) {
       throw new LocationServiceError('Location ID is required', 'INVALID_ID');
@@ -184,10 +209,10 @@ export const getLocationById = async (id: string) => {
 
     const location = await prisma.location.findUnique({
       where: { id },
-      include: locationInclude,
+      include: locationIncludeWithVotes,
     });
 
-    return location ? addSimplifiedAnswers(location) : null;
+    return location ? addSimplifiedAnswersWithVotes(location, userId) : null;
   } catch (error) {
     console.error('Error in getLocationById:', error);
     if (error instanceof LocationServiceError) {
@@ -200,7 +225,7 @@ export const getLocationById = async (id: string) => {
   }
 };
 
-export const getLocationBySlug = async (slug: string) => {
+export const getLocationBySlug = async (slug: string, userId?: string) => {
   try {
     if (!slug) {
       throw new LocationServiceError(
@@ -215,10 +240,10 @@ export const getLocationBySlug = async (slug: string) => {
         deletedAt: null,
         published: DEFAULT_PUBLISHED_STATUS,
       },
-      include: locationInclude,
+      include: locationIncludeWithVotes,
     });
 
-    return location ? addSimplifiedAnswers(location) : null;
+    return location ? addSimplifiedAnswersWithVotes(location, userId) : null;
   } catch (error) {
     console.error('Error in getLocationBySlug:', error);
     if (error instanceof LocationServiceError) {

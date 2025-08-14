@@ -13,6 +13,7 @@ import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'node:fs';
 import env from '../config/env';
+import { getAuth } from '@clerk/express';
 
 // Async function to handle image upload in background
 const processImageUploadAsync = async (
@@ -73,13 +74,20 @@ const processImageUploadAsync = async (
 
 export const getLocations = async (req: Request, res: Response) => {
   try {
-    const { city, category, name, cursor } = req.query;
-    const locations = await LocationService.getAllLocations({
-      city: city as string | undefined,
-      category: category as string | undefined,
-      name: name as string | undefined,
-      cursor: cursor as string | undefined,
-    });
+    const { city, category, name, cursor, votes } = req.query;
+    const { userId } = getAuth(req);
+
+    const locations = await LocationService.getAllLocations(
+      {
+        city: city as string | undefined,
+        category: category as string | undefined,
+        name: name as string | undefined,
+        cursor: cursor as string | undefined,
+        votes: votes === 'true',
+      },
+      userId || undefined,
+    );
+
     sendSuccess(res, locations);
   } catch (error) {
     handleError(res, error);
@@ -88,7 +96,11 @@ export const getLocations = async (req: Request, res: Response) => {
 
 export const getLocation = async (req: Request, res: Response) => {
   try {
-    const location = await LocationService.getLocationById(req.params.id);
+    const { userId } = getAuth(req);
+    const location = await LocationService.getLocationById(
+      req.params.id,
+      userId || undefined,
+    );
     if (!location) {
       sendNotFound(res, 'Location not found');
       return;
@@ -209,7 +221,12 @@ export const getLocationByCityAndCategoryAndName = async (
 export const getLocationBySlug = async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
-    const location = await LocationService.getLocationBySlug(slug);
+    const { userId } = getAuth(req);
+
+    const location = await LocationService.getLocationBySlug(
+      slug,
+      userId || undefined,
+    );
     if (!location) {
       return sendNotFound(res, 'Location not found');
     }
