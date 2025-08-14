@@ -18,7 +18,7 @@ export const voteOnLocation = async (req: Request, res: Response) => {
     const { locationId } = req.params;
     const { voteType }: VoteData = req.body;
 
-        // Get user from Clerk
+    // Get user from Clerk
     const { userId: clerkUserId } = getAuth(req);
     if (!clerkUserId) {
       return sendUnauthorized(res, 'Authentication required');
