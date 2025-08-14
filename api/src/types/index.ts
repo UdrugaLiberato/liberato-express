@@ -143,6 +143,8 @@ export interface LocationFilters {
   includeAnswers?: boolean;
   includeImages?: boolean;
   includeQuestions?: boolean;
+  includeVotes?: boolean;
+  votes?: boolean;
 }
 
 export interface LocationCreateData {
@@ -208,4 +210,41 @@ export interface UploadResponseData {
     size?: number;
     fileType?: string;
   }>;
+}
+
+// Vote Types
+export type VoteType = 'upvote' | 'downvote';
+
+export interface VoteData {
+  voteType: VoteType;
+}
+
+export interface VoteStats {
+  upvotes: number;
+  downvotes: number;
+  userVote?: VoteType;
+}
+
+export interface LocationWithVotes {
+  id: string;
+  name: string;
+  votes?: VoteStats;
+}
+
+export interface VoteUser {
+  id: string;
+  username: string;
+  avatarUrl?: string | null;
+}
+
+export interface VoterInfo {
+  user: VoteUser;
+  votedAt: Date;
+}
+
+export interface LocationVoters {
+  upvoters: VoterInfo[];
+  downvoters: VoterInfo[];
+  totalUpvotes: number;
+  totalDownvotes: number;
 }

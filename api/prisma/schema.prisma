@@ -97,6 +97,7 @@ model location {
   deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
   answer     answer[]
   image      image[]
+  vote       vote[]
   category   category  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cb12469de2")
   city       city      @relation(fields: [cityId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cb8bac62af")
   user       user?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5e9e89cba76ed395")
@@ -138,6 +139,32 @@ model user {
   updatedAt    DateTime?  @map("updated_at") @db.Timestamptz(6)
   deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz(6)
   location     location[]
+  vote         vote[]
+
+  @@schema("public")
+}
+
+model vote {
+  id         String    @id @default(uuid()) @db.VarChar(255)
+  userId     String    @map("user_id") @db.VarChar(255)
+  locationId String    @map("location_id") @db.VarChar(255)
+  voteType   VoteType  @map("vote_type")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  
+  user       user      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  location   location  @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, locationId], map: "idx_vote_user_location_unique")
+  @@index([locationId], map: "idx_vote_location_id")
+  @@index([userId], map: "idx_vote_user_id")
+  @@schema("public")
+}
+
+enum VoteType {
+  upvote
+  downvote
 
   @@schema("public")
 }

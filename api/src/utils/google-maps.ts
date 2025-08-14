@@ -5,7 +5,6 @@ import env from '../config/env';
 const { GOOGLE_API_KEY } = env;
 
 class GoogleMaps {
-  // eslint-disable-next-line no-empty-function
   constructor(private apiKey: string = GOOGLE_API_KEY) {}
 
   async getCoordinateForCity(
