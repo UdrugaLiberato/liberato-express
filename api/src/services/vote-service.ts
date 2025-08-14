@@ -16,6 +16,26 @@ export const createOrUpdateVote = async (
     throw new Error('User ID, location ID, and vote type are required');
   }
 
+  // Verify user exists in database
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+
+  if (!user) {
+    throw new Error(`User with ID ${userId} not found in database`);
+  }
+
+  // Verify location exists in database
+  const location = await prisma.location.findUnique({
+    where: { id: locationId },
+    select: { id: true },
+  });
+
+  if (!location) {
+    throw new Error(`Location with ID ${locationId} not found in database`);
+  }
+
   await prisma.vote.upsert({
     where: {
       userId_locationId: {
@@ -41,6 +61,16 @@ export const removeVote = async (
 ): Promise<void> => {
   if (!userId || !locationId) {
     throw new Error('User ID and location ID are required');
+  }
+
+  // Verify user exists in database
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+
+  if (!user) {
+    throw new Error(`User with ID ${userId} not found in database`);
   }
 
   await prisma.vote.delete({
