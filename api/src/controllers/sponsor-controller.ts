@@ -155,6 +155,12 @@ export const createSponsor = async (req: Request, res: Response) => {
       return;
     }
 
+    // Validate URL format
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      handleValidationError(res, ['URL must start with http:// or https://']);
+      return;
+    }
+
     // Create sponsor immediately without waiting for image upload
     const newSponsor = await SponsorService.create(
       name,
@@ -185,6 +191,12 @@ export const updateSponsor = async (req: Request, res: Response) => {
     const existingSponsor = await SponsorService.getById(id);
     if (!existingSponsor) {
       sendNotFound(res, 'Sponsor not found');
+      return;
+    }
+
+    // Validate URL format if provided
+    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+      handleValidationError(res, ['URL must start with http:// or https://']);
       return;
     }
 
