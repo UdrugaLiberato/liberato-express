@@ -14,6 +14,38 @@ import FormData from 'form-data';
 import fs from 'node:fs';
 import env from '../config/env';
 
+// Helper function to validate sponsor image files
+const validateSponsorImages = (
+  files:
+    | { [fieldname: string]: Express.Multer.File[] }
+    | Express.Multer.File[]
+    | undefined,
+): { isValid: boolean; errorMessage?: string } => {
+  if (!files || Array.isArray(files)) {
+    return {
+      isValid: false,
+      errorMessage: 'Both light_image and dark_image are required',
+    };
+  }
+
+  const lightImages = files.light_image || [];
+  const darkImages = files.dark_image || [];
+
+  if (lightImages.length === 0 || darkImages.length === 0) {
+    return {
+      isValid: false,
+      errorMessage: 'Both light_image and dark_image are required',
+    };
+  }
+
+  return { isValid: true };
+};
+
+// Helper function to validate URL format
+const validateSponsorUrl = (url: string): boolean => {
+  return url.startsWith('http://') || url.startsWith('https://');
+};
+
 // Async function to handle image upload in background
 const processImageUploadAsync = async (
   sponsorId: string,
@@ -99,6 +131,42 @@ const processImageUploadAsync = async (
   }
 };
 
+// Helper function to handle file validation and processing for updates
+const handleSponsorFileUpdate = (
+  files:
+    | { [fieldname: string]: Express.Multer.File[] }
+    | Express.Multer.File[]
+    | undefined,
+  sponsorId: string,
+): { shouldProcess: boolean; errorMessage?: string } => {
+  if (!files) {
+    return { shouldProcess: false };
+  }
+
+  const imageValidation = validateSponsorImages(files);
+
+  if (!Array.isArray(files)) {
+    const lightImages = files.light_image || [];
+    const darkImages = files.dark_image || [];
+    const hasFiles = lightImages.length > 0 || darkImages.length > 0;
+
+    if (hasFiles && !imageValidation.isValid) {
+      return {
+        shouldProcess: false,
+        errorMessage: imageValidation.errorMessage,
+      };
+    }
+
+    if (hasFiles) {
+      // Start async processing
+      processImageUploadAsync(sponsorId, files);
+      return { shouldProcess: true };
+    }
+  }
+
+  return { shouldProcess: false };
+};
+
 export const getAllSponsors = async (_req: Request, res: Response) => {
   try {
     const sponsors = await SponsorService.getAll();
@@ -138,25 +206,14 @@ export const createSponsor = async (req: Request, res: Response) => {
     }
 
     // Validate that both light and dark images are provided
-    if (!files || Array.isArray(files)) {
-      handleValidationError(res, [
-        'Both light_image and dark_image are required when creating a sponsor',
-      ]);
-      return;
-    }
-
-    const lightImages = files.light_image || [];
-    const darkImages = files.dark_image || [];
-
-    if (lightImages.length === 0 || darkImages.length === 0) {
-      handleValidationError(res, [
-        'Both light_image and dark_image are required when creating a sponsor',
-      ]);
+    const imageValidation = validateSponsorImages(files);
+    if (!imageValidation.isValid) {
+      handleValidationError(res, [imageValidation.errorMessage!]);
       return;
     }
 
     // Validate URL format
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    if (!validateSponsorUrl(url)) {
       handleValidationError(res, ['URL must start with http:// or https://']);
       return;
     }
@@ -175,7 +232,7 @@ export const createSponsor = async (req: Request, res: Response) => {
     sendCreated(res, newSponsor);
 
     // Process image upload asynchronously since we've validated files exist
-    processImageUploadAsync(newSponsor.id, files);
+    processImageUploadAsync(newSponsor.id, files!);
   } catch (error) {
     handleError(res, error, 'Failed to create sponsor');
   }
@@ -195,8 +252,15 @@ export const updateSponsor = async (req: Request, res: Response) => {
     }
 
     // Validate URL format if provided
-    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    if (url && !validateSponsorUrl(url)) {
       handleValidationError(res, ['URL must start with http:// or https://']);
+      return;
+    }
+
+    // Validate files before updating if files are provided
+    const fileUpdateResult = handleSponsorFileUpdate(files, id);
+    if (fileUpdateResult.errorMessage) {
+      handleValidationError(res, [fileUpdateResult.errorMessage]);
       return;
     }
 
@@ -213,31 +277,7 @@ export const updateSponsor = async (req: Request, res: Response) => {
     // Send response immediately
     sendSuccess(res, updatedSponsor);
 
-    // Process image upload asynchronously if files are provided
-    if (files) {
-      // If files are provided, validate that both light and dark images are included
-      if (Array.isArray(files)) {
-        handleValidationError(res, [
-          'Both light_image and dark_image are required when updating sponsor images',
-        ]);
-        return;
-      }
-
-      const lightImages = files.light_image || [];
-      const darkImages = files.dark_image || [];
-      const hasFiles = lightImages.length > 0 || darkImages.length > 0;
-
-      if (hasFiles) {
-        // If any images are provided, both light and dark must be provided
-        if (lightImages.length === 0 || darkImages.length === 0) {
-          handleValidationError(res, [
-            'Both light_image and dark_image are required when updating sponsor images',
-          ]);
-          return;
-        }
-        processImageUploadAsync(id, files);
-      }
-    }
+    // File processing already handled by helper function
   } catch (error) {
     handleError(res, error, 'Failed to update sponsor');
   }
