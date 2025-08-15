@@ -21,6 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a **Node.js Express API** for a location-based application with the following structure:
 
 ### Core Technologies
+
 - **Express.js** - Web framework
 - **TypeScript** - Language
 - **Prisma** - ORM with PostgreSQL database
@@ -29,10 +30,11 @@ This is a **Node.js Express API** for a location-based application with the foll
 - **Google Maps API** - Location services
 
 ### Folder Structure
+
 ```
 src/
 ├── config/          # Environment, Prisma, permissions config
-├── controllers/     # HTTP request handlers  
+├── controllers/     # HTTP request handlers
 ├── routes/          # Express route definitions
 ├── services/        # Business logic layer
 ├── utils/           # Helper functions and utilities
@@ -43,6 +45,7 @@ src/
 ```
 
 ### Database Models
+
 Core entities: `user`, `city`, `location`, `category`, `question`, `answer`, `image`
 
 - **Locations** belong to cities and categories, can have images and answers to questions
@@ -52,6 +55,7 @@ Core entities: `user`, `city`, `location`, `category`, `question`, `answer`, `im
 - **Questions/Answers** provide rating/feedback system for locations
 
 ### Key Patterns
+
 - **Service Layer Pattern**: Controllers delegate to services for business logic
 - **Utility Functions**: Shared logic in utils/ for data transformation and validation
 - **Middleware**: Cache layer and file upload handling
@@ -59,15 +63,18 @@ Core entities: `user`, `city`, `location`, `category`, `question`, `answer`, `im
 - **Graceful Shutdown**: Redis connection cleanup on server termination
 
 ### Authentication & Security
+
 - Clerk middleware handles authentication
 - Webhook endpoint for Clerk user events (before JSON parsing)
 - CORS configured for cross-origin requests
 - File upload handling with Multer
 
 ### Cache Strategy
+
 Redis caching implemented in middleware with connection management.
 
 ### Important Notes
+
 - Webhook routes require raw body parsing and must be defined before express.json()
 - Tests are excluded from ESLint configuration
 - Use tsconfig-paths for module resolution
