@@ -59,21 +59,27 @@ model city {
 }
 
 model image {
-  id         Int       @id(map: "idx_16874_primary") @default(autoincrement())
-  src        String    @db.VarChar(255)
-  name       String    @db.VarChar(255)
-  mime       String?   @db.VarChar(255)
-  categoryId String?   @map("category_id") @db.VarChar(255)
-  locationId String?   @map("location_id") @db.VarChar(255)
-  cityId     String?   @map("city_id") @db.VarChar(255)
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
-  category   category? @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "image_ibfk_1")
-  location   location? @relation(fields: [locationId], references: [id], onUpdate: NoAction, map: "image_ibfk_2")
-  city       city?     @relation(fields: [cityId], references: [id], onUpdate: NoAction, map: "image_ibfk_3")
+  id              Int       @id(map: "idx_16874_primary") @default(autoincrement())
+  src             String    @db.VarChar(255)
+  name            String    @db.VarChar(255)
+  mime            String?   @db.VarChar(255)
+  categoryId      String?   @map("category_id") @db.VarChar(255)
+  locationId      String?   @map("location_id") @db.VarChar(255)
+  cityId          String?   @map("city_id") @db.VarChar(255)
+  sponsorLightId  String?   @map("sponsor_light_id") @db.VarChar(255)
+  sponsorDarkId   String?   @map("sponsor_dark_id") @db.VarChar(255)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+  category        category? @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "image_ibfk_1")
+  location        location? @relation(fields: [locationId], references: [id], onUpdate: NoAction, map: "image_ibfk_2")
+  city            city?     @relation(fields: [cityId], references: [id], onUpdate: NoAction, map: "image_ibfk_3")
+  sponsorLight    sponsor?  @relation("SponsorLightImage", fields: [sponsorLightId], references: [id], onUpdate: NoAction, map: "image_sponsor_light_fk")
+  sponsorDark     sponsor?  @relation("SponsorDarkImage", fields: [sponsorDarkId], references: [id], onUpdate: NoAction, map: "image_sponsor_dark_fk")
 
   @@index([categoryId], map: "idx_16874_category_id")
   @@index([locationId], map: "idx_16874_location_id")
   @@index([cityId], map: "idx_16874_city_id")
+  @@index([sponsorLightId], map: "idx_image_sponsor_light_id")
+  @@index([sponsorDarkId], map: "idx_image_sponsor_dark_id")
   @@schema("public")
 }
 
@@ -159,6 +165,23 @@ model vote {
   @@unique([userId, locationId], map: "idx_vote_user_location_unique")
   @@index([locationId], map: "idx_vote_location_id")
   @@index([userId], map: "idx_vote_user_id")
+  @@schema("public")
+}
+
+model sponsor {
+  id          String     @id @default(uuid()) @db.VarChar(255)
+  name        String     @unique @db.VarChar(255)
+  alt         String     @db.VarChar(255)
+  description String
+  url         String     @db.VarChar(255)
+  weight      Int        @default(0)
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime?  @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  
+  imageLight  image[]    @relation("SponsorLightImage")
+  imageDark   image[]    @relation("SponsorDarkImage")
+
   @@schema("public")
 }
 

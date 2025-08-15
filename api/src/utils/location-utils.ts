@@ -128,6 +128,114 @@ export const addSimplifiedAnswers = (
   }
 };
 
+// Helper function to convert various types to integer
+export const toInt = (value: any): number => {
+  try {
+    if (value === null || value === undefined) {
+      return 0;
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 1 : 0;
+    }
+
+    if (typeof value === 'number') {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Number.parseInt(value, 10);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    return 0;
+  } catch (error) {
+    console.error('Error in toInt:', error);
+    return 0;
+  }
+};
+
+// Helper function to generate slug from name
+const generateSlug = (name: string): string => {
+  try {
+    if (!name || typeof name !== 'string') {
+      return '';
+    }
+
+    return name
+      .toLowerCase()
+      .trim()
+      .replaceAll(/[^\s\w-]/g, '') // Remove special characters
+      .replaceAll(/\s+/g, '-') // Replace spaces with hyphens
+      .replaceAll(/-+/g, '-') // Replace multiple hyphens with single
+      .replaceAll(/(^-)|(-$)/g, ''); // Remove leading/trailing hyphens
+  } catch (error) {
+    console.error('Error in generateSlug:', error);
+    return name || '';
+  }
+};
+
+// Helper function to generate unique slug for location
+export const getUniqueSlug = async (
+  name: string,
+  cityId: string,
+  categoryId: string,
+): Promise<string> => {
+  try {
+    if (!name || !cityId || !categoryId) {
+      throw new LocationUtilsError(
+        'Name, city ID, and category ID are required',
+        'MISSING_SLUG_PARAMS',
+      );
+    }
+
+    const baseSlug = generateSlug(name);
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Check for existing slug and generate unique one
+
+    while (true) {
+      // eslint-disable-next-line no-await-in-loop
+      const existingLocation = await prisma.location.findFirst({
+        where: {
+          slug,
+          cityId,
+          categoryId,
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+
+      if (!existingLocation) {
+        break;
+      }
+
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+
+      // Prevent infinite loop
+      if (counter > 100) {
+        throw new LocationUtilsError(
+          'Unable to generate unique slug',
+          'SLUG_GENERATION_FAILED',
+        );
+      }
+    }
+
+    return slug;
+  } catch (error) {
+    console.error('Error in getUniqueSlug:', error);
+    if (error instanceof LocationUtilsError) {
+      throw error;
+    }
+    throw new LocationUtilsError(
+      'Failed to generate unique slug',
+      'SLUG_ERROR',
+    );
+  }
+};
+
 export const addSimplifiedAnswersWithVotes = (
   location: any,
   userId?: string,
@@ -412,32 +520,6 @@ export const buildLocationUpdateData = async (
   }
 };
 
-export const toInt = (value: any): number => {
-  try {
-    if (value === null || value === undefined) {
-      return 0;
-    }
-
-    if (typeof value === 'boolean') {
-      return value ? 1 : 0;
-    }
-
-    if (typeof value === 'number') {
-      return value;
-    }
-
-    if (typeof value === 'string') {
-      const parsed = Number.parseInt(value, 10);
-      return Number.isNaN(parsed) ? 0 : parsed;
-    }
-
-    return 0;
-  } catch (error) {
-    console.error('Error in toInt:', error);
-    return 0;
-  }
-};
-
 export const fromPascalWithDashes = (str: string): string => {
   try {
     if (!str || typeof str !== 'string') {
@@ -451,84 +533,6 @@ export const fromPascalWithDashes = (str: string): string => {
   } catch (error) {
     console.error('Error in fromPascalWithDashes:', error);
     return str || '';
-  }
-};
-
-export const getUniqueSlug = async (
-  name: string,
-  cityId: string,
-  categoryId: string,
-): Promise<string> => {
-  try {
-    if (!name || !cityId || !categoryId) {
-      throw new LocationUtilsError(
-        'Name, city ID, and category ID are required',
-        'MISSING_SLUG_PARAMS',
-      );
-    }
-
-    const baseSlug = generateSlug(name);
-    let slug = baseSlug;
-    let counter = 1;
-
-    // Check for existing slug and generate unique one
-    while (true) {
-      const existingLocation = await prisma.location.findFirst({
-        where: {
-          slug,
-          cityId,
-          categoryId,
-          deletedAt: null,
-        },
-        select: { id: true },
-      });
-
-      if (!existingLocation) {
-        break;
-      }
-
-      slug = `${baseSlug}-${counter}`;
-      counter++;
-
-      // Prevent infinite loop
-      if (counter > 100) {
-        throw new LocationUtilsError(
-          'Unable to generate unique slug',
-          'SLUG_GENERATION_FAILED',
-        );
-      }
-    }
-
-    return slug;
-  } catch (error) {
-    console.error('Error in getUniqueSlug:', error);
-    if (error instanceof LocationUtilsError) {
-      throw error;
-    }
-    throw new LocationUtilsError(
-      'Failed to generate unique slug',
-      'SLUG_ERROR',
-    );
-  }
-};
-
-// Helper function to generate slug from name
-const generateSlug = (name: string): string => {
-  try {
-    if (!name || typeof name !== 'string') {
-      return '';
-    }
-
-    return name
-      .toLowerCase()
-      .trim()
-      .replaceAll(/[^\s\w-]/g, '') // Remove special characters
-      .replaceAll(/\s+/g, '-') // Replace spaces with hyphens
-      .replaceAll(/-+/g, '-') // Replace multiple hyphens with single
-      .replaceAll(/^-|-$/g, ''); // Remove leading/trailing hyphens
-  } catch (error) {
-    console.error('Error in generateSlug:', error);
-    return name || '';
   }
 };
 
