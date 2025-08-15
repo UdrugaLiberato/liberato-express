@@ -37,17 +37,11 @@ const initializeRedis = async (): Promise<RedisClientType> => {
         console.error('Redis Client Error:', err);
       });
 
-      client.on('connect', () => {
-        console.log('Redis Client Connected');
-      });
+      client.on('connect', () => {});
 
-      client.on('ready', () => {
-        console.log('Redis Client Ready');
-      });
+      client.on('ready', () => {});
 
-      client.on('end', () => {
-        console.log('Redis Client Disconnected');
-      });
+      client.on('end', () => {});
 
       await client.connect();
     } catch (error) {
@@ -73,7 +67,6 @@ const cache = async (req: Request, res: Response, next: NextFunction) => {
     const redisClient = await initializeRedis();
 
     if (!redisClient.isReady) {
-      console.log('Redis client not connected, skipping cache');
       return next();
     }
 
@@ -83,12 +76,10 @@ const cache = async (req: Request, res: Response, next: NextFunction) => {
     const cachedData = await redisClient.get(key);
 
     if (cachedData) {
-      console.log('Cache hit');
       res.json(JSON.parse(cachedData) as any);
       return;
     }
 
-    console.log('Cache miss');
     // Store the original res.json to intercept response
     const originalJson = res.json.bind(res);
     res.json = (data: any) => {
@@ -115,7 +106,6 @@ const cache = async (req: Request, res: Response, next: NextFunction) => {
 export const closeRedisConnection = async (): Promise<void> => {
   if (client && client.isReady) {
     await client.quit();
-    console.log('Redis connection closed gracefully');
   }
 };
 

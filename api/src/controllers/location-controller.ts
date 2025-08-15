@@ -43,8 +43,6 @@ const processImageUploadAsync = async (
 
     // Update location with image info once upload is complete
     await LocationService.updateWithImage(locationId, uploadResponse.data);
-
-    console.log(`Image uploaded successfully for location ${locationId}`);
   } catch (uploadError: any) {
     console.error(
       `Failed to upload image for location ${locationId}:`,

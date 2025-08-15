@@ -89,8 +89,6 @@ const processImageUploadAsync = async (
       uploadResponse.data,
       files,
     );
-
-    console.log(`Images uploaded successfully for sponsor ${sponsorId}`);
   } catch (uploadError: any) {
     console.error(
       `Failed to upload images for sponsor ${sponsorId}:`,

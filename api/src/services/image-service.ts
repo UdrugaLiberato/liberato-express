@@ -36,7 +36,6 @@ export const update = (id: number, data: ImageUpdateData) => {
 };
 
 export const remove = (id: number) => {
-  console.log('id', id);
   return prisma.image.update({
     where: { id },
     data: {

@@ -605,9 +605,6 @@ export const updateWithImage = async (
     }
 
     await Promise.all(imageCreationPromises);
-    console.log(
-      `Successfully processed ${imageCreationPromises.length} images for location ${locationId}`,
-    );
   } catch (error) {
     console.error(
       `Error in updateWithImage for location ${locationId}:`,
