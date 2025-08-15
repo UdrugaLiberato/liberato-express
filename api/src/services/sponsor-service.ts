@@ -1,4 +1,4 @@
-import env from 'src/config/env';
+import env from '../config/env';
 import prisma from '../config/prisma';
 import { UploadResponseData } from '../types';
 
