@@ -90,4 +90,14 @@ export const cityImageUpload = multer({
   },
 });
 
+// Specialized upload for sponsor images (light and dark variants)
+export const sponsorImageUpload = multer({
+  storage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for sponsor images
+    files: 2, // Maximum 2 images (light and dark)
+  },
+});
+
 export default upload;

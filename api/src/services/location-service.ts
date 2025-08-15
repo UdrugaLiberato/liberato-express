@@ -23,7 +23,6 @@ import {
 
 // Constants for better maintainability
 const DEFAULT_PAGE_SIZE = 10;
-const MAX_PAGE_SIZE = 1000;
 const DEFAULT_PUBLISHED_STATUS = 1;
 
 // Custom error class for location service
@@ -440,6 +439,61 @@ export const createLocation = async (
   }
 };
 
+// Helper function to update coordinates when street or city changes
+const updateLocationCoordinates = async (
+  body: LocationUpdateData,
+  dataToUpdate: any,
+) => {
+  if (body.street === undefined && body.city_id === undefined) {
+    return;
+  }
+
+  const city = body.city_id
+    ? await prisma.city.findUnique({ where: { id: body.city_id } })
+    : null;
+
+  if (!city) {
+    return;
+  }
+
+  try {
+    const coordinates = await getCoordinates(
+      `${body.street ?? ''} ${city.name}`,
+    );
+    dataToUpdate.latitude = coordinates.lat;
+    dataToUpdate.longitude = coordinates.lng;
+  } catch (error) {
+    console.warn('Failed to update coordinates:', error);
+  }
+};
+
+// Helper function to handle async update operations
+const processLocationUpdates = async (
+  id: string,
+  body: LocationUpdateData,
+  files: Express.Multer.File[],
+) => {
+  const promises = [];
+
+  if (files?.length) {
+    promises.push(
+      prisma.image.deleteMany({ where: { locationId: id } }),
+      createImages(files, id),
+    );
+  }
+
+  if (body.qa) {
+    promises.push(
+      prisma.answer.deleteMany({ where: { locationId: id } }),
+      createAnswers(body.qa, id),
+    );
+  }
+
+  if (promises.length > 0) {
+    await Promise.all(promises);
+  }
+};
+
 export const updateLocation = async (
   id: string,
   body: LocationUpdateData,
@@ -453,7 +507,6 @@ export const updateLocation = async (
       );
     }
 
-    // Get current location data for slug generation
     const currentLocation = await prisma.location.findUnique({
       where: { id },
       select: { cityId: true, categoryId: true, id: true, name: true },
@@ -467,26 +520,7 @@ export const updateLocation = async (
     }
 
     const dataToUpdate = await buildLocationUpdateData(body, currentLocation);
-
-    // Update coordinates if street or city changes
-    if (body.street !== undefined || body.city_id !== undefined) {
-      const city = body.city_id
-        ? await prisma.city.findUnique({ where: { id: body.city_id } })
-        : null;
-
-      if (city) {
-        try {
-          const coordinates = await getCoordinates(
-            `${body.street ?? ''} ${city.name}`,
-          );
-          dataToUpdate.latitude = coordinates.lat;
-          dataToUpdate.longitude = coordinates.lng;
-        } catch (error) {
-          console.warn('Failed to update coordinates:', error);
-          // Continue without updating coordinates
-        }
-      }
-    }
+    await updateLocationCoordinates(body, dataToUpdate);
 
     await prisma.location.update({
       where: { id },
@@ -498,29 +532,7 @@ export const updateLocation = async (
       },
     });
 
-    // Process images and answers
-    const promises = [];
-
-    if (files?.length) {
-      // Delete existing images and create new ones
-      promises.push(
-        prisma.image.deleteMany({ where: { locationId: id } }),
-        createImages(files, id),
-      );
-    }
-
-    if (body.qa) {
-      // Delete existing answers and create new ones
-      promises.push(
-        prisma.answer.deleteMany({ where: { locationId: id } }),
-        createAnswers(body.qa, id),
-      );
-    }
-
-    // Wait for all async operations to complete
-    if (promises.length > 0) {
-      await Promise.all(promises);
-    }
+    await processLocationUpdates(id, body, files);
 
     const fullLocation = await prisma.location.findUnique({
       where: { id },
@@ -593,9 +605,6 @@ export const updateWithImage = async (
     }
 
     await Promise.all(imageCreationPromises);
-    console.log(
-      `Successfully processed ${imageCreationPromises.length} images for location ${locationId}`,
-    );
   } catch (error) {
     console.error(
       `Error in updateWithImage for location ${locationId}:`,

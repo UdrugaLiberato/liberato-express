@@ -43,8 +43,6 @@ const processImageUploadAsync = async (
 
     // Update category with image info once upload is complete
     await CategoryService.updateWithImage(categoryId, uploadResponse.data);
-
-    console.log(`Image uploaded successfully for category ${categoryId}`);
   } catch (uploadError: any) {
     console.error(
       `Failed to upload image for category ${categoryId}:`,

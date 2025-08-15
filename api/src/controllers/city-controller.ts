@@ -41,8 +41,6 @@ const processImageUploadAsync = async (
     );
 
     await CityService.updateWithImage(cityId, uploadResponse.data);
-
-    console.log(`Image uploaded successfully for city ${cityId}`);
   } catch (uploadError: any) {
     console.error(`Failed to upload image for city ${cityId}:`, uploadError);
 

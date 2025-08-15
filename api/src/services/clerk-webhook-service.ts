@@ -128,7 +128,6 @@ export const handleUserDeleted = async (evt: WebhookEvent) => {
 
 export const handleSessionCreated = async (evt: WebhookEvent) => {
   if (evt.type === 'session.created') {
-    console.log('Session created:', evt.data);
     const sessionId = (evt.data as any).id;
     const userId = (evt.data as any).user_id;
 
@@ -148,10 +147,6 @@ export const handleSessionCreated = async (evt: WebhookEvent) => {
           .catch((error) =>
             console.warn('Could not update user last active:', error),
           );
-      } else {
-        console.log(
-          `⏭️ User ${userId} not found yet, skipping lastActiveAt update`,
-        );
       }
     }
 
@@ -162,7 +157,6 @@ export const handleSessionCreated = async (evt: WebhookEvent) => {
 
 export const handleSessionEnded = async (evt: WebhookEvent) => {
   if (evt.type === 'session.ended') {
-    console.log('Session ended:', evt.data);
     const sessionId = (evt.data as any).id;
     const userId = (evt.data as any).user_id;
     return { sessionId, userId, action: 'ended' };
@@ -172,7 +166,6 @@ export const handleSessionEnded = async (evt: WebhookEvent) => {
 
 export const handleSessionRevoked = async (evt: WebhookEvent) => {
   if (evt.type === 'session.revoked') {
-    console.log('Session revoked:', evt.data);
     const sessionId = (evt.data as any).id;
     const userId = (evt.data as any).user_id;
     return { sessionId, userId, action: 'revoked' };
@@ -182,7 +175,6 @@ export const handleSessionRevoked = async (evt: WebhookEvent) => {
 
 export const handleSessionRemoved = async (evt: WebhookEvent) => {
   if (evt.type === 'session.removed') {
-    console.log('Session removed:', evt.data);
     const sessionId = (evt.data as any).id;
     const userId = (evt.data as any).user_id;
     return { sessionId, userId, action: 'removed' };
@@ -192,7 +184,6 @@ export const handleSessionRemoved = async (evt: WebhookEvent) => {
 
 export const handleRoleCreated = async (evt: WebhookEvent) => {
   if (evt.type === 'role.created') {
-    console.log('Role created:', evt.data);
     const roleId = (evt.data as any).id;
     const roleName = (evt.data as any).name;
     return { roleId, roleName, action: 'created' };
@@ -202,7 +193,6 @@ export const handleRoleCreated = async (evt: WebhookEvent) => {
 
 export const handleRoleUpdated = async (evt: WebhookEvent) => {
   if (evt.type === 'role.updated') {
-    console.log('Role updated:', evt.data);
     const roleId = (evt.data as any).id;
     const roleName = (evt.data as any).name;
     return { roleId, roleName, action: 'updated' };
@@ -212,7 +202,6 @@ export const handleRoleUpdated = async (evt: WebhookEvent) => {
 
 export const handleRoleDeleted = async (evt: WebhookEvent) => {
   if (evt.type === 'role.deleted') {
-    console.log('Role deleted:', evt.data);
     const roleId = (evt.data as any).id;
     return { roleId, action: 'deleted' };
   }
