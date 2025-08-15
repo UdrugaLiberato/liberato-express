@@ -178,24 +178,6 @@ export const deleteLocation = async (req: Request, res: Response) => {
   }
 };
 
-export const getLocationsByCityAndCategory = async (
-  req: Request,
-  res: Response,
-) => {
-  try {
-    const cursor = req.query.cursor as string | undefined;
-    const { city, category } = req.params;
-    const locations = await LocationService.getLocationsByCityAndCategory({
-      city,
-      category,
-      cursor,
-    });
-    sendSuccess(res, locations);
-  } catch (error) {
-    handleError(res, error);
-  }
-};
-
 export const getLocationByCityAndCategoryAndName = async (
   req: Request,
   res: Response,

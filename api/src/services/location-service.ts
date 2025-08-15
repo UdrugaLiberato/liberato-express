@@ -104,14 +104,14 @@ export const getAllLocations = async (
       const locations = await prisma.location.findMany({
         where,
         ...(cursor ? { cursor: { id: cursor } } : undefined),
-        take: MAX_PAGE_SIZE + 1,
+        take: DEFAULT_PAGE_SIZE + 1,
         include: includeVotes ? locationIncludeWithVotes : locationInclude,
         orderBy: { featured: 'desc' },
       });
 
       const { items: locationsToReturn, nextCursor } = handlePagination(
         locations,
-        MAX_PAGE_SIZE,
+        DEFAULT_PAGE_SIZE,
       );
 
       return {
@@ -184,14 +184,24 @@ export const getAllLocations = async (
       where: {
         deletedAt: null,
       },
+      ...(cursor ? { cursor: { id: cursor } } : undefined),
+      take: DEFAULT_PAGE_SIZE + 1,
       orderBy: { featured: 'desc' },
     });
 
-    return locations.map((location) =>
-      includeVotes
-        ? addSimplifiedAnswersWithVotes(location, userId)
-        : addSimplifiedAnswers(location),
+    const { items: locationsToReturn, nextCursor } = handlePagination(
+      locations,
+      DEFAULT_PAGE_SIZE,
     );
+
+    return {
+      locations: locationsToReturn.map((location) =>
+        includeVotes
+          ? addSimplifiedAnswersWithVotes(location, userId)
+          : addSimplifiedAnswers(location),
+      ),
+      nextCursor: nextCursor?.id || null,
+    };
   } catch (error) {
     console.error('Error in getAllLocations:', error);
     throw new LocationServiceError(
@@ -636,65 +646,6 @@ export const deleteLocation = async (id: string) => {
   }
 };
 
-export const getLocationsByCityAndCategory = async (
-  filters: LocationFilters,
-) => {
-  try {
-    let { city, category } = filters;
-    const { cursor } = filters;
-
-    if (!city || !category) {
-      throw new LocationServiceError(
-        'City and category are required',
-        'MISSING_PARAMS',
-      );
-    }
-
-    // Normalize city and category names
-    if (city.includes('-')) {
-      city = city.replaceAll('-', ' ');
-    }
-    if (category.includes('-')) {
-      category = category.replaceAll('-', ' ');
-    }
-
-    const locations = await prisma.location.findMany({
-      where: {
-        city: { name: { mode: 'insensitive', contains: city } },
-        category: { name: { mode: 'insensitive', contains: category } },
-        published: DEFAULT_PUBLISHED_STATUS,
-        deletedAt: null,
-      },
-      ...(cursor ? { cursor: { id: cursor } } : undefined),
-      take: DEFAULT_PAGE_SIZE + 1,
-      include: locationInclude,
-      orderBy: { featured: 'desc' },
-    });
-
-    const { items: locationsToReturn, nextCursor } = handlePagination(
-      locations,
-      DEFAULT_PAGE_SIZE,
-    );
-
-    return {
-      locations: locationsToReturn.map((location) =>
-        addSimplifiedAnswers(location),
-      ),
-      nextCursor: nextCursor?.id || null,
-    };
-  } catch (error) {
-    console.error('Error in getLocationsByCityAndCategory:', error);
-    if (error instanceof LocationServiceError) {
-      throw error;
-    }
-    throw new LocationServiceError(
-      'Failed to retrieve locations by city and category',
-      'GET_BY_CITY_CATEGORY_ERROR',
-    );
-  }
-};
-
-// New method: Get featured locations
 export const getFeaturedLocations = async (limit: number = 10) => {
   try {
     const locations = await prisma.location.findMany({
