@@ -69,6 +69,19 @@ const buildLocationWhereClause = (filters: LocationFilters) => {
     };
   }
 
+  if (filters.accessibility) {
+    const questionIds = filters.accessibility.split(',').map((id) => id.trim());
+    where.answer = {
+      some: {
+        questionId: {
+          in: questionIds,
+        },
+        answer: 1,
+        deletedAt: null,
+      },
+    };
+  }
+
   return where;
 };
 
@@ -90,7 +103,7 @@ export const getAllLocations = async (
   userId?: string,
 ) => {
   try {
-    const { cursor, votes } = filters;
+    const { cursor, votes, accessibility } = filters;
     const where = buildLocationWhereClause(filters);
     const includeVotes = votes === true;
 
@@ -98,13 +111,17 @@ export const getAllLocations = async (
     const hasFilters =
       filters.city !== undefined ||
       filters.category !== undefined ||
-      filters.name !== undefined;
+      filters.name !== undefined ||
+      filters.accessibility !== undefined;
+
+    // Ignore cursor if accessibility filter is provided
+    const shouldUseCursor = cursor && !accessibility;
 
     if (hasFilters) {
       const [locations, count] = await Promise.all([
         prisma.location.findMany({
           where,
-          ...(cursor ? { cursor: { id: cursor } } : undefined),
+          ...(shouldUseCursor ? { cursor: { id: cursor } } : undefined),
           take: DEFAULT_PAGE_SIZE + 1,
           include: includeVotes ? locationIncludeWithVotes : locationInclude,
           orderBy: { featured: 'desc' },
@@ -192,7 +209,7 @@ export const getAllLocations = async (
         where: {
           deletedAt: null,
         },
-        ...(cursor ? { cursor: { id: cursor } } : undefined),
+        ...(shouldUseCursor ? { cursor: { id: cursor } } : undefined),
         take: DEFAULT_PAGE_SIZE + 1,
         orderBy: { featured: 'desc' },
       }),

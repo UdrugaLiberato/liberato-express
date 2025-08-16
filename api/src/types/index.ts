@@ -145,6 +145,7 @@ export interface LocationFilters {
   includeQuestions?: boolean;
   includeVotes?: boolean;
   votes?: boolean;
+  accessibility?: string;
 }
 
 export interface LocationCreateData {
