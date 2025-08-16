@@ -28,6 +28,8 @@ This is a **Node.js Express API** for a location-based application with the foll
 - **Clerk** - Authentication service
 - **Redis** - Caching layer
 - **Google Maps API** - Location services
+- **Zod** - Schema validation
+- **Axios** - HTTP client for external API calls
 
 ### Folder Structure
 
@@ -46,13 +48,16 @@ src/
 
 ### Database Models
 
-Core entities: `user`, `city`, `location`, `category`, `question`, `answer`, `image`
+Core entities: `user`, `city`, `location`, `category`, `question`, `answer`, `image`, `vote`, `sponsor`, `notification`
 
 - **Locations** belong to cities and categories, can have images and answers to questions
 - **Users** can own locations (via Clerk authentication)
 - **Cities** have geographic boundaries (lat/lng + radius)
 - **Categories** organize locations with multilingual descriptions
 - **Questions/Answers** provide rating/feedback system for locations
+- **Votes** allow users to vote on locations (upvote/downvote)
+- **Sponsors** represent business partners with associated images and metadata
+- **Notifications** store device tokens for push notifications with platform support (ios/android/web, no user relation required)
 
 ### Key Patterns
 
@@ -79,3 +84,6 @@ Redis caching implemented in middleware with connection management.
 - Tests are excluded from ESLint configuration
 - Use tsconfig-paths for module resolution
 - Database migrations managed through Prisma
+- API includes voting system for locations and sponsor management
+- Global statistics endpoint available for application metrics
+- Notifications API supports public device token registration with platform filtering (active query: true/false/all)

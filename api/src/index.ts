@@ -17,6 +17,7 @@ import healthRoutes from './routes/health-routes';
 import webhookRoutes from './routes/webhook-routes';
 import sponsorRoutes from './routes/sponsor-routes';
 import statsRoutes from './routes/stats-routes';
+import notificationRoutes from './routes/notification-routes';
 
 const app = express();
 const port = env.PORT;
@@ -48,6 +49,7 @@ app.use('/images', imageRoutes);
 app.use('/health', healthRoutes);
 app.use('/sponsors', sponsorRoutes);
 app.use('/stats', statsRoutes);
+app.use('/notifications', notificationRoutes);
 
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

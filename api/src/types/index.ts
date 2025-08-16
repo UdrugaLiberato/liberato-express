@@ -248,3 +248,22 @@ export interface LocationVoters {
   totalUpvotes: number;
   totalDownvotes: number;
 }
+
+// Notification Types
+export type NotificationPlatform = 'ios' | 'android' | 'web';
+
+export interface NotificationData {
+  deviceToken: string;
+  platform: NotificationPlatform;
+  isActive?: boolean;
+}
+
+export interface NotificationUpdateData {
+  platform?: NotificationPlatform;
+  isActive?: boolean;
+}
+
+export interface NotificationFilters {
+  platform?: NotificationPlatform;
+  isActive?: boolean;
+}
