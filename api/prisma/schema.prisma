@@ -185,9 +185,32 @@ model sponsor {
   @@schema("public")
 }
 
+model notification {
+  id          String           @id @default(uuid()) @db.VarChar(255)
+  deviceToken String           @unique @map("device_token") @db.VarChar(255)
+  platform    NotificationPlatform
+  isActive    Boolean          @default(true) @map("is_active")
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime?        @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?        @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([deviceToken], map: "idx_notification_device_token")
+  @@index([platform], map: "idx_notification_platform")
+  @@index([isActive], map: "idx_notification_is_active")
+  @@schema("public")
+}
+
 enum VoteType {
   upvote
   downvote
+
+  @@schema("public")
+}
+
+enum NotificationPlatform {
+  ios
+  android
+  web
 
   @@schema("public")
 }
