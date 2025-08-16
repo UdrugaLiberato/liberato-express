@@ -20,6 +20,7 @@ import {
   LocationUpdateData,
   UploadResponseData,
 } from '../types';
+import { getLocationCountByFilters } from './stats-service';
 
 // Constants for better maintainability
 const DEFAULT_PAGE_SIZE = 10;
@@ -100,13 +101,19 @@ export const getAllLocations = async (
       filters.name !== undefined;
 
     if (hasFilters) {
-      const locations = await prisma.location.findMany({
-        where,
-        ...(cursor ? { cursor: { id: cursor } } : undefined),
-        take: DEFAULT_PAGE_SIZE + 1,
-        include: includeVotes ? locationIncludeWithVotes : locationInclude,
-        orderBy: { featured: 'desc' },
-      });
+      const [locations, count] = await Promise.all([
+        prisma.location.findMany({
+          where,
+          ...(cursor ? { cursor: { id: cursor } } : undefined),
+          take: DEFAULT_PAGE_SIZE + 1,
+          include: includeVotes ? locationIncludeWithVotes : locationInclude,
+          orderBy: { featured: 'desc' },
+        }),
+        getLocationCountByFilters({
+          city: filters.city,
+          category: filters.category,
+        }),
+      ]);
 
       const { items: locationsToReturn, nextCursor } = handlePagination(
         locations,
@@ -120,6 +127,7 @@ export const getAllLocations = async (
             : addSimplifiedAnswers(location),
         ),
         nextCursor: nextCursor?.id || null,
+        count,
       };
     }
 
@@ -178,15 +186,23 @@ export const getAllLocations = async (
       }),
     };
 
-    const locations = await prisma.location.findMany({
-      select: selectFields,
-      where: {
-        deletedAt: null,
-      },
-      ...(cursor ? { cursor: { id: cursor } } : undefined),
-      take: DEFAULT_PAGE_SIZE + 1,
-      orderBy: { featured: 'desc' },
-    });
+    const [locations, count] = await Promise.all([
+      prisma.location.findMany({
+        select: selectFields,
+        where: {
+          deletedAt: null,
+        },
+        ...(cursor ? { cursor: { id: cursor } } : undefined),
+        take: DEFAULT_PAGE_SIZE + 1,
+        orderBy: { featured: 'desc' },
+      }),
+      prisma.location.count({
+        where: {
+          published: DEFAULT_PUBLISHED_STATUS,
+          deletedAt: null,
+        },
+      }),
+    ]);
 
     const { items: locationsToReturn, nextCursor } = handlePagination(
       locations,
@@ -200,6 +216,7 @@ export const getAllLocations = async (
           : addSimplifiedAnswers(location),
       ),
       nextCursor: nextCursor?.id || null,
+      count,
     };
   } catch (error) {
     console.error('Error in getAllLocations:', error);
