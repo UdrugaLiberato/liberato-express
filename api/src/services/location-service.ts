@@ -75,7 +75,7 @@ const buildLocationWhereClause = (filters: LocationFilters) => {
 // Helper function to handle pagination
 const handlePagination = <T>(items: T[], pageSize: number) => {
   const hasNextPage = items.length > pageSize;
-  const nextCursor = hasNextPage ? items[pageSize - 1] : null;
+  const nextCursor = hasNextPage ? items[pageSize] : null;
   const itemsToReturn = hasNextPage ? items.slice(0, pageSize) : items;
 
   return {
