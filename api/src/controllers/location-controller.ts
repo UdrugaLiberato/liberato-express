@@ -75,7 +75,7 @@ const processImageUploadAsync = async (
 
 export const getLocations = async (req: Request, res: Response) => {
   try {
-    const { city, category, name, cursor, votes } = req.query;
+    const { city, category, name, cursor, votes, accessibility } = req.query;
     const { userId } = getAuth(req);
 
     const locations = await LocationService.getAllLocations(
@@ -85,6 +85,7 @@ export const getLocations = async (req: Request, res: Response) => {
         name: name as string | undefined,
         cursor: cursor as string | undefined,
         votes: votes === 'true',
+        accessibility: accessibility as string | undefined,
       },
       userId || undefined,
     );
