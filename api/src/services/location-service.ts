@@ -71,15 +71,15 @@ const buildLocationWhereClause = (filters: LocationFilters) => {
 
   if (filters.accessibility) {
     const questionIds = filters.accessibility.split(',').map((id) => id.trim());
-    where.answer = {
-      some: {
-        questionId: {
-          in: questionIds,
+    where.AND = questionIds.map((questionId) => ({
+      answer: {
+        some: {
+          questionId,
+          answer: 1,
+          deletedAt: null,
         },
-        answer: 1,
-        deletedAt: null,
       },
-    };
+    }));
   }
 
   return where;
