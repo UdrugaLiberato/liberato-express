@@ -43,6 +43,11 @@ const processImageUploadAsync = async (
 
     // Update location with image info once upload is complete
     await LocationService.updateWithImage(locationId, uploadResponse.data);
+
+    // Clean up local file only after successful upload
+    if (file.path && fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
   } catch (uploadError: any) {
     console.error(
       `Failed to upload image for location ${locationId}:`,
@@ -62,11 +67,9 @@ const processImageUploadAsync = async (
     } else {
       console.error('Upload error:', uploadError?.message || 'Unknown error');
     }
-  } finally {
-    // Clean up local file
-    if (file.path && fs.existsSync(file.path)) {
-      fs.unlinkSync(file.path);
-    }
+
+    // Keep the local file on failure for potential retry or debugging
+    console.log(`Local file preserved at: ${file.path} due to upload failure`);
   }
 };
 
